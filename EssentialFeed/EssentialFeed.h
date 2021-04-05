@@ -1,9 +1,4 @@
-//
-//  EssentialFeed.h
-//  EssentialFeed
-//
-//  Created by Andreas Link on 05.04.21.
-//
+//  Copyright © 2021 Andreas Link. All rights reserved.
 
 #import <Foundation/Foundation.h>
 
