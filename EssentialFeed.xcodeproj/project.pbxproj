@@ -11,6 +11,7 @@
 		38AAD484261B4549004D6AF6 /* EssentialFeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AAD483261B4549004D6AF6 /* EssentialFeedTests.swift */; };
 		38AAD486261B4549004D6AF6 /* EssentialFeed.h in Headers */ = {isa = PBXBuildFile; fileRef = 38AAD478261B4549004D6AF6 /* EssentialFeed.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		38AAD492261B4B12004D6AF6 /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AAD491261B4B12004D6AF6 /* FeedItem.swift */; };
+		38AAD496261B4BDB004D6AF6 /* FeedItemLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AAD495261B4BDB004D6AF6 /* FeedItemLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +32,7 @@
 		38AAD483261B4549004D6AF6 /* EssentialFeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EssentialFeedTests.swift; sourceTree = "<group>"; };
 		38AAD485261B4549004D6AF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		38AAD491261B4B12004D6AF6 /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
+		38AAD495261B4BDB004D6AF6 /* FeedItemLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 			children = (
 				38AAD478261B4549004D6AF6 /* EssentialFeed.h */,
 				38AAD491261B4B12004D6AF6 /* FeedItem.swift */,
+				38AAD495261B4BDB004D6AF6 /* FeedItemLoader.swift */,
 				38AAD479261B4549004D6AF6 /* Info.plist */,
 			);
 			path = EssentialFeed;
@@ -147,6 +150,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1240;
 				LastUpgradeCheck = 1240;
+				ORGANIZATIONNAME = "Andreas Link";
 				TargetAttributes = {
 					38AAD474261B4549004D6AF6 = {
 						CreatedOnToolsVersion = 12.4;
@@ -199,6 +203,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				38AAD492261B4B12004D6AF6 /* FeedItem.swift in Sources */,
+				38AAD496261B4BDB004D6AF6 /* FeedItemLoader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
