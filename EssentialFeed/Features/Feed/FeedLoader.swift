@@ -1,5 +1,5 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
-protocol FeedItemLoader {
+protocol FeedLoader {
     func fetchItems(completion: @escaping (Result<[FeedItem], Error>) -> Void)
 }
