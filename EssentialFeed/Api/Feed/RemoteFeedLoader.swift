@@ -3,11 +3,11 @@
 import Foundation
 
 public protocol HttpClient {
-    func load(from url: URL, completion: (Error) -> Void)
+    func load(from url: URL, completion: @escaping (Error) -> Void)
 }
 
 public class RemoteFeedLoader {
-    public enum Error {
+    public enum Error: Swift.Error {
         case connectivity
     }
 
@@ -19,7 +19,7 @@ public class RemoteFeedLoader {
         self.client = client
     }
 
-    public func fetchItems(completion: (Error) -> Void) {
+    public func fetchItems(completion: @escaping (Error) -> Void) {
         client.load(from: url) { _ in
             completion(.connectivity)
         }
