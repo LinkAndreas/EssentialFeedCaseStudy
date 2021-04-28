@@ -3,7 +3,7 @@
 import Foundation
 
 public protocol HttpClient {
-    func load(from url: URL)
+    func load(from url: URL, completion: (Error) -> Void)
 }
 
 public class RemoteFeedLoader {
@@ -15,7 +15,7 @@ public class RemoteFeedLoader {
         self.client = client
     }
 
-    public func fetchItems() {
-        client.load(from: url)
+    public func fetchItems(completion: (Error) -> Void) {
+        client.load(from: url, completion: completion)
     }
 }

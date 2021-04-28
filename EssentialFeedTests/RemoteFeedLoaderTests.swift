@@ -4,10 +4,15 @@ import EssentialFeed
 import XCTest
 
 class HttpClientSpy: HttpClient {
+    var error: Error?
     var requestedURLs: [URL] = []
 
-    func load(from url: URL) {
+    func load(from url: URL, completion: (Error) -> Void) {
         requestedURLs.append(url)
+
+        if let error = error {
+            completion(error)
+        }
     }
 }
 
@@ -23,7 +28,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        sut.fetchItems()
+        sut.fetchItems { _ in }
 
         XCTAssertEqual(client.requestedURLs, [url])
     }
@@ -32,10 +37,23 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        sut.fetchItems()
-        sut.fetchItems()
+        sut.fetchItems { _ in }
+        sut.fetchItems { _ in }
 
         XCTAssertEqual(client.requestedURLs, [url, url])
+    }
+
+    func test_load_deliversErrorOnClientError() {
+        let url: URL = anyURL()
+        let (sut, client) = makeSut(url: url)
+
+        client.error = NSError(domain: "domain", code: 42, userInfo: nil)
+        var capturedError: Error?
+        sut.fetchItems { error in
+            capturedError = error
+        }
+
+        XCTAssertNotNil(capturedError)
     }
 
     // MARK: Helpers:
