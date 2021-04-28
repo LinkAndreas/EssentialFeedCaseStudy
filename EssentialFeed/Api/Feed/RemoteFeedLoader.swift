@@ -7,6 +7,10 @@ public protocol HttpClient {
 }
 
 public class RemoteFeedLoader {
+    public enum Error {
+        case connectivity
+    }
+
     private let url: URL
     private let client: HttpClient
 
@@ -16,6 +20,8 @@ public class RemoteFeedLoader {
     }
 
     public func fetchItems(completion: (Error) -> Void) {
-        client.load(from: url, completion: completion)
+        client.load(from: url) { _ in
+            completion(.connectivity)
+        }
     }
 }
