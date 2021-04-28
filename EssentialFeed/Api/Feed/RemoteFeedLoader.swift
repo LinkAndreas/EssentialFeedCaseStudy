@@ -21,8 +21,14 @@ public class RemoteFeedLoader {
     }
 
     public func fetchItems(completion: @escaping (Error) -> Void) {
-        client.load(from: url) { _ in
-            completion(.invalidData)
+        client.load(from: url) { response in
+            switch response {
+            case .success:
+                completion(.invalidData)
+
+            case .failure:
+                completion(.connectivity)
+            }
         }
     }
 }
