@@ -3,12 +3,13 @@
 import Foundation
 
 public protocol HttpClient {
-    func load(from url: URL, completion: @escaping (Error) -> Void)
+    func load(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void)
 }
 
 public class RemoteFeedLoader {
     public enum Error: Swift.Error {
         case connectivity
+        case invalidData
     }
 
     private let url: URL
@@ -21,7 +22,7 @@ public class RemoteFeedLoader {
 
     public func fetchItems(completion: @escaping (Error) -> Void) {
         client.load(from: url) { _ in
-            completion(.connectivity)
+            completion(.invalidData)
         }
     }
 }
