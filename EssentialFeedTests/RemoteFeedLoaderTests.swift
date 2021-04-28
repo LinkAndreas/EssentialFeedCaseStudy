@@ -1,6 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
-@testable import EssentialFeed
+import EssentialFeed
 import XCTest
 
 class HttpClientSpy: HttpClient {
