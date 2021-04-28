@@ -20,14 +20,17 @@ public class RemoteFeedLoader {
         self.client = client
     }
 
-    public func fetchItems(completion: @escaping (Error) -> Void) {
+    public func fetchItems(completion: @escaping (Result<[FeedItem], Error>) -> Void) {
         client.load(from: url) { response in
             switch response {
+            case let .success(response) where response.statusCode != 200:
+                completion(.failure(.invalidData))
+                
             case .success:
-                completion(.invalidData)
+                completion(.success([]))
 
             case .failure:
-                completion(.connectivity)
+                completion(.failure(.connectivity))
             }
         }
     }
