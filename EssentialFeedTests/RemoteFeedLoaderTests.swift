@@ -3,19 +3,6 @@
 import EssentialFeed
 import XCTest
 
-class HttpClientSpy: HttpClient {
-    var error: Error?
-    var requestedURLs: [URL] = []
-
-    func load(from url: URL, completion: (Error) -> Void) {
-        requestedURLs.append(url)
-
-        if let error = error {
-            completion(error)
-        }
-    }
-}
-
 class RemoteFeedLoaderTests: XCTestCase {
     func test_init_doesNotRequestDataFromURL() {
         let url = anyURL()
@@ -55,6 +42,16 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
 
     // MARK: Helpers:
+    class HttpClientSpy: HttpClient {
+        var requestedURLs: [URL] = []
+        var completions: [(Error) -> Void] = []
+
+        func load(from url: URL, completion: @escaping (Error) -> Void) {
+            requestedURLs.append(url)
+            completions.append(completion)
+        }
+    }
+    
     func makeSut(url: URL) -> (sut: RemoteFeedLoader, client: HttpClientSpy) {
         let client: HttpClientSpy = .init()
         let sut: RemoteFeedLoader = .init(url: url, client: client)
