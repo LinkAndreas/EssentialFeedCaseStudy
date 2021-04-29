@@ -56,23 +56,24 @@ class RemoteFeedLoaderTests: XCTestCase {
         }
     }
 
-    func test_load_deliversSuccessfulResultOn200HttpResponse() {
+    func test_load_deliversErrorOn200HttpResponseWithInvalidJson() {
+        let invalidJson: Data = .init("Invalid JSON".utf8)
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
         var capturedResults: [Result<[FeedItem], RemoteFeedLoader.Error>] = []
         sut.fetchItems { capturedResults.append($0) }
-        client.complete(withStatusCode: 200)
+        client.complete(withStatusCode: 200, data: invalidJson)
 
-        XCTAssertEqual(capturedResults, [.success([])])
+        XCTAssertEqual(capturedResults, [.failure(.invalidData)])
     }
 
     // MARK: Helpers:
     class HttpClientSpy: HttpClient {
-        var messages: [(url: URL, completion: (Result<HTTPURLResponse, Error>) -> Void)] = []
+        var messages: [(url: URL, completion: (Result<(Data, HTTPURLResponse), Error>) -> Void)] = []
         var requestedURLs: [URL] { messages.map(\.url) }
 
-        func load(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void) {
+        func load(from url: URL, completion: @escaping (Result<(Data, HTTPURLResponse), Error>) -> Void) {
             messages.append((url, completion))
         }
 
@@ -80,7 +81,7 @@ class RemoteFeedLoaderTests: XCTestCase {
             messages[index].completion(.failure(error))
         }
 
-        func complete(withStatusCode statusCode: Int, atIndex index: Int = 0) {
+        func complete(withStatusCode statusCode: Int, data: Data = .init(), atIndex index: Int = 0) {
             let response = HTTPURLResponse(
                 url: requestedURLs[index],
                 statusCode: statusCode,
@@ -88,7 +89,7 @@ class RemoteFeedLoaderTests: XCTestCase {
                 headerFields: nil
             )!
 
-            messages[index].completion(.success(response))
+            messages[index].completion(.success((data, response)))
         }
     }
 

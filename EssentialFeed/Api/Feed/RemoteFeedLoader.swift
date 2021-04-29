@@ -3,7 +3,7 @@
 import Foundation
 
 public protocol HttpClient {
-    func load(from url: URL, completion: @escaping (Result<HTTPURLResponse, Error>) -> Void)
+    func load(from url: URL, completion: @escaping (Result<(Data, HTTPURLResponse), Error>) -> Void)
 }
 
 public class RemoteFeedLoader {
@@ -23,11 +23,11 @@ public class RemoteFeedLoader {
     public func fetchItems(completion: @escaping (Result<[FeedItem], Error>) -> Void) {
         client.load(from: url) { response in
             switch response {
-            case let .success(response) where response.statusCode != 200:
+            case let .success((data, response)) where response.statusCode != 200:
                 completion(.failure(.invalidData))
                 
             case .success:
-                completion(.success([]))
+                completion(.failure(.invalidData))
 
             case .failure:
                 completion(.failure(.connectivity))
