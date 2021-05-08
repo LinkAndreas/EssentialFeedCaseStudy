@@ -34,7 +34,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        expect(sut: sut, toCompleteWithError: .connectivity, when: {
+        expect(sut: sut, toCompleteWith: .failure(.connectivity), when: {
             let error = NSError(domain: "domain", code: 42, userInfo: nil)
             client.complete(with: error)
         })
@@ -46,7 +46,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 
         let samples: [Int] = [199, 201, 300, 400, 500]
         samples.enumerated().forEach { index, statusCode in
-            expect(sut: sut, toCompleteWithError: .invalidData, when: {
+            expect(sut: sut, toCompleteWith: .failure(.invalidData), when: {
                 client.complete(withStatusCode: statusCode, atIndex: index)
             })
         }
@@ -57,7 +57,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        expect(sut: sut, toCompleteWithError: .invalidData, when: {
+        expect(sut: sut, toCompleteWith: .failure(.invalidData), when: {
             client.complete(withStatusCode: 200, data: invalidJson)
         })
     }
@@ -89,7 +89,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 
     func expect(
         sut: RemoteFeedLoader,
-        toCompleteWithError expectedError: RemoteFeedLoader.Error,
+        toCompleteWith expectedResult: Result<[FeedItem], RemoteFeedLoader.Error>,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -99,7 +99,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 
         action()
 
-        XCTAssertEqual(capturedResults, [.failure(expectedError)], file: file, line: line)
+        XCTAssertEqual(capturedResults, [expectedResult], file: file, line: line)
     }
 
     func makeSut(url: URL) -> (sut: RemoteFeedLoader, client: HttpClientSpy) {
