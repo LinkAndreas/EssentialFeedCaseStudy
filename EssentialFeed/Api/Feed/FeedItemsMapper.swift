@@ -18,14 +18,11 @@ internal enum FeedItemsMapper {
         data: Data,
         response: HTTPURLResponse
     ) -> Result<[FeedItem], RemoteFeedLoader.Error> {
-        guard response.statusCode == OK_200 else { return .failure(.invalidData) }
-
-        do {
-            let root = try JSONDecoder().decode(Root.self, from: data)
-            return .success(root.items.map(FeedItem.init(from:)))
-        } catch {
+        guard response.statusCode == OK_200, let root = try? JSONDecoder().decode(Root.self, from: data) else {
             return .failure(.invalidData)
         }
+
+        return .success(root.items.map(FeedItem.init(from:)))
     }
 }
 
