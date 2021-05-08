@@ -41,7 +41,7 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
 
     func test_load_deliversErrorOnNon200HttpResponse() {
-        let validJsonData: Data = makeItemsJSON(items: [])
+        let validJsonData: Data = makeJSONData(items: [])
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
@@ -64,12 +64,36 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
 
     func test_load_deliversNoItemsOn200HttpResponseWithEmptyJSONList() {
-        let jsonWithEmptyListData: Data = makeItemsJSON(items: [])
+        let jsonWithEmptyListData: Data = makeJSONData(items: [])
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
         expect(sut: sut, toCompleteWith: .success([]), when: {
             client.complete(withStatusCode: 200, data: jsonWithEmptyListData)
+        })
+    }
+
+    func test_load_deliversItemsOn200HttpResponseWithJSONList() {
+        let item1 = makeItem(
+            id: .init(),
+            description: "Description 1",
+            location: "Location 1",
+            imageURL: anyURL()
+        )
+
+        let item2 = makeItem(
+            id: .init(),
+            description: "Description 2",
+            location: "Location 2",
+            imageURL: anyURL()
+        )
+
+        let jsonWithListData: Data = makeJSONData(items: [item1.json, item2.json])
+        let url: URL = anyURL()
+        let (sut, client) = makeSut(url: url)
+
+        expect(sut: sut, toCompleteWith: .success([item1.model, item2.model]), when: {
+            client.complete(withStatusCode: 200, data: jsonWithListData)
         })
     }
 
@@ -131,7 +155,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         return (item, json)
     }
 
-    func makeItemsJSON(items: [[String: Any]]) -> Data {
+    func makeJSONData(items: [[String: Any]]) -> Data {
         let json: [String: Any] = ["items": items]
         return try! JSONSerialization.data(withJSONObject: json)
     }

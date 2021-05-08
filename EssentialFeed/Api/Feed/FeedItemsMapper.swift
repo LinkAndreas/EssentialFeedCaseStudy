@@ -5,20 +5,11 @@ enum FeedItemsMapper {
         var items: [Item]
     }
 
-    private struct Item: Decodable {
+    fileprivate struct Item: Decodable {
         let id: String
         let description: String?
         let location: String?
-        let imageUrl: String
-
-        var item: FeedItem {
-            return .init(
-                id: UUID(uuidString: id)!,
-                description: description,
-                location: location,
-                imageURL: URL.init(string: imageUrl)!
-            )
-        }
+        let image: String
     }
 
     static func map(data: Data, response: HTTPURLResponse) throws -> [FeedItem] {
@@ -29,6 +20,18 @@ enum FeedItemsMapper {
             throw RemoteFeedLoader.Error.invalidData
         }
 
-        return root.items.map(\.item)
+        return root.items.map(FeedItem.init(from:))
     }
 }
+
+private extension FeedItem {
+    init(from item: FeedItemsMapper.Item) {
+        self = .init(
+            id: UUID(uuidString: item.id)!,
+            description: item.description,
+            location: item.location,
+            imageURL: URL.init(string: item.image)!
+        )
+    }
+}
+
