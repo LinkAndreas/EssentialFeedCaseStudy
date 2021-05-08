@@ -97,6 +97,18 @@ class RemoteFeedLoaderTests: XCTestCase {
         })
     }
 
+    func test_load_shouldNotDeliverResultAfterBeingDeallocated() {
+        let client: HttpClientSpy = .init()
+        var sut: RemoteFeedLoader? = .init(url: anyURL(), client: client)
+
+        var capturedResults: [Result<[FeedItem], RemoteFeedLoader.Error>] = []
+        sut?.fetchItems { capturedResults.append($0) }
+        sut = nil
+        client.complete(withStatusCode: 200, data: makeJSONData(items: []))
+
+        XCTAssertEqual(capturedResults, [], "Result should not have been delivered.")
+    }
+
     // MARK: Helpers:
     class HttpClientSpy: HttpClient {
         var messages: [(url: URL, completion: (Result<(Data, HTTPURLResponse), Error>) -> Void)] = []
