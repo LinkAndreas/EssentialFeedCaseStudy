@@ -41,24 +41,35 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
 
     func test_load_deliversErrorOnNon200HttpResponse() {
+        let validJsonData: Data = makeItemsJSON(items: [])
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
         let samples: [Int] = [199, 201, 300, 400, 500]
         samples.enumerated().forEach { index, statusCode in
             expect(sut: sut, toCompleteWith: .failure(.invalidData), when: {
-                client.complete(withStatusCode: statusCode, atIndex: index)
+                client.complete(withStatusCode: statusCode, data: validJsonData, atIndex: index)
             })
         }
     }
 
     func test_load_deliversErrorOn200HttpResponseWithInvalidJson() {
-        let invalidJson: Data = .init("Invalid JSON".utf8)
+        let invalidJsonData: Data = invalidJsonData()
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
         expect(sut: sut, toCompleteWith: .failure(.invalidData), when: {
-            client.complete(withStatusCode: 200, data: invalidJson)
+            client.complete(withStatusCode: 200, data: invalidJsonData)
+        })
+    }
+
+    func test_load_deliversNoItemsOn200HttpResponseWithEmptyJSONList() {
+        let jsonWithEmptyListData: Data = makeItemsJSON(items: [])
+        let url: URL = anyURL()
+        let (sut, client) = makeSut(url: url)
+
+        expect(sut: sut, toCompleteWith: .success([]), when: {
+            client.complete(withStatusCode: 200, data: jsonWithEmptyListData)
         })
     }
 
@@ -75,7 +86,7 @@ class RemoteFeedLoaderTests: XCTestCase {
             messages[index].completion(.failure(error))
         }
 
-        func complete(withStatusCode statusCode: Int, data: Data = .init(), atIndex index: Int = 0) {
+        func complete(withStatusCode statusCode: Int, data: Data, atIndex index: Int = 0) {
             let response = HTTPURLResponse(
                 url: requestedURLs[index],
                 statusCode: statusCode,
@@ -108,7 +119,28 @@ class RemoteFeedLoaderTests: XCTestCase {
         return (sut, client)
     }
 
+    func makeItem(id: UUID, description: String?, location: String?, imageURL: URL) -> (model: FeedItem, json: [String: Any]) {
+        let item: FeedItem = .init(id: id, description: description, location: location, imageURL: imageURL)
+        let json: [String: Any] = [
+            "id": id.uuidString,
+            "description": description,
+            "location": location,
+            "image": imageURL.absoluteString
+        ].compactMapValues { $0 }
+
+        return (item, json)
+    }
+
+    func makeItemsJSON(items: [[String: Any]]) -> Data {
+        let json: [String: Any] = ["items": items]
+        return try! JSONSerialization.data(withJSONObject: json)
+    }
+
     func anyURL() -> URL {
         return URL(string: "http://any.url")!
+    }
+
+    func invalidJsonData() -> Data {
+        return .init("Invalid JSON".utf8)
     }
 }
