@@ -14,15 +14,18 @@ internal enum FeedItemsMapper {
 
     private static let OK_200: UInt = 200
 
-    internal static func map(data: Data, response: HTTPURLResponse) throws -> [FeedItem] {
-        guard
-            let root = try? JSONDecoder().decode(Root.self, from: data),
-            response.statusCode == OK_200
-        else {
-            throw RemoteFeedLoader.Error.invalidData
-        }
+    internal static func map(
+        data: Data,
+        response: HTTPURLResponse
+    ) -> Result<[FeedItem], RemoteFeedLoader.Error> {
+        guard response.statusCode == OK_200 else { return .failure(.invalidData) }
 
-        return root.items.map(FeedItem.init(from:))
+        do {
+            let root = try JSONDecoder().decode(Root.self, from: data)
+            return .success(root.items.map(FeedItem.init(from:)))
+        } catch {
+            return .failure(.invalidData)
+        }
     }
 }
 
