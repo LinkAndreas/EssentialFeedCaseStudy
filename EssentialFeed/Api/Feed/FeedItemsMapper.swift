@@ -1,6 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
-enum FeedItemsMapper {
+internal enum FeedItemsMapper {
     private struct Root: Decodable {
         var items: [Item]
     }
@@ -12,7 +12,7 @@ enum FeedItemsMapper {
         let image: String
     }
 
-    static func map(data: Data, response: HTTPURLResponse) throws -> [FeedItem] {
+    internal static func map(data: Data, response: HTTPURLResponse) throws -> [FeedItem] {
         guard
             let root = try? JSONDecoder().decode(Root.self, from: data),
             response.statusCode == 200
@@ -24,8 +24,8 @@ enum FeedItemsMapper {
     }
 }
 
-private extension FeedItem {
-    init(from item: FeedItemsMapper.Item) {
+extension FeedItem {
+    fileprivate init(from item: FeedItemsMapper.Item) {
         self = .init(
             id: UUID(uuidString: item.id)!,
             description: item.description,
