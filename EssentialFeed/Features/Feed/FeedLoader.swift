@@ -1,5 +1,7 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
-protocol FeedLoader {
-    func fetchItems(completion: (Result<[FeedItem], Error>) -> Void)
+public protocol FeedLoader {
+    typealias Result = Swift.Result<[FeedItem], Error>
+
+    func fetchItems(completion: @escaping (Result) -> Void)
 }

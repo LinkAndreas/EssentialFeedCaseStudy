@@ -6,7 +6,7 @@ public protocol HttpClient {
     func load(from url: URL, completion: @escaping (Result<(Data, HTTPURLResponse), Error>) -> Void)
 }
 
-public final class RemoteFeedLoader {
+public final class RemoteFeedLoader: FeedLoader {
     public enum Error: Swift.Error {
         case connectivity
         case invalidData
@@ -20,7 +20,7 @@ public final class RemoteFeedLoader {
         self.client = client
     }
 
-    public func fetchItems(completion: @escaping (Result<[FeedItem], Error>) -> Void) {
+    public func fetchItems(completion: @escaping (FeedLoader.Result) -> Void) {
         client.load(from: url) { [weak self] response in
             guard self != nil else { return }
 
@@ -29,7 +29,7 @@ public final class RemoteFeedLoader {
                 completion(FeedItemsMapper.map(data: data, response: response))
 
             case .failure:
-                completion(.failure(.connectivity))
+                completion(.failure(Error.connectivity))
             }
         }
     }
