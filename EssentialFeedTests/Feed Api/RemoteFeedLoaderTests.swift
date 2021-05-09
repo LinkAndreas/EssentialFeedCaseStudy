@@ -34,7 +34,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        expect(sut: sut, toCompleteWith: .failure(RemoteFeedLoader.Error.connectivity), when: {
+        expect(sut: sut, toCompleteWith: failure(.connectivity), when: {
             let error = NSError(domain: "domain", code: 42, userInfo: nil)
             client.complete(with: error)
         })
@@ -47,7 +47,7 @@ class RemoteFeedLoaderTests: XCTestCase {
 
         let samples: [Int] = [199, 201, 300, 400, 500]
         samples.enumerated().forEach { index, statusCode in
-            expect(sut: sut, toCompleteWith: .failure(RemoteFeedLoader.Error.invalidData), when: {
+            expect(sut: sut, toCompleteWith: failure(.invalidData), when: {
                 client.complete(withStatusCode: statusCode, data: validJsonData, atIndex: index)
             })
         }
@@ -58,7 +58,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        expect(sut: sut, toCompleteWith: .failure(RemoteFeedLoader.Error.invalidData), when: {
+        expect(sut: sut, toCompleteWith: failure(.invalidData), when: {
             client.complete(withStatusCode: 200, data: invalidJsonData)
         })
     }
@@ -169,6 +169,10 @@ class RemoteFeedLoaderTests: XCTestCase {
         trackForMemoryLeaks(sut)
 
         return (sut, client)
+    }
+
+    func failure(_ error: RemoteFeedLoader.Error) -> FeedLoader.Result {
+        return .failure(error)
     }
 
     func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #file, line: UInt = #line) {
