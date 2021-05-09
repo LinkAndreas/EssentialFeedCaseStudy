@@ -110,7 +110,7 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
 
     // MARK: Helpers:
-    class HttpClientSpy: HttpClient {
+    class HttpClientSpy: HTTPClient {
         var messages: [(url: URL, completion: (Result<(Data, HTTPURLResponse), Error>) -> Void)] = []
         var requestedURLs: [URL] { messages.map(\.url) }
 

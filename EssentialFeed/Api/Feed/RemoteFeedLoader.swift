@@ -2,10 +2,6 @@
 
 import Foundation
 
-public protocol HttpClient {
-    func load(from url: URL, completion: @escaping (Result<(Data, HTTPURLResponse), Error>) -> Void)
-}
-
 public final class RemoteFeedLoader: FeedLoader {
     public enum Error: Swift.Error {
         case connectivity
@@ -13,9 +9,9 @@ public final class RemoteFeedLoader: FeedLoader {
     }
 
     private let url: URL
-    private let client: HttpClient
+    private let client: HTTPClient
 
-    public init(url: URL, client: HttpClient) {
+    public init(url: URL, client: HTTPClient) {
         self.url = url
         self.client = client
     }
