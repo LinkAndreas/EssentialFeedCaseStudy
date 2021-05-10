@@ -20,7 +20,11 @@ class URLSessionHTTPClient {
     }
 
     func load(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) {
-        session.dataTask(with: url) { data, response, error in }.resume()
+        session.dataTask(with: url) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+            }
+        }.resume()
     }
 }
 
@@ -29,13 +33,35 @@ final class URLSessionHTTPClientTests: XCTestCase {
         let url: URL = .init(string: "http://any-url.com")!
         let session: HTTPSessionSpy = .init()
         let task: HTTPSessionTaskSpy = .init()
-        session.stub(url: url, with: .init(task: task))
+        session.stub(url: url, task: task)
 
         let sut: URLSessionHTTPClient = .init(session: session)
 
         sut.load(from: url) { _ in }
 
         XCTAssertEqual(task.resumeCallCount, 1)
+    }
+
+    func test_loadFromURL_failesOnRequestError() {
+        let url: URL = .init(string: "http://any-url.com")!
+        let session: HTTPSessionSpy = .init()
+        let expectedError: NSError = .init(domain: "test_error", code: 42, userInfo: nil)
+        session.stub(url: url, error: expectedError)
+
+        let sut: URLSessionHTTPClient = .init(session: session)
+        let expectation = expectation(description: "Wait for load completion.")
+        var capturedResults: [HTTPClient.Result] = []
+
+        sut.load(from: url) { result in
+            capturedResults.append(result)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+
+        guard case let .failure(error as NSError) = capturedResults[0] else { return XCTFail("Wrong result") }
+
+        XCTAssertEqual(error, expectedError)
     }
 
     // MARK: - Helpers
@@ -66,9 +92,19 @@ final class URLSessionHTTPClientTests: XCTestCase {
             return stub.task
         }
 
-        internal func stub(url: URL, with stub: Stub) {
-            dataTaskStubs[url] = stub
+        internal func stub(
+            url: URL,
+            data: Data? = nil,
+            response: URLResponse? = nil,
+            error: Error? = nil,
+            task: HTTPSessionTask = FakeHTTPSessionTask()
+        ) {
+            dataTaskStubs[url] = .init(data: data, response: response, error: error, task: task)
         }
+    }
+
+    private class FakeHTTPSessionTask: HTTPSessionTask {
+        func resume() {}
     }
 
     private class HTTPSessionTaskSpy: HTTPSessionTask {
