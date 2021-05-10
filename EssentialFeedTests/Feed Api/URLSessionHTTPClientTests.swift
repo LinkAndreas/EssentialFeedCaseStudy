@@ -142,7 +142,8 @@ final class URLSessionHTTPClientTests: XCTestCase {
     }
 
     func makeSut() -> URLSessionHTTPClient {
-        let client: URLSessionHTTPClient = .init()
-        return client
+        let sut: URLSessionHTTPClient = .init()
+        trackForMemoryLeaks(sut)
+        return sut
     }
 }
