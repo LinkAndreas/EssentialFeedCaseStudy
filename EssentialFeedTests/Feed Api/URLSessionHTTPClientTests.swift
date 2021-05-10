@@ -20,9 +20,15 @@ class URLSessionHTTPClient {
 }
 
 final class URLSessionHTTPClientTests: XCTestCase {
-    func test_loadFromURL_performsGETRequestWithURL() {
+    override func setUp() {
         URLProtocolStub.startInterceptingRequests()
+    }
 
+    override func tearDown() {
+        URLProtocolStub.stopInterceptingRequests()
+    }
+
+    func test_loadFromURL_performsGETRequestWithURL() {
         let url: URL = .init(string: "http://unique-url.com")!
         let sut: URLSessionHTTPClient = .init()
 
@@ -39,12 +45,9 @@ final class URLSessionHTTPClientTests: XCTestCase {
 
         XCTAssertEqual(capturedRequests.count, 1, "Expected to observe a single request.")
         XCTAssertEqual(capturedRequests[0].url, url)
-
-        URLProtocolStub.stopInterceptingRequests()
     }
     
     func test_loadFromURL_failesOnRequestError() {
-        URLProtocolStub.startInterceptingRequests()
         let url: URL = .init(string: "http://any-url.com")!
         let expectedError: NSError = .init(domain: "test_error", code: 42, userInfo: nil)
         URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
@@ -69,8 +72,6 @@ final class URLSessionHTTPClientTests: XCTestCase {
         default:
             XCTFail("Wrong result")
         }
-
-        URLProtocolStub.stopInterceptingRequests()
     }
 
     // MARK: - Helpers
