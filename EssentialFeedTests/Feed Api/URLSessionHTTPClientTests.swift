@@ -30,7 +30,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
 
     func test_loadFromURL_performsGETRequestWithURL() {
         let url: URL = .init(string: "http://unique-url.com")!
-        let sut: URLSessionHTTPClient = .init()
+        let sut = makeSut()
 
         sut.load(from: url) { _ in }
 
@@ -52,7 +52,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         let expectedError: NSError = .init(domain: "test_error", code: 42, userInfo: nil)
         URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
 
-        let sut: URLSessionHTTPClient = .init()
+        let sut = makeSut()
         let expectation = expectation(description: "Wait for load completion.")
         var capturedResults: [HTTPClient.Result] = []
 
@@ -139,5 +139,10 @@ final class URLSessionHTTPClientTests: XCTestCase {
             stub = nil
             requestObserver = nil
         }
+    }
+
+    func makeSut() -> URLSessionHTTPClient {
+        let client: URLSessionHTTPClient = .init()
+        return client
     }
 }
