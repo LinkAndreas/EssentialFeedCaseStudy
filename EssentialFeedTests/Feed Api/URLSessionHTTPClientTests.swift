@@ -3,32 +3,6 @@
 import EssentialFeed
 import XCTest
 
-class URLSessionHTTPClient: HTTPClient {
-    enum Error: Swift.Error, Equatable {
-        case invalidResponse
-    }
-    private let session: URLSession
-
-    init(session: URLSession = .shared) {
-        self.session = session
-    }
-
-    func load(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) {
-        session.dataTask(with: url) { data, response, error in
-            switch (data, (response as? HTTPURLResponse), error) {
-            case let (data?, response?, nil):
-                completion(.success((data, response)))
-
-            case let (nil, nil, error?):
-                completion(.failure(error))
-
-            default:
-                completion(.failure(Error.invalidResponse))
-            }
-        }.resume()
-    }
-}
-
 final class URLSessionHTTPClientTests: XCTestCase {
     override func setUp() {
         URLProtocolStub.startInterceptingRequests()
