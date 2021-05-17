@@ -4,6 +4,9 @@ import EssentialFeed
 import XCTest
 
 class URLSessionHTTPClient {
+    enum Error: Swift.Error, Equatable {
+        case invalidResponse
+    }
     private let session: URLSession
 
     init(session: URLSession = .shared) {
@@ -12,8 +15,15 @@ class URLSessionHTTPClient {
 
     func load(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) {
         session.dataTask(with: url) { data, response, error in
-            if let error = error {
+            switch (data, (response as? HTTPURLResponse), error) {
+            case let (data?, response?, nil):
+                completion(.success((data, response)))
+
+            case let (nil, nil, error?):
                 completion(.failure(error))
+
+            default:
+                completion(.failure(Error.invalidResponse))
             }
         }.resume()
     }
@@ -56,6 +66,17 @@ final class URLSessionHTTPClientTests: XCTestCase {
         XCTAssertEqual(receivedError?.code, expectedError.code)
     }
 
+    func test_loadFromURL_failesOnAllInvalidRepresentations() {
+        XCTAssertNotNil(resultErrorFor(data: nil, response: nil, error: nil))
+        XCTAssertNotNil(resultErrorFor(data: nil, response: anyNonHttpResponse(), error: nil))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: nil, error: nil))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: nil, error: anyError()))
+        XCTAssertNotNil(resultErrorFor(data: nil, response: anyNonHttpResponse(), error: anyError()))
+        XCTAssertNotNil(resultErrorFor(data: nil, response: anyHttpResponse(), error: anyError()))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyNonHttpResponse(), error: anyError()))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyHttpResponse(), error: anyError()))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyNonHttpResponse(), error: nil))
+    }
 
     func test_loadFromURL_succeedsOnHTTPUrlResponseWithData() {
         let sut = makeSut()
@@ -199,5 +220,21 @@ final class URLSessionHTTPClientTests: XCTestCase {
 
     func anyURL() -> URL {
         return URL(string: "http://any.url")!
+    }
+
+    func anyNonHttpResponse() -> URLResponse {
+        return .init(url: anyURL(), mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
+    }
+
+    func anyHttpResponse() -> HTTPURLResponse {
+        return .init(url: anyURL(), statusCode: 200, httpVersion: nil, headerFields: nil)!
+    }
+
+    func anyData() -> Data {
+        return "anyData".data(using: .utf8)!
+    }
+
+    func anyError() -> NSError {
+        return .init(domain: "any domain", code: 0, userInfo: nil)
     }
 }
