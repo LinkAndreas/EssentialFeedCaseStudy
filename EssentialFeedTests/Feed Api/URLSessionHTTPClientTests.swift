@@ -3,7 +3,7 @@
 import EssentialFeed
 import XCTest
 
-class URLSessionHTTPClient {
+class URLSessionHTTPClient: HTTPClient {
     enum Error: Swift.Error, Equatable {
         case invalidResponse
     }
@@ -240,7 +240,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         }
     }
 
-    func makeSut() -> URLSessionHTTPClient {
+    func makeSut() -> HTTPClient {
         let sut: URLSessionHTTPClient = .init()
         trackForMemoryLeaks(sut)
         return sut
