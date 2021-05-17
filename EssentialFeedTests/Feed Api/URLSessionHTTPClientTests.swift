@@ -49,26 +49,43 @@ final class URLSessionHTTPClientTests: XCTestCase {
     }
     
     func test_loadFromURL_failesOnRequestError() {
-        let url: URL = anyURL()
         let expectedError: NSError = .init(domain: "test_error", code: 42, userInfo: nil)
-        URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
+        let receivedError: NSError? = resultErrorFor(data: nil, response: nil, error: expectedError) as NSError?
 
+        XCTAssertEqual(receivedError?.domain, expectedError.domain)
+        XCTAssertEqual(receivedError?.code, expectedError.code)
+    }
+
+
+    func test_loadFromURL_succeedsOnHTTPUrlResponseWithData() {
         let sut = makeSut()
+        let url: URL = anyURL()
+        let expectedData: Data = anyData()
+        let expectedResponse: HTTPURLResponse = anyHttpResponse()
+
+        URLProtocolStub.stub(data: expectedData, response: expectedResponse, error: nil)
+
         let expectation = expectation(description: "Wait for load completion.")
-        var capturedResults: [HTTPClient.Result] = []
+        var capturedResult: HTTPClient.Result?
 
         sut.load(from: url) { result in
-            capturedResults.append(result)
+            capturedResult = result
             expectation.fulfill()
         }
 
         wait(for: [expectation], timeout: 1.0)
 
-        XCTAssertEqual(capturedResults.count, 1, "Expected one result, received \(capturedResults.count) results")
+        switch capturedResult {
+        case let .success((recivedData, receivedResponse)):
+            XCTAssertEqual(expectedData, recivedData)
+            XCTAssertEqual(expectedResponse.url, receivedResponse.url)
+            XCTAssertEqual(expectedResponse.statusCode, receivedResponse.statusCode)
 
-        switch capturedResults[0] {
-        case let .failure(error as NSError):
-            XCTAssertEqual(error.domain, expectedError.domain)
+        default:
+            XCTFail("Expected successful result")
+        }
+    }
+
 
         default:
             XCTFail("Wrong result")
@@ -76,6 +93,37 @@ final class URLSessionHTTPClientTests: XCTestCase {
     }
 
     // MARK: - Helpers
+    private func resultErrorFor(
+        data: Data?,
+        response: URLResponse?,
+        error: Error?,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Error? {
+        let sut = makeSut()
+        let url: URL = anyURL()
+
+        URLProtocolStub.stub(data: data, response: response, error: error)
+
+        let expectation = expectation(description: "Wait for load completion.")
+        var capturedResult: HTTPClient.Result?
+
+        sut.load(from: url) { result in
+            capturedResult = result
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+
+        switch capturedResult {
+        case let .failure(error):
+            return error
+
+        case .success, .none:
+            return nil
+        }
+    }
+
     private class URLProtocolStub: URLProtocol {
         private static var stub: Stub?
         private static var requestObserver: ((URLRequest) -> Void)?
