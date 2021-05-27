@@ -28,7 +28,11 @@ public class LocalFeedLoader {
 
             switch result {
             case .success:
-                self.store.insert(items: items, timestamp: self.currentDate(), completion: completion)
+                self.store.insert(items: items, timestamp: self.currentDate()) { [weak self] result in
+                    guard self != nil else { return }
+
+                    completion(result)
+                }
 
             case let .failure(error):
                 completion(.failure(error))
@@ -102,7 +106,7 @@ class CacheFeedUseCase: XCTestCase {
         })
     }
 
-    func test_save_shouldNotDeliverResultOnDeallocation() {
+    func test_save_doesNotDeliverResultAfterDeletionErrorOnDeallocation() {
         let items: [FeedItem] = [uniqueItem(), uniqueItem()]
         let store: FeedStoreSpy = .init()
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store) { .init() }
@@ -115,6 +119,24 @@ class CacheFeedUseCase: XCTestCase {
 
         sut = nil
         store.completeDeletion(with: deletionError)
+
+        XCTAssertNil(receivedResult, "Result should not have been delivered")
+    }
+
+    func test_save_doesNotDeliverResultAfterInsertionErrorOnDeallocation() {
+        let items: [FeedItem] = [uniqueItem(), uniqueItem()]
+        let store: FeedStoreSpy = .init()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store) { .init() }
+        let insertionError: NSError = anyNSError()
+
+        var receivedResult: Result<Void, Error>?
+        sut?.save(items: items) { result in
+            receivedResult = result
+        }
+
+        store.completeDeletionSuccessfully()
+        sut = nil
+        store.completeInsertion(with: insertionError)
 
         XCTAssertNil(receivedResult, "Result should not have been delivered")
     }
