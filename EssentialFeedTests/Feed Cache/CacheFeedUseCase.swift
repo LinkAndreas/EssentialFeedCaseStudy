@@ -4,6 +4,8 @@ import EssentialFeed
 import XCTest
 
 class LocalFeedLoader {
+    typealias SaveCompletion = (Result<Void, Error>) -> Void
+
     private let store: FeedStore
     private let currentDate: () -> Date
 
@@ -12,13 +14,13 @@ class LocalFeedLoader {
         self.currentDate = currentDate
     }
 
-    func save(items: [FeedItem], completion: @escaping (Result<Void, Error>) -> Void) {
+    func save(items: [FeedItem], completion: @escaping SaveCompletion) {
         store.deleteCachedFeed { [weak self] result in
             guard let self = self else { return }
 
             switch result {
             case .success:
-                self.store.insert(items: items, timestamp: self.currentDate())
+                self.store.insert(items: items, timestamp: self.currentDate(), completion: completion)
 
             case let .failure(error):
                 completion(.failure(error))
@@ -28,19 +30,24 @@ class LocalFeedLoader {
 }
 
 class FeedStore {
+    typealias DeletionCompletion = (Result<Void, Error>) -> Void
+    typealias InsertionCompletion = (Result<Void, Error>) -> Void
+
     enum Message: Equatable {
         case deleteCachedFeed
         case insert(items: [FeedItem], timestamp: Date)
     }
 
-    var deletionCompletions: [(Result<Void, Error>) -> Void] = []
     var receivedMessages: [Message] = []
+    var deletionCompletions: [DeletionCompletion] = []
+    var insertionCompletions: [InsertionCompletion] = []
 
-    func insert(items: [FeedItem], timestamp: Date) {
+    func insert(items: [FeedItem], timestamp: Date, completion: @escaping InsertionCompletion) {
+        insertionCompletions.append(completion)
         receivedMessages.append(.insert(items: items, timestamp: timestamp))
     }
 
-    func deleteCachedFeed(completion: @escaping (Result<Void, Error>) -> Void) {
+    func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         deletionCompletions.append(completion)
         receivedMessages.append(.deleteCachedFeed)
     }
@@ -51,6 +58,14 @@ class FeedStore {
 
     func completeDeletionSuccessfully(atIndex index: Int = 0) {
         deletionCompletions[index](.success(()))
+    }
+
+    func completeInsertion(with error: Error, atIndex index: Int = 0) {
+        insertionCompletions[index](.failure(error))
+    }
+
+    func completeInsertionSuccessfully(atIndex index: Int = 0) {
+        insertionCompletions[index](.success(()))
     }
 }
 
@@ -114,6 +129,32 @@ class CacheFeedUseCase: XCTestCase {
         wait(for: [exp], timeout: 1.0)
 
         XCTAssertEqual(receivedError as NSError?, deletionError)
+    }
+
+    func test_save_failsOnInsertionError() {
+        let items: [FeedItem] = [uniqueItem(), uniqueItem()]
+        let (sut, store) = makeSUT()
+        let insertionError: NSError = anyNSError()
+
+        let exp: XCTestExpectation = .init(description: "expectation")
+        var receivedError: Error?
+
+        sut.save(items: items) { result in
+            switch result {
+            case .success: break
+
+            case let .failure(error):
+                receivedError = error
+                exp.fulfill()
+            }
+        }
+
+        store.completeDeletionSuccessfully()
+        store.completeInsertion(with: insertionError)
+
+        wait(for: [exp], timeout: 1.0)
+
+        XCTAssertEqual(receivedError as NSError?, insertionError)
     }
 
     // MARK: - Helpers
