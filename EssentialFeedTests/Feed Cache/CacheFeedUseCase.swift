@@ -107,35 +107,27 @@ class CacheFeedUseCase: XCTestCase {
     }
 
     func test_save_failsOnDeletionError() {
-        let items: [FeedItem] = [uniqueItem(), uniqueItem()]
         let (sut, store) = makeSUT()
         let deletionError: NSError = anyNSError()
 
-        let exp: XCTestExpectation = .init(description: "expectation")
-        var receivedError: Error?
-
-        sut.save(items: items) { result in
-            switch result {
-            case .success: break
-
-            case let .failure(error):
-                receivedError = error
-                exp.fulfill()
-            }
-        }
-
-        store.completeDeletion(with: deletionError)
-
-        wait(for: [exp], timeout: 1.0)
-
-        XCTAssertEqual(receivedError as NSError?, deletionError)
+        expect(sut, toCompleteWith: deletionError, when: {
+            store.completeDeletion(with: deletionError)
+        })
     }
 
     func test_save_failsOnInsertionError() {
-        let items: [FeedItem] = [uniqueItem(), uniqueItem()]
         let (sut, store) = makeSUT()
         let insertionError: NSError = anyNSError()
 
+        expect(sut, toCompleteWith: insertionError, when: {
+            store.completeDeletionSuccessfully()
+            store.completeInsertion(with: insertionError)
+        })
+    }
+
+    // MARK: - Helpers
+    private func expect(_ sut: LocalFeedLoader, toCompleteWith expectedError: NSError, when action: () -> Void) {
+        let items: [FeedItem] = [uniqueItem(), uniqueItem()]
         let exp: XCTestExpectation = .init(description: "expectation")
         var receivedError: Error?
 
@@ -149,15 +141,13 @@ class CacheFeedUseCase: XCTestCase {
             }
         }
 
-        store.completeDeletionSuccessfully()
-        store.completeInsertion(with: insertionError)
+        action()
 
         wait(for: [exp], timeout: 1.0)
 
-        XCTAssertEqual(receivedError as NSError?, insertionError)
+        XCTAssertEqual(receivedError as NSError?, expectedError)
     }
 
-    // MARK: - Helpers
     private func makeSUT(
         currentDate: @escaping () -> Date = { .init() },
         file: StaticString = #file, line: UInt = #line
