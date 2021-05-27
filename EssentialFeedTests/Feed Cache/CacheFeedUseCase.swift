@@ -110,7 +110,7 @@ class CacheFeedUseCase: XCTestCase {
         let (sut, store) = makeSUT()
         let deletionError: NSError = anyNSError()
 
-        expect(sut, toCompleteWith: deletionError, when: {
+        expect(sut, toCompleteWith: .failure(deletionError), when: {
             store.completeDeletion(with: deletionError)
         })
     }
@@ -119,39 +119,59 @@ class CacheFeedUseCase: XCTestCase {
         let (sut, store) = makeSUT()
         let insertionError: NSError = anyNSError()
 
-        expect(sut, toCompleteWith: insertionError, when: {
+        expect(sut, toCompleteWith: .failure(insertionError), when: {
             store.completeDeletionSuccessfully()
             store.completeInsertion(with: insertionError)
+        })
+    }
+
+    func test_save_suceedsOnSuccessfulInsertion() {
+        let (sut, store) = makeSUT()
+
+        expect(sut, toCompleteWith: .success(()), when: {
+            store.completeDeletionSuccessfully()
+            store.completeInsertionSuccessfully()
         })
     }
 
     // MARK: - Helpers
     private func expect(
         _ sut: LocalFeedLoader,
-        toCompleteWith expectedError: NSError,
+        toCompleteWith expectedResult: Result<Void, Error>,
         when action: () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) {
         let items: [FeedItem] = [uniqueItem(), uniqueItem()]
         let exp: XCTestExpectation = .init(description: "expectation")
-        var receivedError: Error?
+        var receivedResult: Result<Void, Error>?
 
         sut.save(items: items) { result in
             switch result {
-            case .success: break
+            case .success:
+                receivedResult = .success(())
 
-            case let .failure(error):
-                receivedError = error
-                exp.fulfill()
+            case let .failure(error as NSError):
+                receivedResult = .failure(error)
             }
+
+            exp.fulfill()
         }
 
         action()
 
         wait(for: [exp], timeout: 1.0)
 
-        XCTAssertEqual(receivedError as NSError?, expectedError, file: file, line: line)
+        switch (receivedResult, expectedResult) {
+        case (.success, .success):
+            return
+
+        case let (.failure(error1 as NSError), .failure(error2 as NSError)):
+            XCTAssertEqual(error1, error2)
+
+        default:
+            XCTFail("Expected \(String(describing: receivedResult)) to equl \(expectedResult)", file: file, line: line)
+        }
     }
 
     private func makeSUT(
