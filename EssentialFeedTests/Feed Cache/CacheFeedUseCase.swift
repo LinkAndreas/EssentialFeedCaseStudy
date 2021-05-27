@@ -28,15 +28,19 @@ public class LocalFeedLoader {
 
             switch result {
             case .success:
-                self.store.insert(items: items, timestamp: self.currentDate()) { [weak self] result in
-                    guard self != nil else { return }
-
-                    completion(result)
-                }
+                self.cache(items: items, with: completion)
 
             case let .failure(error):
                 completion(.failure(error))
             }
+        }
+    }
+
+    private func cache(items: [FeedItem], with completion: @escaping (Result<Void, Error>) -> Void) {
+        store.insert(items: items, timestamp: self.currentDate()) { [weak self] result in
+            guard self != nil else { return }
+
+            completion(result)
         }
     }
 }
