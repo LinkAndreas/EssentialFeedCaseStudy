@@ -3,7 +3,7 @@
 import EssentialFeed
 import XCTest
 
-protocol FeedStore {
+public protocol FeedStore {
     typealias DeletionCompletion = (Result<Void, Error>) -> Void
     typealias InsertionCompletion = (Result<Void, Error>) -> Void
 
@@ -11,7 +11,7 @@ protocol FeedStore {
     func deleteCachedFeed(completion: @escaping DeletionCompletion)
 }
 
-class LocalFeedLoader {
+public class LocalFeedLoader {
     typealias SaveCompletion = (Result<Void, Error>) -> Void
 
     private let store: FeedStore
@@ -100,6 +100,23 @@ class CacheFeedUseCase: XCTestCase {
             store.completeDeletionSuccessfully()
             store.completeInsertionSuccessfully()
         })
+    }
+
+    func test_save_shouldNotDeliverResultOnDeallocation() {
+        let items: [FeedItem] = [uniqueItem(), uniqueItem()]
+        let store: FeedStoreSpy = .init()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store) { .init() }
+        let deletionError: NSError = anyNSError()
+
+        var receivedResult: Result<Void, Error>?
+        sut?.save(items: items) { result in
+            receivedResult = result
+        }
+
+        sut = nil
+        store.completeDeletion(with: deletionError)
+
+        XCTAssertNil(receivedResult, "Result should not have been delivered")
     }
 
     // MARK: - Helpers
