@@ -126,7 +126,13 @@ class CacheFeedUseCase: XCTestCase {
     }
 
     // MARK: - Helpers
-    private func expect(_ sut: LocalFeedLoader, toCompleteWith expectedError: NSError, when action: () -> Void) {
+    private func expect(
+        _ sut: LocalFeedLoader,
+        toCompleteWith expectedError: NSError,
+        when action: () -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
         let items: [FeedItem] = [uniqueItem(), uniqueItem()]
         let exp: XCTestExpectation = .init(description: "expectation")
         var receivedError: Error?
@@ -145,12 +151,13 @@ class CacheFeedUseCase: XCTestCase {
 
         wait(for: [exp], timeout: 1.0)
 
-        XCTAssertEqual(receivedError as NSError?, expectedError)
+        XCTAssertEqual(receivedError as NSError?, expectedError, file: file, line: line)
     }
 
     private func makeSUT(
         currentDate: @escaping () -> Date = { .init() },
-        file: StaticString = #file, line: UInt = #line
+        file: StaticString = #file,
+        line: UInt = #line
     ) -> (LocalFeedLoader, FeedStore) {
         let store: FeedStore = .init()
         let sut: LocalFeedLoader = .init(store: store, currentDate: currentDate)
