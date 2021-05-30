@@ -47,7 +47,7 @@ private extension Array where Element == RemoteFeedItem {
                 id: item.id,
                 description: item.description,
                 location: item.location,
-                imageURL: item.image
+                url: item.image
             )
         }
     }

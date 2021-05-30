@@ -176,7 +176,7 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     }
 
     func makeItem(id: UUID, description: String?, location: String?, imageURL: URL) -> (model: FeedImage, json: [String: Any]) {
-        let item: FeedImage = .init(id: id, description: description, location: location, imageURL: imageURL)
+        let item: FeedImage = .init(id: id, description: description, location: location, url: imageURL)
         let json: [String: Any] = [
             "id": id.uuidString,
             "description": description,
