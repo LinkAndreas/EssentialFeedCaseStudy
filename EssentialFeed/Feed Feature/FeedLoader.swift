@@ -3,5 +3,5 @@
 public protocol FeedLoader {
     typealias Result = Swift.Result<[FeedImage], Error>
 
-    func fetchItems(completion: @escaping (Result) -> Void)
+    func fetchFeed(completion: @escaping (Result) -> Void)
 }

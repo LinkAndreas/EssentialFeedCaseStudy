@@ -6,18 +6,18 @@ import XCTest
 class EssentialFeedAPIEndToEndTests: XCTestCase {
     func test_endToEndTestServerLoadFeedResult_matchesFixedTestAccountData() {
         switch loadFeedResult() {
-        case let .success(items)?:
-            XCTAssertEqual(items[0], expectedImage(at: 0))
-            XCTAssertEqual(items[1], expectedImage(at: 1))
-            XCTAssertEqual(items[2], expectedImage(at: 2))
-            XCTAssertEqual(items[3], expectedImage(at: 3))
-            XCTAssertEqual(items[4], expectedImage(at: 4))
-            XCTAssertEqual(items[5], expectedImage(at: 5))
-            XCTAssertEqual(items[6], expectedImage(at: 6))
-            XCTAssertEqual(items[7], expectedImage(at: 7))
+        case let .success(feed)?:
+            XCTAssertEqual(feed[0], expectedImage(at: 0))
+            XCTAssertEqual(feed[1], expectedImage(at: 1))
+            XCTAssertEqual(feed[2], expectedImage(at: 2))
+            XCTAssertEqual(feed[3], expectedImage(at: 3))
+            XCTAssertEqual(feed[4], expectedImage(at: 4))
+            XCTAssertEqual(feed[5], expectedImage(at: 5))
+            XCTAssertEqual(feed[6], expectedImage(at: 6))
+            XCTAssertEqual(feed[7], expectedImage(at: 7))
 
         case let .failure(error)?:
-            XCTFail("Expected fetch items call to succeed, but received error instead: \(error).")
+            XCTFail("Expected fetch feed to succeed, but received error instead: \(error).")
 
         default:
             XCTFail("Expected to receive successful response.")
@@ -36,7 +36,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         let expectation: XCTestExpectation = .init(description: "Wait for response.")
         var capturedResult: FeedLoader.Result?
 
-        loader.fetchItems { result in
+        loader.fetchFeed { result in
             capturedResult = result
             expectation.fulfill()
         }
