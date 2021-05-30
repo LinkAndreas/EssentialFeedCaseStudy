@@ -1,7 +1,5 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
-import Foundation
-
 public struct LocalFeedImage: Equatable {
     public let id: UUID
     public let description: String?
