@@ -101,7 +101,7 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let client: HttpClientSpy = .init()
         var sut: RemoteFeedLoader? = .init(url: anyURL(), client: client)
 
-        var capturedResults: [Result<[FeedItem], Error>] = []
+        var capturedResults: [Result<[FeedImage], Error>] = []
         sut?.fetchItems { capturedResults.append($0) }
         sut = nil
         client.complete(withStatusCode: 200, data: makeJSONData(items: []))
@@ -175,8 +175,8 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         return .failure(error)
     }
 
-    func makeItem(id: UUID, description: String?, location: String?, imageURL: URL) -> (model: FeedItem, json: [String: Any]) {
-        let item: FeedItem = .init(id: id, description: description, location: location, imageURL: imageURL)
+    func makeItem(id: UUID, description: String?, location: String?, imageURL: URL) -> (model: FeedImage, json: [String: Any]) {
+        let item: FeedImage = .init(id: id, description: description, location: location, imageURL: imageURL)
         let json: [String: Any] = [
             "id": id.uuidString,
             "description": description,
