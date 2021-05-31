@@ -57,6 +57,44 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
         }
     }
 
+    func test_load_deliversNoFeedOnEmptyCache() {
+        let (sut, store) = makeSUT()
+
+        let exp: XCTestExpectation = .init(description: "Wait for load result.")
+        let expectedResult: LocalFeedLoader.LoadResult = .success([])
+        var receivedResult: LocalFeedLoader.LoadResult?
+
+        sut.loadFeed { result in
+            receivedResult = result
+            exp.fulfill()
+        }
+
+        store.completeLoadSuccessfully(with: [])
+
+        wait(for: [exp], timeout: 1.0)
+
+        XCTAssertEqual(store.receivedMessages, [.retrieve])
+
+        switch (receivedResult, expectedResult) {
+        case let (.success(receivedFeed), .success(expectedFeed)):
+            XCTAssertEqual(
+                receivedFeed,
+                expectedFeed,
+                "Expected \(expectedFeed), but recived \(receivedFeed) instead."
+            )
+
+        case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
+            XCTAssertEqual(
+                receivedError,
+                expectedError,
+                "Expected \(expectedError), but recived \(receivedError) instead."
+            )
+
+        default:
+            XCTFail("Expected \(expectedResult), but received \(String(describing: receivedResult)) instead")
+        }
+    }
+
     // MARK: - Helper
     private func makeSUT() -> (LocalFeedLoader, FeedStoreSpy) {
         let store: FeedStoreSpy = FeedStoreSpy()
