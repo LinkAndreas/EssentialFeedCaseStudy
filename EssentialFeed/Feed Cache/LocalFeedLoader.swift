@@ -4,6 +4,7 @@ import Foundation
 
 public final class LocalFeedLoader {
     public typealias SaveResult = Result<Void, Error>
+    public typealias LoadResult = Result<[FeedImage], Error>
 
     private let store: FeedStore
     private let currentDate: () -> Date
@@ -24,6 +25,12 @@ public final class LocalFeedLoader {
             case let .failure(error):
                 completion(.failure(error))
             }
+        }
+    }
+
+    public func loadFeed(completion: @escaping (LoadResult) -> Void) {
+        store.load { result in
+            completion(result.map({_ in []}))
         }
     }
 

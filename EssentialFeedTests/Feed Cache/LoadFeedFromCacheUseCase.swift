@@ -10,6 +10,53 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
         XCTAssertEqual(store.receivedMessages, [])
     }
 
+    func test_load_requestsCacheRetrival() {
+        let (sut, store) = makeSUT()
+
+        sut.loadFeed { _ in }
+
+        XCTAssertEqual(store.receivedMessages, [.retrieve])
+    }
+
+    func test_load_deliversErrorOnRetrievalError() {
+        let (sut, store) = makeSUT()
+
+        let exp: XCTestExpectation = .init(description: "Wait for load result.")
+        let expectedError: NSError = anyNSError()
+        let expectedResult: LocalFeedLoader.LoadResult = .failure(expectedError)
+        var receivedResult: LocalFeedLoader.LoadResult?
+
+        sut.loadFeed { result in
+            receivedResult = result
+            exp.fulfill()
+        }
+
+        store.completeLoad(with: expectedError)
+
+        wait(for: [exp], timeout: 1.0)
+
+        XCTAssertEqual(store.receivedMessages, [.retrieve])
+
+        switch (receivedResult, expectedResult) {
+        case let (.success(receivedFeed), .success(expectedFeed)):
+            XCTAssertEqual(
+                receivedFeed,
+                expectedFeed,
+                "Expected \(expectedFeed), but recived \(receivedFeed) instead."
+            )
+
+        case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
+            XCTAssertEqual(
+                receivedError,
+                expectedError,
+                "Expected \(expectedError), but recived \(receivedError) instead."
+            )
+
+        default:
+            XCTFail("Expected \(expectedResult), but received \(String(describing: receivedResult)) instead")
+        }
+    }
+
     // MARK: - Helper
     private func makeSUT() -> (LocalFeedLoader, FeedStoreSpy) {
         let store: FeedStoreSpy = FeedStoreSpy()
@@ -18,40 +65,7 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
         return (sut, store)
     }
 
-    private class FeedStoreSpy: FeedStore {
-        enum Message: Equatable {
-            case deleteCachedFeed
-            case insert(feed: [LocalFeedImage], timestamp: Date)
-        }
-
-        var receivedMessages: [Message] = []
-        var deletionCompletions: [DeletionCompletion] = []
-        var insertionCompletions: [InsertionCompletion] = []
-
-        func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-            insertionCompletions.append(completion)
-            receivedMessages.append(.insert(feed: feed, timestamp: timestamp))
-        }
-
-        func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-            deletionCompletions.append(completion)
-            receivedMessages.append(.deleteCachedFeed)
-        }
-
-        func completeDeletion(with error: Error, atIndex index: Int = 0) {
-            deletionCompletions[index](.failure(error))
-        }
-
-        func completeDeletionSuccessfully(atIndex index: Int = 0) {
-            deletionCompletions[index](.success(()))
-        }
-
-        func completeInsertion(with error: Error, atIndex index: Int = 0) {
-            insertionCompletions[index](.failure(error))
-        }
-
-        func completeInsertionSuccessfully(atIndex index: Int = 0) {
-            insertionCompletions[index](.success(()))
-        }
+    private func anyNSError() -> NSError {
+        return .init(domain: "any domain", code: 42, userInfo: nil)
     }
 }
