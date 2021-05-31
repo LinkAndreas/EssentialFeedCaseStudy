@@ -19,80 +19,20 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
     }
 
     func test_load_deliversErrorOnRetrievalError() {
+        let expectedError: NSError = anyNSError()
         let (sut, store) = makeSUT()
 
-        let exp: XCTestExpectation = .init(description: "Wait for load result.")
-        let expectedError: NSError = anyNSError()
-        let expectedResult: LocalFeedLoader.LoadResult = .failure(expectedError)
-        var receivedResult: LocalFeedLoader.LoadResult?
-
-        sut.loadFeed { result in
-            receivedResult = result
-            exp.fulfill()
-        }
-
-        store.completeLoad(with: expectedError)
-
-        wait(for: [exp], timeout: 1.0)
-
-        XCTAssertEqual(store.receivedMessages, [.retrieve])
-
-        switch (receivedResult, expectedResult) {
-        case let (.success(receivedFeed), .success(expectedFeed)):
-            XCTAssertEqual(
-                receivedFeed,
-                expectedFeed,
-                "Expected \(expectedFeed), but recived \(receivedFeed) instead."
-            )
-
-        case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-            XCTAssertEqual(
-                receivedError,
-                expectedError,
-                "Expected \(expectedError), but recived \(receivedError) instead."
-            )
-
-        default:
-            XCTFail("Expected \(expectedResult), but received \(String(describing: receivedResult)) instead")
-        }
+        expect(sut, toCompleteWith: .failure(expectedError), when: {
+            store.completeLoad(with: expectedError)
+        })
     }
 
     func test_load_deliversNoFeedOnEmptyCache() {
         let (sut, store) = makeSUT()
 
-        let exp: XCTestExpectation = .init(description: "Wait for load result.")
-        let expectedResult: LocalFeedLoader.LoadResult = .success([])
-        var receivedResult: LocalFeedLoader.LoadResult?
-
-        sut.loadFeed { result in
-            receivedResult = result
-            exp.fulfill()
-        }
-
-        store.completeLoadSuccessfully(with: [])
-
-        wait(for: [exp], timeout: 1.0)
-
-        XCTAssertEqual(store.receivedMessages, [.retrieve])
-
-        switch (receivedResult, expectedResult) {
-        case let (.success(receivedFeed), .success(expectedFeed)):
-            XCTAssertEqual(
-                receivedFeed,
-                expectedFeed,
-                "Expected \(expectedFeed), but recived \(receivedFeed) instead."
-            )
-
-        case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-            XCTAssertEqual(
-                receivedError,
-                expectedError,
-                "Expected \(expectedError), but recived \(receivedError) instead."
-            )
-
-        default:
-            XCTFail("Expected \(expectedResult), but received \(String(describing: receivedResult)) instead")
-        }
+        expect(sut, toCompleteWith: .success([]), when: {
+            store.completeLoadSuccessfully(with: [])
+        })
     }
 
     // MARK: - Helper
@@ -105,5 +45,42 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
 
     private func anyNSError() -> NSError {
         return .init(domain: "any domain", code: 42, userInfo: nil)
+    }
+
+    private func expect(
+        _ sut: LocalFeedLoader,
+        toCompleteWith expectedResult: LocalFeedLoader.LoadResult,
+        when action: () -> Void
+    ) {
+        let exp: XCTestExpectation = .init(description: "Wait for load result.")
+        var receivedResult: LocalFeedLoader.LoadResult?
+
+        sut.loadFeed { result in
+            receivedResult = result
+            exp.fulfill()
+        }
+
+        action()
+
+        wait(for: [exp], timeout: 1.0)
+
+        switch (receivedResult, expectedResult) {
+        case let (.success(receivedFeed), .success(expectedFeed)):
+            XCTAssertEqual(
+                receivedFeed,
+                expectedFeed,
+                "Expected \(expectedFeed), but recived \(receivedFeed) instead."
+            )
+
+        case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
+            XCTAssertEqual(
+                receivedError,
+                expectedError,
+                "Expected \(expectedError), but recived \(receivedError) instead."
+            )
+
+        default:
+            XCTFail("Expected \(expectedResult), but received \(String(describing: receivedResult)) instead")
+        }
     }
 }
