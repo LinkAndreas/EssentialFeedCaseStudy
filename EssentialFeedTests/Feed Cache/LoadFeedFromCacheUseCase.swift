@@ -79,7 +79,9 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
     private func expect(
         _ sut: LocalFeedLoader,
         toCompleteWith expectedResult: LocalFeedLoader.LoadResult,
-        when action: () -> Void
+        when action: () -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
     ) {
         let exp: XCTestExpectation = .init(description: "Wait for load result.")
         var receivedResult: LocalFeedLoader.LoadResult?
@@ -98,18 +100,26 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
             XCTAssertEqual(
                 receivedFeed,
                 expectedFeed,
-                "Expected \(expectedFeed), but recived \(receivedFeed) instead."
+                "Expected \(expectedFeed), but recived \(receivedFeed) instead.",
+                file: file,
+                line: line
             )
 
         case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
             XCTAssertEqual(
                 receivedError,
                 expectedError,
-                "Expected \(expectedError), but recived \(receivedError) instead."
+                "Expected \(expectedError), but recived \(receivedError) instead.",
+                file: file,
+                line: line
             )
 
         default:
-            XCTFail("Expected \(expectedResult), but received \(String(describing: receivedResult)) instead")
+            XCTFail(
+                "Expected \(expectedResult), but received \(String(describing: receivedResult)) instead",
+                file: file,
+                line: line
+            )
         }
     }
 
