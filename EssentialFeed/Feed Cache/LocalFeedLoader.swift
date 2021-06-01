@@ -54,12 +54,14 @@ public final class LocalFeedLoader {
             guard let self = self else { return }
 
             switch result {
-            case .empty: break
-
-            case let .found(_, timestamp) where self.validate(timestamp): break
-
-            case .found, .failure:
+            case let .found(_, timestamp) where !self.validate(timestamp):
                 self.store.deleteCachedFeed { _ in }
+
+            case .failure:
+                self.store.deleteCachedFeed { _ in }
+
+            default:
+                break
             }
         }
     }
