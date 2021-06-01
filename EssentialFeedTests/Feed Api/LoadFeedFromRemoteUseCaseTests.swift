@@ -192,10 +192,6 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         return try! JSONSerialization.data(withJSONObject: json)
     }
 
-    func anyURL() -> URL {
-        return URL(string: "http://any.url")!
-    }
-
     func invalidJsonData() -> Data {
         return .init("Invalid JSON".utf8)
     }

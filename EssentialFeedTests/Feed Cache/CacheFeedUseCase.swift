@@ -165,14 +165,6 @@ class CacheFeedUseCase: XCTestCase {
 
         return (feed, locals)
     }
-
-    private func anyURL() -> URL {
-        return URL(string: "http://any-url.com")!
-    }
-
-    private func anyNSError() -> NSError {
-        return .init(domain: "any domain", code: 42, userInfo: nil)
-    }
 }
 
 
