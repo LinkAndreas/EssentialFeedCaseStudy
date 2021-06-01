@@ -34,13 +34,10 @@ public final class LocalFeedLoader {
             guard let self = self else { return }
 
             switch result {
-            case .empty:
-                completion(.success([]))
-
             case let .found(feed, timestamp) where self.validate(timestamp):
                 completion(.success(feed.toModels()))
 
-            case .found:
+            case .empty, .found:
                 completion(.success([]))
 
             case let .failure(error):
