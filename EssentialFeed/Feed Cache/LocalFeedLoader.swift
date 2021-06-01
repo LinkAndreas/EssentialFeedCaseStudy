@@ -30,7 +30,9 @@ public final class LocalFeedLoader {
     }
 
     public func loadFeed(completion: @escaping (LoadResult) -> Void) {
-        store.load { [unowned self] result in
+        store.load { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .empty:
                 completion(.success([]))
