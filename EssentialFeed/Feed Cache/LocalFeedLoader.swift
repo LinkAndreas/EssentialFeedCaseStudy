@@ -55,6 +55,8 @@ public final class LocalFeedLoader {
             switch result {
             case .empty: break
 
+            case .found: break
+
             default:
                 self?.store.deleteCachedFeed {  _ in }
             }
