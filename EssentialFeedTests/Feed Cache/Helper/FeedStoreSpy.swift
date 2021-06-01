@@ -45,7 +45,7 @@ internal class FeedStoreSpy: FeedStore {
         insertionCompletions[index](.success(()))
     }
 
-    func completeLoad(with error: Error, atIndex index: Int = 0) {
+    func completeRetrieval(with error: Error, atIndex index: Int = 0) {
         retrievalCompletions[index](.failure(error: error))
     }
 

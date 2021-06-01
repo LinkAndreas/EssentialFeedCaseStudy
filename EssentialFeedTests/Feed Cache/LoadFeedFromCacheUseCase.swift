@@ -23,7 +23,7 @@ final class LoadFeedFromCacheUseCase: XCTestCase {
         let (sut, store) = makeSUT()
 
         expect(sut, toCompleteWith: .failure(expectedError), when: {
-            store.completeLoad(with: expectedError)
+            store.completeRetrieval(with: expectedError)
         })
     }
 
