@@ -4,9 +4,34 @@ import EssentialFeed
 import XCTest
 
 class CodableFeedStore {
-    struct Cache: Codable {
-        let feed: [LocalFeedImage]
+    private struct Cache: Codable {
+        let feed: [CodableFeedImage]
         let timestamp: Date
+    }
+
+    private struct CodableFeedImage: Equatable, Codable {
+        let id: UUID
+        let description: String?
+        let location: String?
+        let url: URL
+
+        init(id: UUID, description: String?, location: String?, url: URL) {
+            self.id = id
+            self.description = description
+            self.location = location
+            self.url = url
+        }
+
+        init(from feedImage: LocalFeedImage) {
+            id = feedImage.id
+            description = feedImage.description
+            location = feedImage.location
+            url = feedImage.url
+        }
+
+        var local: LocalFeedImage {
+            return .init(id: id, description: description, location: location, url: url)
+        }
     }
 
     private let storeURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -14,7 +39,7 @@ class CodableFeedStore {
 
     func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
         let encoder: JSONEncoder = .init()
-        let encoded = try! encoder.encode(Cache(feed: feed, timestamp: timestamp))
+        let encoded = try! encoder.encode(Cache(feed: feed.map(CodableFeedImage.init(from:)), timestamp: timestamp))
         try! encoded.write(to: storeURL)
         completion(.success(()))
     }
@@ -26,12 +51,11 @@ class CodableFeedStore {
 
         let decoder: JSONDecoder = .init()
         let decoded = try! decoder.decode(Cache.self, from: data)
-        completion(.found(feed: decoded.feed, timestamp: decoded.timestamp))
+        completion(.found(feed: decoded.feed.map(\.local), timestamp: decoded.timestamp))
     }
 }
 
 final class CodableFeedStoreCacheTests: XCTestCase {
-
     override func setUp() {
         super.setUp()
 

@@ -1,6 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
-public struct LocalFeedImage: Equatable, Codable {
+public struct LocalFeedImage: Equatable {
     public let id: UUID
     public let description: String?
     public let location: String?
