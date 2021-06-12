@@ -228,8 +228,8 @@
 				3853B6952666A4A100D14854 /* ValidateFeedCacheUseCase.swift */,
 				38919C3726655D07000B8F5C /* LoadFeedFromCacheUseCase.swift */,
 				388C1DD3266E52F300D9CADD /* CodableFeedStoreCacheTests.swift */,
-				3814F5FA2674E9BE0065F6FF /* FeedStoreSpecs.swift */,
 				3814F5FC2674EF3F0065F6FF /* XCTestCase+FeedStoreSpecs.swift */,
+				3814F5FA2674E9BE0065F6FF /* FeedStoreSpecs.swift */,
 			);
 			path = "Feed Cache";
 			sourceTree = "<group>";
