@@ -53,8 +53,12 @@ class CodableFeedStore {
         }
 
         let decoder: JSONDecoder = .init()
-        let decoded = try! decoder.decode(Cache.self, from: data)
-        completion(.found(feed: decoded.feed.map(\.local), timestamp: decoded.timestamp))
+        do {
+            let decoded = try decoder.decode(Cache.self, from: data)
+            completion(.found(feed: decoded.feed.map(\.local), timestamp: decoded.timestamp))
+        } catch {
+            completion(.failure(error: error))
+        }
     }
 }
 
@@ -103,6 +107,14 @@ final class CodableFeedStoreCacheTests: XCTestCase {
         expect(sut, toCompleteTwiceWith: .found(feed: feed.locals, timestamp: timestamp))
     }
 
+    func test_retrieve_deliversFailureOnRetrievalError() {
+        let sut = makeSUT()
+
+        try! "Invalid data".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
+
+        expect(sut, toCompleteWith: .failure(error: anyNSError()))
+    }
+
     // MARK: - Helpers
     private func makeSUT() -> CodableFeedStore {
         let sut: CodableFeedStore = .init(storeURL: testSpecificStoreURL())
@@ -146,14 +158,15 @@ final class CodableFeedStoreCacheTests: XCTestCase {
                     line: line
                 )
 
-            case (.empty, .empty):
+            case (.empty, .empty), (.failure, .failure):
                 break
 
-            case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-                XCTAssertEqual(receivedError, expectedError)
-
             default:
-                XCTFail("Expected result: \(expectedResult), but received \(receivedResult) instead.")
+                XCTFail(
+                    "Expected result: \(expectedResult), but received \(receivedResult) instead.",
+                    file: file,
+                    line: line
+                )
             }
 
             exp.fulfill()
