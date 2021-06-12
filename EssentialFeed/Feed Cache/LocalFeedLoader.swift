@@ -16,7 +16,7 @@ extension LocalFeedLoader {
     public typealias LoadResult = Result<[FeedImage], Error>
 
     public func fetchFeed(completion: @escaping (LoadResult) -> Void) {
-        store.load { [weak self] result in
+        store.retrieve { [weak self] result in
             guard let self = self else { return }
 
             switch result {
@@ -61,7 +61,7 @@ extension LocalFeedLoader {
 
 extension LocalFeedLoader {
     public func validateCache() {
-        store.load { [weak self] result in
+        store.retrieve { [weak self] result in
             guard let self = self else { return }
 
             switch result {

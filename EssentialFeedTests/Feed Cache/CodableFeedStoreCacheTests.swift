@@ -3,7 +3,7 @@
 import EssentialFeed
 import XCTest
 
-class CodableFeedStore {
+class CodableFeedStore: FeedStore {
     private struct Cache: Codable {
         let feed: [CodableFeedImage]
         let timestamp: Date
@@ -40,18 +40,7 @@ class CodableFeedStore {
         self.storeURL = storeURL
     }
 
-    func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
-        let encoder: JSONEncoder = .init()
-        do {
-            let encoded = try encoder.encode(Cache(feed: feed.map(CodableFeedImage.init(from:)), timestamp: timestamp))
-            try encoded.write(to: storeURL)
-            completion(.success(()))
-        } catch {
-            completion(.failure(error))
-        }
-    }
-
-    func retrieve(completion: @escaping FeedStore.RetrievalCompletion) {
+    func retrieve(completion: @escaping RetrievalCompletion) {
         guard let data: Data = try? Data(contentsOf: storeURL) else {
             return completion(.empty)
         }
@@ -65,7 +54,18 @@ class CodableFeedStore {
         }
     }
 
-    func deleteCachedFeed(completion: @escaping FeedStore.DeletionCompletion) {
+    func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
+        let encoder: JSONEncoder = .init()
+        do {
+            let encoded = try encoder.encode(Cache(feed: feed.map(CodableFeedImage.init(from:)), timestamp: timestamp))
+            try encoded.write(to: storeURL)
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         guard FileManager.default.fileExists(atPath: storeURL.path) else { return completion(.success(())) }
 
         do {
