@@ -42,9 +42,13 @@ class CodableFeedStore {
 
     func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
         let encoder: JSONEncoder = .init()
-        let encoded = try! encoder.encode(Cache(feed: feed.map(CodableFeedImage.init(from:)), timestamp: timestamp))
-        try! encoded.write(to: storeURL)
-        completion(.success(()))
+        do {
+            let encoded = try encoder.encode(Cache(feed: feed.map(CodableFeedImage.init(from:)), timestamp: timestamp))
+            try encoded.write(to: storeURL)
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
     }
 
     func retrieve(completion: @escaping FeedStore.RetrievalCompletion) {
@@ -139,6 +143,17 @@ final class CodableFeedStoreCacheTests: XCTestCase {
         expect(sut, toCompleteWith: .found(feed: secondFeed.locals, timestamp: secondTimestamp))
     }
 
+    func test_insert_deliversErrorOnInsertionError() {
+        let invalidStoreURL = URL(string: "invalid://store-url")!
+        let sut = makeSUT(storeURL: invalidStoreURL)
+
+        let feed = uniqueImageFeed()
+        let timestamp = Date()
+
+        let receivedError = insert(feed.locals, timestamp , into: sut)
+        XCTAssertNotNil(receivedError, "Expected to receive error, but received success instead.")
+    }
+
     // MARK: - Helpers
     private func makeSUT(storeURL: URL? = nil, file: StaticString = #file, line: UInt = #line) -> CodableFeedStore {
         let sut: CodableFeedStore = .init(storeURL: storeURL ?? testSpecificStoreURL())
@@ -199,22 +214,25 @@ final class CodableFeedStoreCacheTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
-    private func insert(_ feed: [LocalFeedImage], _ timestamp: Date, into sut: CodableFeedStore) {
+    @discardableResult
+    private func insert(_ feed: [LocalFeedImage], _ timestamp: Date, into sut: CodableFeedStore) -> Error? {
         let exp: XCTestExpectation = .init(description: "Wait for cache insertion.")
-
+        var receivedError: Error?
         sut.insert(feed: feed, timestamp: timestamp) { result in
             switch result {
             case .success:
                 break
 
             case let .failure(error):
-                XCTFail("Expected insert to succeed, receiver error instead: \(error)")
+                receivedError = error
             }
 
             exp.fulfill()
         }
 
         wait(for: [exp], timeout: 1.0)
+
+        return receivedError
     }
 
 
