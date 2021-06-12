@@ -64,6 +64,17 @@ class CodableFeedStore {
             completion(.failure(error: error))
         }
     }
+
+    func deleteCachedFeed(completion: @escaping FeedStore.DeletionCompletion) {
+        guard FileManager.default.fileExists(atPath: storeURL.path) else { return completion(.success(())) }
+
+        do {
+            try FileManager.default.removeItem(at: storeURL)
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
 }
 
 final class CodableFeedStoreCacheTests: XCTestCase {
@@ -154,6 +165,15 @@ final class CodableFeedStoreCacheTests: XCTestCase {
         XCTAssertNotNil(receivedError, "Expected to receive error, but received success instead.")
     }
 
+    func test_delete_hasNoSideEffectsOnEmptyCache() {
+        let sut = makeSUT()
+
+        let deletionError = deleteCache(from: sut)
+
+        XCTAssertNil(deletionError, "Expected deletion to succeed, but received error instead: \(String(describing: deletionError)).")
+        expect(sut, toCompleteWith: .empty)
+    }
+
     // MARK: - Helpers
     private func makeSUT(storeURL: URL? = nil, file: StaticString = #file, line: UInt = #line) -> CodableFeedStore {
         let sut: CodableFeedStore = .init(storeURL: storeURL ?? testSpecificStoreURL())
@@ -235,6 +255,26 @@ final class CodableFeedStoreCacheTests: XCTestCase {
         return receivedError
     }
 
+    @discardableResult
+    private func deleteCache(from sut: CodableFeedStore) -> Error? {
+        let exp: XCTestExpectation = .init(description: "Wait for cache deletion.")
+        var receivedError: Error?
+        sut.deleteCachedFeed { result in
+            switch result {
+            case .success:
+                break
+
+            case let .failure(error):
+                receivedError = error
+            }
+
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 1.0)
+
+        return receivedError
+    }
 
     private func testSpecificStoreURL() -> URL {
         return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
