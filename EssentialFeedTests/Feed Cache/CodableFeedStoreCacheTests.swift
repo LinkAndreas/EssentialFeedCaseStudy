@@ -151,6 +151,62 @@ final class CodableFeedStoreCacheTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
+    func test_retrieve_hasNoSideEffectsOnNonEmptyCache() {
+        let sut = makeSUT()
+
+        let feed = uniqueImageFeed()
+        let timestamp = Date()
+        let exp: XCTestExpectation = .init(description: "Wait for result.")
+        sut.insert(feed: feed.locals, timestamp: timestamp) { result in
+            switch result {
+            case .success:
+                break
+
+            case let .failure(error):
+                XCTFail("Expected insert to succeed, receiver error instead: \(error)")
+            }
+
+            sut.retrieve { firstResult in
+                sut.retrieve { secondResult in
+                    switch (firstResult, secondResult) {
+                    case let (
+                        .found(firstReceivedFeed, firstReceivedTimestamp),
+                        .found(secondReceivedFeed, secondReceivedTimestamp)
+                    ):
+                        XCTAssertEqual(
+                            firstReceivedFeed,
+                            feed.locals,
+                            "Expected \(feed.locals), but received \(firstReceivedFeed) instead."
+                        )
+                        XCTAssertEqual(
+                            secondReceivedFeed,
+                            feed.locals,
+                            "Expected \(feed.locals), but received \(secondReceivedFeed) instead."
+                        )
+                        XCTAssertEqual(
+                            firstReceivedTimestamp,
+                            timestamp,
+                            "Expected \(timestamp), but received \(firstReceivedTimestamp) instead."
+                        )
+                        XCTAssertEqual(
+                            secondReceivedTimestamp,
+                            timestamp,
+                            "Expected \(timestamp), but received \(secondReceivedTimestamp) instead."
+                        )
+
+                    default:
+                        XCTFail(
+                            "Expected receive twice from non empty cache delivers same result with feed: \(feed) and timestamp: \(timestamp), but received \(firstResult) and \(secondResult) instead."
+                        )
+                    }
+
+                    exp.fulfill()
+                }
+            }
+        }
+
+        wait(for: [exp], timeout: 1.0)
+    }
 
     // MARK: - Helpers
     private func makeSUT() -> CodableFeedStore {
@@ -160,8 +216,8 @@ final class CodableFeedStoreCacheTests: XCTestCase {
     }
 
     private func testSpecificStoreURL() -> URL {
-        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
-        .first!.appendingPathComponent("\(type(of: self)).store")
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("\(type(of: self)).store")
     }
 
     private func setupEmptyStoreState() {
