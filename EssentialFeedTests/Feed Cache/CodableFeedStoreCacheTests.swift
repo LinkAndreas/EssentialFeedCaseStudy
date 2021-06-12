@@ -88,21 +88,8 @@ final class CodableFeedStoreCacheTests: XCTestCase {
 
         let feed = uniqueImageFeed()
         let timestamp = Date()
-        let exp: XCTestExpectation = .init(description: "Wait for result.")
-        sut.insert(feed: feed.locals, timestamp: timestamp) { result in
-            switch result {
-            case .success:
-                break
 
-            case let .failure(error):
-                XCTFail("Expected insert to succeed, receiver error instead: \(error)")
-            }
-
-            exp.fulfill()
-        }
-
-        wait(for: [exp], timeout: 1.0)
-
+        insert(feed.locals, timestamp, into: sut)
         expect(sut, toCompleteWith: .found(feed: feed.locals, timestamp: timestamp))
     }
 
@@ -111,21 +98,8 @@ final class CodableFeedStoreCacheTests: XCTestCase {
 
         let feed = uniqueImageFeed()
         let timestamp = Date()
-        let exp: XCTestExpectation = .init(description: "Wait for cache insertion.")
-        sut.insert(feed: feed.locals, timestamp: timestamp) { result in
-            switch result {
-            case .success:
-                break
 
-            case let .failure(error):
-                XCTFail("Expected insert to succeed, receiver error instead: \(error)")
-            }
-
-            exp.fulfill()
-        }
-
-        wait(for: [exp], timeout: 1.0)
-
+        insert(feed.locals, timestamp, into: sut)
         expect(sut, toCompleteTwiceWith: .found(feed: feed.locals, timestamp: timestamp))
     }
 
@@ -187,6 +161,25 @@ final class CodableFeedStoreCacheTests: XCTestCase {
 
         wait(for: [exp], timeout: 1.0)
     }
+
+    private func insert(_ feed: [LocalFeedImage], _ timestamp: Date, into sut: CodableFeedStore) {
+        let exp: XCTestExpectation = .init(description: "Wait for cache insertion.")
+
+        sut.insert(feed: feed, timestamp: timestamp) { result in
+            switch result {
+            case .success:
+                break
+
+            case let .failure(error):
+                XCTFail("Expected insert to succeed, receiver error instead: \(error)")
+            }
+
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 1.0)
+    }
+
 
     private func testSpecificStoreURL() -> URL {
         return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
