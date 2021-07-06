@@ -21,6 +21,7 @@ public final class CoreDataFeedStore: FeedStore {
         let context = self.context
         context.perform {
             do {
+                try ManagedCache.deleteAll(in: context)
                 let cache = ManagedCache(context: context)
                 cache.timestamp = timestamp
                 cache.feed = .init(array: feed.map { local in
@@ -42,14 +43,22 @@ public final class CoreDataFeedStore: FeedStore {
     }
 
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-
+        let context = self.context
+        context.perform {
+            do {
+                try ManagedCache.deleteAll(in: context)
+                completion(.success(()))
+            } catch {
+                completion(.failure(error))
+            }
+        }
     }
 
     public func retrieve(completion: @escaping RetrievalCompletion) {
         let context = self.context
         context.perform {
             do {
-                if let cache = try ManagedCache.find(in: context) {
+                if let cache = try ManagedCache.find(in: context).first {
                     completion(
                         .found(
                             feed: cache.feed.array
@@ -82,10 +91,14 @@ private class ManagedCache: NSManagedObject {
 }
 
 extension ManagedCache {
-    static func find(in context: NSManagedObjectContext) throws -> ManagedCache? {
+    static func find(in context: NSManagedObjectContext) throws -> [ManagedCache] {
         let request = NSFetchRequest<ManagedCache>(entityName: entity().name!)
         request.returnsObjectsAsFaults = false
-        return try context.fetch(request).first
+        return try context.fetch(request)
+    }
+
+    static func deleteAll(in context: NSManagedObjectContext) throws {
+        try find(in: context).forEach(context.delete)
     }
 }
 
