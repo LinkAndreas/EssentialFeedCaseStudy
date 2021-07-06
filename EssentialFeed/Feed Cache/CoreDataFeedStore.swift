@@ -3,13 +3,42 @@
 import CoreData
 
 public final class CoreDataFeedStore: FeedStore {
-    private let container: NSPersistentContainer
+    enum Constants {
+        static let modelName = "FeedStore"
+    }
 
-    public init(bundle: Bundle = .main) throws {
-        self.container = try .load(modelName: "FeedStore", in: bundle)
+    private let container: NSPersistentContainer
+    private let context: NSManagedObjectContext
+
+    public init(storeURL: URL) throws {
+        let bundle: Bundle = Bundle(for: CoreDataFeedStore.self)
+        let model: NSManagedObjectModel = .with(name: Constants.modelName, in: bundle)!
+        container = try .load(name: Constants.modelName, model: model, url: storeURL)
+        context = container.newBackgroundContext()
     }
 
     public func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
+        let context = self.context
+        context.perform {
+            do {
+                let cache = ManagedCache(context: context)
+                cache.timestamp = timestamp
+                cache.feed = .init(array: feed.map { local in
+                    let managed = ManagedFeedImage(context: context)
+                    managed.cache = cache
+                    managed.imageDescription = local.description
+                    managed.location = local.location
+                    managed.url = local.url
+                    managed.id = local.id
+                    return managed
+                })
+
+                try context.save()
+                completion(.success(()))
+            } catch {
+                completion(.failure(error))
+            }
+        }
     }
 
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
@@ -17,27 +46,54 @@ public final class CoreDataFeedStore: FeedStore {
     }
 
     public func retrieve(completion: @escaping RetrievalCompletion) {
-        completion(.empty)
+        let context = self.context
+        context.perform {
+            do {
+                if let cache = try ManagedCache.find(in: context) {
+                    completion(
+                        .found(
+                            feed: cache.feed.array
+                                .compactMap({ $0 as? ManagedFeedImage })
+                                .map { managed in
+                                    LocalFeedImage(
+                                        id: managed.id,
+                                        description: managed.imageDescription,
+                                        location: managed.location,
+                                        url: managed.url
+                                    )
+                                },
+                            timestamp: cache.timestamp
+                        )
+                    )
+                } else {
+                    completion(.empty)
+                }
+            } catch {
+                completion(.failure(error: error))
+            }
+        }
     }
 }
 
+@objc(ManagedCache)
 private class ManagedCache: NSManagedObject {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<ManagedCache> {
-        return NSFetchRequest<ManagedCache>(entityName: "ManagedCache")
-    }
-
-    @NSManaged var timestamp: Date?
-    @NSManaged var feed: NSOrderedSet?
+    @NSManaged var timestamp: Date
+    @NSManaged var feed: NSOrderedSet
 }
 
-private class ManagagedFeedImage: NSManagedObject, Identifiable {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<ManagagedFeedImage> {
-        return NSFetchRequest<ManagagedFeedImage>(entityName: "ManagagedFeedImage")
+extension ManagedCache {
+    static func find(in context: NSManagedObjectContext) throws -> ManagedCache? {
+        let request = NSFetchRequest<ManagedCache>(entityName: entity().name!)
+        request.returnsObjectsAsFaults = false
+        return try context.fetch(request).first
     }
+}
 
-    @NSManaged var id: UUID?
+@objc(ManagedFeedImage)
+private class ManagedFeedImage: NSManagedObject {
+    @NSManaged var id: UUID
     @NSManaged var imageDescription: String?
-    @NSManaged var url: URL?
     @NSManaged var location: String?
-    @NSManaged var cache: ManagedCache?
+    @NSManaged var url: URL
+    @NSManaged var cache: ManagedCache
 }
