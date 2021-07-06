@@ -4,19 +4,6 @@ import CoreData
 import EssentialFeed
 import XCTest
 
-final class CoreDataFeedStore: FeedStore {
-    public func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-    }
-
-    public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-
-    }
-
-    public func retrieve(completion: @escaping RetrievalCompletion) {
-        completion(.empty)
-    }
-}
-
 final class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     func test_retrieve_deliversEmptyOnEmptyCache() {
         let sut = makeSUT()
