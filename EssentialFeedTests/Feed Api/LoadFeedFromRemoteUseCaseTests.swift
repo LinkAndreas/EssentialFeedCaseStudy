@@ -3,7 +3,7 @@
 import EssentialFeed
 import XCTest
 
-class RemoteFeedLoaderTests: XCTestCase {
+class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     func test_init_doesNotRequestDataFromURL() {
         let url = anyURL()
         let (_, client) = makeSut(url: url)
@@ -15,7 +15,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        sut.fetchItems { _ in }
+        sut.fetchFeed { _ in }
 
         XCTAssertEqual(client.requestedURLs, [url])
     }
@@ -24,8 +24,8 @@ class RemoteFeedLoaderTests: XCTestCase {
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        sut.fetchItems { _ in }
-        sut.fetchItems { _ in }
+        sut.fetchFeed { _ in }
+        sut.fetchFeed { _ in }
 
         XCTAssertEqual(client.requestedURLs, [url, url])
     }
@@ -101,8 +101,8 @@ class RemoteFeedLoaderTests: XCTestCase {
         let client: HttpClientSpy = .init()
         var sut: RemoteFeedLoader? = .init(url: anyURL(), client: client)
 
-        var capturedResults: [Result<[FeedItem], Error>] = []
-        sut?.fetchItems { capturedResults.append($0) }
+        var capturedResults: [Result<[FeedImage], Error>] = []
+        sut?.fetchFeed { capturedResults.append($0) }
         sut = nil
         client.complete(withStatusCode: 200, data: makeJSONData(items: []))
 
@@ -142,7 +142,7 @@ class RemoteFeedLoaderTests: XCTestCase {
         line: UInt = #line
     ) {
         let expectation = expectation(description: "Wait for fetchItems completion")
-        sut.fetchItems { result in
+        sut.fetchFeed { result in
             switch (result, expectedResult) {
             case let (.success(items), .success(expectedItems)):
                 XCTAssertEqual(items, expectedItems, file: file, line: line)
@@ -175,8 +175,8 @@ class RemoteFeedLoaderTests: XCTestCase {
         return .failure(error)
     }
 
-    func makeItem(id: UUID, description: String?, location: String?, imageURL: URL) -> (model: FeedItem, json: [String: Any]) {
-        let item: FeedItem = .init(id: id, description: description, location: location, imageURL: imageURL)
+    func makeItem(id: UUID, description: String?, location: String?, imageURL: URL) -> (model: FeedImage, json: [String: Any]) {
+        let item: FeedImage = .init(id: id, description: description, location: location, url: imageURL)
         let json: [String: Any] = [
             "id": id.uuidString,
             "description": description,
@@ -190,10 +190,6 @@ class RemoteFeedLoaderTests: XCTestCase {
     func makeJSONData(items: [[String: Any]]) -> Data {
         let json: [String: Any] = ["items": items]
         return try! JSONSerialization.data(withJSONObject: json)
-    }
-
-    func anyURL() -> URL {
-        return URL(string: "http://any.url")!
     }
 
     func invalidJsonData() -> Data {

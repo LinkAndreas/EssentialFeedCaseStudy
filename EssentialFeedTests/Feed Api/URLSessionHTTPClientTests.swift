@@ -45,11 +45,11 @@ final class URLSessionHTTPClientTests: XCTestCase {
         XCTAssertNotNil(resultErrorFor(data: nil, response: nil, error: nil))
         XCTAssertNotNil(resultErrorFor(data: nil, response: anyNonHttpResponse(), error: nil))
         XCTAssertNotNil(resultErrorFor(data: anyData(), response: nil, error: nil))
-        XCTAssertNotNil(resultErrorFor(data: anyData(), response: nil, error: anyError()))
-        XCTAssertNotNil(resultErrorFor(data: nil, response: anyNonHttpResponse(), error: anyError()))
-        XCTAssertNotNil(resultErrorFor(data: nil, response: anyHttpResponse(), error: anyError()))
-        XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyNonHttpResponse(), error: anyError()))
-        XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyHttpResponse(), error: anyError()))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: nil, error: anyNSError()))
+        XCTAssertNotNil(resultErrorFor(data: nil, response: anyNonHttpResponse(), error: anyNSError()))
+        XCTAssertNotNil(resultErrorFor(data: nil, response: anyHttpResponse(), error: anyNSError()))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyNonHttpResponse(), error: anyNSError()))
+        XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyHttpResponse(), error: anyNSError()))
         XCTAssertNotNil(resultErrorFor(data: anyData(), response: anyNonHttpResponse(), error: nil))
     }
 
@@ -225,10 +225,6 @@ final class URLSessionHTTPClientTests: XCTestCase {
         return sut
     }
 
-    func anyURL() -> URL {
-        return URL(string: "http://any.url")!
-    }
-
     func anyNonHttpResponse() -> URLResponse {
         return .init(url: anyURL(), mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
     }
@@ -239,9 +235,5 @@ final class URLSessionHTTPClientTests: XCTestCase {
 
     func anyData() -> Data {
         return "anyData".data(using: .utf8)!
-    }
-
-    func anyError() -> NSError {
-        return .init(domain: "any domain", code: 0, userInfo: nil)
     }
 }
