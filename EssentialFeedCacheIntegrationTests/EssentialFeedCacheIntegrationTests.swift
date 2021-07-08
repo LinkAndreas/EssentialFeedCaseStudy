@@ -27,7 +27,8 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         let sutToPerformLoad = makeSUT()
         let imageFeed = uniqueImageFeed().models
 
-        expect(sutToPerformSave, toCompleteSaveOf: imageFeed, with: .success(()))
+        save(imageFeed, with: sutToPerformSave)
+
         expect(sutToPerformLoad, toCompleteLoadWith: .success(imageFeed))
     }
 
@@ -38,8 +39,9 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         let firstFeed = uniqueImageFeed().models
         let latestFeed = uniqueImageFeed().models
 
-        expect(sutToPerformFirstSave, toCompleteSaveOf: firstFeed, with: .success(()))
-        expect(sutToPerformLastSave, toCompleteSaveOf: latestFeed, with: .success(()))
+        save(firstFeed, with: sutToPerformFirstSave)
+        save(latestFeed, with: sutToPerformLastSave)
+
         expect(sutToPerformLoad, toCompleteLoadWith: .success(latestFeed))
     }
 
@@ -76,28 +78,20 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
-    private func expect(
-        _ sut: LocalFeedLoader,
-        toCompleteSaveOf imageFeed: [FeedImage],
-        with expectedResult: Result<Void, Error>,
+    private func save(
+        _ imageFeed: [FeedImage],
+        with sut: LocalFeedLoader,
         file: StaticString = #filePath,
         line: UInt8 = #line
     ) {
         let exp = expectation(description: "Wait for result")
-        sut.save(feed: imageFeed) { receivedResult in
-            switch (receivedResult, expectedResult) {
-            case (.success, .success):
+        sut.save(feed: imageFeed) { result in
+            switch result {
+            case .success:
                 break
 
-            case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-                XCTAssertEqual(
-                    receivedError,
-                    expectedError,
-                    "Expected to receive \(expectedError), but received \(receivedError) instead."
-                )
-
-            default:
-                XCTFail("Expected to recieve \(expectedResult), but received: \(receivedResult) instead.")
+            case let .failure(receivedError):
+                XCTFail("Expected to succeed, but received \(receivedError) instead.")
             }
 
             exp.fulfill()
