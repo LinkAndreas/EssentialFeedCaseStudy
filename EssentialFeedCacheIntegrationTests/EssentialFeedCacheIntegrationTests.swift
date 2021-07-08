@@ -35,6 +35,46 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
+    func test_load_deliversItemsSavedOnASeparateInstance() {
+        let sutToPerformSave = makeSUT()
+        let sutToPerformLoad = makeSUT()
+        let imageFeed = uniqueImageFeed().models
+
+        let saveExp = expectation(description: "Wait for save completion")
+        sutToPerformSave.save(feed: imageFeed) { result in
+            switch result {
+            case .success:
+                break
+
+            case let .failure(error):
+                XCTFail("Expected successful result, but received error \(error) instead.")
+            }
+
+            saveExp.fulfill()
+        }
+
+        wait(for: [saveExp], timeout: 1.0)
+
+        let loadExp = expectation(description: "Wait for load completion")
+        sutToPerformLoad.fetchFeed { result in
+            switch result {
+            case let .success(receivedImageFeed):
+                XCTAssertEqual(
+                    imageFeed,
+                    receivedImageFeed,
+                    "Expected \(imageFeed), but received \(receivedImageFeed) instead."
+                )
+
+            case let .failure(error):
+                XCTFail("Expected successful result, but received error \(error) instead.")
+            }
+
+            loadExp.fulfill()
+        }
+
+        wait(for: [loadExp], timeout: 1.0)
+    }
+
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
         let storeBundle = Bundle(for: CoreDataFeedStore.self)
