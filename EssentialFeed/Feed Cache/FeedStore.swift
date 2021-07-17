@@ -3,7 +3,7 @@
 import Foundation
 
 public protocol FeedStore {
-    typealias RetrievalResult = Swift.Result<CachedFeed, Error>
+    typealias RetrievalResult = Swift.Result<CachedFeed?, Error>
 
     typealias DeletionCompletion = (Result<Void, Error>) -> Void
     typealias InsertionCompletion = (Result<Void, Error>) -> Void

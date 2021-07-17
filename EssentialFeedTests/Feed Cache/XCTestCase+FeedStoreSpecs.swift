@@ -9,7 +9,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line
     ) {
-        expect(sut, toCompleteWith: .success(.empty), file: file, line: line)
+        expect(sut, toCompleteWith: .success(.none), file: file, line: line)
     }
 
     func assertThatRetrieveHasNoSideEffectOnEmptyCache(
@@ -17,7 +17,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line
     ) {
-        expect(sut, toCompleteTwiceWith: .success(.empty), file: file, line: line)
+        expect(sut, toCompleteTwiceWith: .success(.none), file: file, line: line)
     }
 
     func assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(
@@ -32,7 +32,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
 
         expect(
             sut,
-            toCompleteWith: .success(.found(feed: feed.locals, timestamp: timestamp)),
+            toCompleteWith: .success(CachedFeed(feed: feed.locals, timestamp: timestamp)),
             file: file,
             line: line
         )
@@ -50,7 +50,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
 
         expect(
             sut,
-            toCompleteTwiceWith: .success(.found(feed: feed.locals, timestamp: timestamp)),
+            toCompleteTwiceWith: .success(CachedFeed(feed: feed.locals, timestamp: timestamp)),
             file: file,
             line: line
         )
@@ -71,7 +71,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
 
         expect(
             sut,
-            toCompleteWith: .success(.found(feed: secondFeed.locals, timestamp: secondTimestamp)),
+            toCompleteWith: .success(CachedFeed(feed: secondFeed.locals, timestamp: secondTimestamp)),
             file: file,
             line: line
         )
@@ -116,7 +116,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
     ) {
         deleteCache(from: sut)
 
-        expect(sut, toCompleteWith: .success(.empty), file: file, line: line)
+        expect(sut, toCompleteWith: .success(.none), file: file, line: line)
     }
 
     func assertThatDeleteEmptiesPreviouslyInsertedCache(
@@ -127,7 +127,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
         insert(uniqueImageFeed().locals, Date(), into: sut)
         deleteCache(from: sut)
 
-        expect(sut, toCompleteWith: .success(.empty), file: file, line: line)
+        expect(sut, toCompleteWith: .success(.none), file: file, line: line)
     }
 
     func assertThatDeleteDeliversNoErrorOnNonEmptyCache(
@@ -202,7 +202,7 @@ extension FailableInsertFeedStoreSpecs where Self: XCTestCase {
     ) {
         insert(uniqueImageFeed().locals, Date(), into: sut)
 
-        expect(sut, toCompleteWith: .success(.empty), file: file, line: line)
+        expect(sut, toCompleteWith: .success(.none), file: file, line: line)
     }
 }
 
@@ -225,7 +225,7 @@ extension FailableDeleteFeedStoreSpecs where Self: XCTestCase {
     ) {
         deleteCache(from: sut)
 
-        expect(sut, toCompleteWith: .success(.empty), file: file, line: line)
+        expect(sut, toCompleteWith: .success(.none), file: file, line: line)
     }
 }
 
@@ -252,26 +252,16 @@ extension FeedStoreSpecs where Self: XCTestCase {
             switch (receivedResult, expectedResult) {
 
             case
-                let (
-                    .success(.found(receivedFeed, receivedTimestamp)),
-                    .success(.found(expectedFeed, expectedTimestamp))
-                ):
+                let (.success(receivedCache?), .success(expectedCache?)):
                 XCTAssertEqual(
-                    receivedFeed,
-                    expectedFeed,
-                    "Expected to receive feed: \(expectedFeed), but received \(receivedFeed) instead.",
-                    file: file,
-                    line: line
-                )
-                XCTAssertEqual(
-                    receivedTimestamp,
-                    expectedTimestamp,
-                    "Expected to receive timestamp: \(expectedTimestamp), but received \(receivedTimestamp) instead.",
+                    receivedCache,
+                    expectedCache,
+                    "Expected to receive cache: \(expectedCache), but received \(receivedCache) instead.",
                     file: file,
                     line: line
                 )
 
-            case (.success(.empty), .success(.empty)), (.failure, .failure):
+            case (.success(.none), .success(.none)), (.failure, .failure):
                 break
 
             default:
