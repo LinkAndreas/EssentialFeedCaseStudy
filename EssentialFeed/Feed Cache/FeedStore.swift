@@ -3,10 +3,13 @@
 import Foundation
 
 public protocol FeedStore {
-    typealias RetrievalResult = Swift.Result<CachedFeed?, Error>
+    typealias DeletionResult = Swift.Result<Void, Error>
+    typealias DeletionCompletion = (DeletionResult) -> Void
 
-    typealias DeletionCompletion = (Result<Void, Error>) -> Void
-    typealias InsertionCompletion = (Result<Void, Error>) -> Void
+    typealias InsertionResult = Swift.Result<Void, Error>
+    typealias InsertionCompletion = (InsertionResult) -> Void
+
+    typealias RetrievalResult = Swift.Result<CachedFeed?, Error>
     typealias RetrievalCompletion = (RetrievalResult) -> Void
 
     // The comletion can be called in any Thread. Clients are responsible to dispatch in appropriate threads if needed.
