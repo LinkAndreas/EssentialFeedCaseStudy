@@ -59,22 +59,24 @@ public final class CoreDataFeedStore: FeedStore {
             do {
                 if let cache = try ManagedCache.find(in: context).first {
                     completion(
-                        .success(.found(
-                            feed: cache.feed.array
-                                .compactMap({ $0 as? ManagedFeedImage })
-                                .map { managed in
-                                    LocalFeedImage(
-                                        id: managed.id,
-                                        description: managed.imageDescription,
-                                        location: managed.location,
-                                        url: managed.url
-                                    )
-                                },
-                            timestamp: cache.timestamp
-                        ))
+                        .success(
+                            CachedFeed(
+                                feed: cache.feed.array
+                                    .compactMap({ $0 as? ManagedFeedImage })
+                                    .map { managed in
+                                        LocalFeedImage(
+                                            id: managed.id,
+                                            description: managed.imageDescription,
+                                            location: managed.location,
+                                            url: managed.url
+                                        )
+                                    },
+                                timestamp: cache.timestamp
+                            )
+                        )
                     )
                 } else {
-                    completion(.success(.empty))
+                    completion(.success(.none))
                 }
             } catch {
                 completion(.failure(error))
