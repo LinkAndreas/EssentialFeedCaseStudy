@@ -20,19 +20,9 @@ public final class CoreDataFeedStore: FeedStore {
         let context = self.context
         context.perform {
             do {
-                try ManagedCache.deleteAll(in: context)
-                let cache = ManagedCache(context: context)
+                let cache = try ManagedCache.newUniqueInstance(in: context)
                 cache.timestamp = timestamp
-                cache.feed = .init(array: feed.map { local in
-                    let managed = ManagedFeedImage(context: context)
-                    managed.cache = cache
-                    managed.imageDescription = local.description
-                    managed.location = local.location
-                    managed.url = local.url
-                    managed.id = local.id
-                    return managed
-                })
-
+                cache.feed = ManagedFeedImage.managed(from: feed, and: cache, in: context)
                 try context.save()
                 completion(.success(()))
             } catch {
@@ -58,23 +48,7 @@ public final class CoreDataFeedStore: FeedStore {
         context.perform {
             do {
                 if let cache = try ManagedCache.find(in: context).first {
-                    completion(
-                        .success(
-                            CachedFeed(
-                                feed: cache.feed.array
-                                    .compactMap({ $0 as? ManagedFeedImage })
-                                    .map { managed in
-                                        LocalFeedImage(
-                                            id: managed.id,
-                                            description: managed.imageDescription,
-                                            location: managed.location,
-                                            url: managed.url
-                                        )
-                                    },
-                                timestamp: cache.timestamp
-                            )
-                        )
-                    )
+                    completion(.success(cache.local))
                 } else {
                     completion(.success(.none))
                 }
@@ -98,8 +72,17 @@ extension ManagedCache {
         return try context.fetch(request)
     }
 
+    static func newUniqueInstance(in context: NSManagedObjectContext) throws -> ManagedCache {
+        try deleteAll(in: context)
+        return ManagedCache(context: context)
+    }
+
     static func deleteAll(in context: NSManagedObjectContext) throws {
         try find(in: context).forEach(context.delete)
+    }
+
+    var local: CachedFeed {
+        return .init(feed: feed.compactMap({ ($0 as? ManagedFeedImage)?.local }), timestamp: timestamp)
     }
 }
 
@@ -110,4 +93,27 @@ private class ManagedFeedImage: NSManagedObject {
     @NSManaged var location: String?
     @NSManaged var url: URL
     @NSManaged var cache: ManagedCache
+}
+
+extension ManagedFeedImage {
+    static func managed(
+        from localFeed: [LocalFeedImage],
+        and cache: ManagedCache,
+        in context: NSManagedObjectContext
+    ) -> NSOrderedSet {
+        let images = NSOrderedSet(array: localFeed.map { local in
+            let managed = ManagedFeedImage(context: context)
+            managed.id = local.id
+            managed.imageDescription = local.description
+            managed.location = local.location
+            managed.url = local.url
+            managed.cache = cache
+            return managed
+        })
+        return images
+    }
+
+    var local: LocalFeedImage {
+        return .init(id: id, description: imageDescription, location: location, url: url)
+    }
 }
