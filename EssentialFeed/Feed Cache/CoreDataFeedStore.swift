@@ -19,42 +19,30 @@ public final class CoreDataFeedStore: FeedStore {
     public func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
         let context = self.context
         context.perform {
-            do {
+            completion(Result {
                 let cache = try ManagedCache.newUniqueInstance(in: context)
                 cache.timestamp = timestamp
                 cache.feed = ManagedFeedImage.managed(from: feed, and: cache, in: context)
                 try context.save()
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
+            })
         }
     }
 
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         let context = self.context
         context.perform {
-            do {
+            completion(Result {
                 try ManagedCache.deleteAll(in: context)
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
+            })
         }
     }
 
     public func retrieve(completion: @escaping RetrievalCompletion) {
         let context = self.context
         context.perform {
-            do {
-                if let cache = try ManagedCache.find(in: context).first {
-                    completion(.success(cache.local))
-                } else {
-                    completion(.success(.none))
-                }
-            } catch {
-                completion(.failure(error))
-            }
+            completion(Result {
+                try ManagedCache.find(in: context).first?.local
+            })
         }
     }
 }
