@@ -59,7 +59,7 @@ public final class CoreDataFeedStore: FeedStore {
             do {
                 if let cache = try ManagedCache.find(in: context).first {
                     completion(
-                        .found(
+                        .success(.found(
                             feed: cache.feed.array
                                 .compactMap({ $0 as? ManagedFeedImage })
                                 .map { managed in
@@ -71,13 +71,13 @@ public final class CoreDataFeedStore: FeedStore {
                                     )
                                 },
                             timestamp: cache.timestamp
-                        )
+                        ))
                     )
                 } else {
-                    completion(.empty)
+                    completion(.success(.empty))
                 }
             } catch {
-                completion(.failure(error: error))
+                completion(.failure(error))
             }
         }
     }
