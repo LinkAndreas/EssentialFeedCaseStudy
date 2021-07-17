@@ -8,5 +8,5 @@
 struct FeedImageViewModel {
     let description: String?
     let location: String?
-    let imageName: String?
+    let imageName: String
 }
