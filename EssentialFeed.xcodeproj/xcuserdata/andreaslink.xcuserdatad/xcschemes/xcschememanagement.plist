@@ -16,8 +16,10 @@
 		</dict>
 		<key>EssentialFeedAPIEndToEndTests.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<true/>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>3</integer>
 		</dict>
 		<key>EssentialFeedCacheIntegrationTests.xcscheme_^#shared#^_</key>
 		<dict>
@@ -35,6 +37,11 @@
 			<true/>
 		</dict>
 		<key>38AAD474261B4549004D6AF6</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>38EF491826553D5200EE6AF8</key>
 		<dict>
 			<key>primary</key>
 			<true/>
