@@ -1,35 +1,8 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
 import EssentialFeed
+import EssentialFeediOS
 import XCTest
-
-final class FeedViewController: UITableViewController {
-    private var loader: FeedLoader?
-
-    convenience init(loader: FeedLoader) {
-        self.init()
-
-        self.loader = loader
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        refreshControl = UIRefreshControl()
-        refreshControl?.addTarget(self, action: #selector(load ), for: .valueChanged)
-        load()
-    }
-
-    @objc
-    private func load() {
-        refreshControl?.beginRefreshing()
-        loader?.fetchFeed { [weak self] _ in
-            guard let self = self else { return }
-
-            self.refreshControl?.endRefreshing()
-        }
-    }
-}
 
 final class FeedViewControllerTests: XCTestCase {
     func test_loadFeedActions_requestsFeedFromLoader() {
