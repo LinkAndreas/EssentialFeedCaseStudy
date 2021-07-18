@@ -23,60 +23,78 @@ final class FeedViewController: UITableViewController {
     @objc
     private func load() {
         refreshControl?.beginRefreshing()
-        loader?.fetchFeed { _ in }
+        loader?.fetchFeed { [weak self] _ in
+            guard let self = self else { return }
+
+            self.refreshControl?.endRefreshing()
+        }
     }
 }
 
 final class FeedViewControllerTests: XCTestCase {
     func test_init_doesNotLoadFeed() {
-        let (loader, _) = makeSUT()
+        let (loaderSpy, _) = makeSUT()
 
-        XCTAssertEqual(loader.callCount, 0)
+        XCTAssertEqual(loaderSpy.callCount, 0)
     }
 
     func test_viewDidLoad_loadsFeed() {
-        let (loader, sut) = makeSUT()
+        let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
 
-        XCTAssertEqual(loader.callCount, 1)
+        XCTAssertEqual(loaderSpy.callCount, 1)
     }
 
     func test_pullToRefresh_loadsFeed() {
-        let (loader, sut) = makeSUT()
+        let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
         sut.refreshControl?.simulatePullToRefresh()
         sut.refreshControl?.simulatePullToRefresh()
 
-        XCTAssertEqual(loader.callCount, 3)
+        XCTAssertEqual(loaderSpy.callCount, 3)
     }
 
     func test_viewDidLoad_showsLoadingIndicator() {
-        let (loader, sut) = makeSUT()
+        let (_, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
 
         XCTAssertEqual(sut.refreshControl?.isRefreshing, true)
     }
 
+    func test_viewDidLoad_hidesLoadingIndicatorOnLoaderCompletion() {
+        let (loaderSpy, sut) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        loaderSpy.complete(with: .success([]))
+
+        XCTAssertEqual(sut.refreshControl?.isRefreshing, false)
+    }
+
     // MARK: - Helpers
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> (loader: LoaderSpy, sut: FeedViewController) {
-        let loader = LoaderSpy()
-        let sut = FeedViewController(loader: loader)
-        trackForMemoryLeaks(loader, file: file, line: line)
+    ) -> (loaderSpy: LoaderSpy, sut: FeedViewController) {
+        let loaderSpy = LoaderSpy()
+        let sut = FeedViewController(loader: loaderSpy)
+        trackForMemoryLeaks(loaderSpy, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
-        return (loader, sut)
+        return (loaderSpy, sut)
     }
 
     final class LoaderSpy: FeedLoader {
-        private (set) var callCount = 0
+        var completions: [(FeedLoader.Result) -> Void] = []
+        var callCount: Int { completions.count }
 
         func fetchFeed(completion: @escaping (FeedLoader.Result) -> Void) {
-            callCount += 1
+            completions.append(completion)
+        }
+
+        func complete(with result: FeedLoader.Result, atIndex index: Int = 0) {
+            completions[index](result)
         }
     }
 }
