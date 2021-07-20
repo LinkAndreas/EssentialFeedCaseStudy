@@ -7,4 +7,6 @@ public final class FeedImageCell: UITableViewCell {
     public let descriptionLabel: UILabel = .init()
     public let locationContainer: UIView = .init()
     public let feedImageContainer: UIView = .init()
+    public let feedImageView: UIImageView = .init()
+    public let feedImageRetryButton: UIButton = .init()
 }

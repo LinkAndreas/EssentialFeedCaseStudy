@@ -124,6 +124,7 @@ final class FeedViewControllerTests: XCTestCase {
 
         let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
         let view1 = sut.simulateFeedImageViewVisible(atIndex: 1)
+
         XCTAssertEqual(view0?.isShowingLoadingIndicator, true, "Expected loading indicator for first view while loading first image")
         XCTAssertEqual(view1?.isShowingLoadingIndicator, true, "Expected loading indicator for second view while loading second image")
 
@@ -134,6 +135,29 @@ final class FeedViewControllerTests: XCTestCase {
         loaderSpy.completeImageLoading(with: .failure(anyNSError()), atIndex: 1)
         XCTAssertEqual(view0?.isShowingLoadingIndicator, false, "Expected no loading indicator state change for first view once second image loading completes successfully")
         XCTAssertEqual(view1?.isShowingLoadingIndicator, false, "Expected no loading indicator for second view when loading second image completes with error")
+    }
+
+    func test_feedImageView_rendersImageDataLoadedFromURL() {
+        let (loaderSpy, sut) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoading(with: .success([makeImage(), makeImage()]))
+
+        let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
+        let view1 = sut.simulateFeedImageViewVisible(atIndex: 1)
+
+        XCTAssertEqual(view0?.renderedImage, .none, "Expected no image when loading first image")
+        XCTAssertEqual(view1?.renderedImage, .none, "Expected no image when loading second image")
+
+        let imageData0 = UIImage.make(with: .blue).pngData()!
+        let imageData1 = UIImage.make(with: .red).pngData()!
+        loaderSpy.completeImageLoading(with: .success(imageData0), atIndex: 0)
+        XCTAssertEqual(view0?.renderedImage, imageData0, "Expected image for first view when loading first image completes successfully")
+        XCTAssertEqual(view1?.renderedImage, .none, "Expected no image state change for second view when first image loading completed successfully")
+
+        loaderSpy.completeImageLoading(with: .success(imageData1), atIndex: 1)
+        XCTAssertEqual(view0?.renderedImage, imageData0, "Expected no image state change for first view when second image loading completes with error")
+        XCTAssertEqual(view1?.renderedImage, imageData1, "Expected image for second view when loading second image completes successfully")
     }
 
     // MARK: - Helpers
@@ -308,6 +332,10 @@ extension FeedImageCell {
     var isShowingLoadingIndicator: Bool {
         feedImageContainer.isShimmering
     }
+
+    var renderedImage: Data? {
+        return feedImageView.image?.pngData()
+    }
 }
 
 private extension UIRefreshControl {
@@ -317,5 +345,18 @@ private extension UIRefreshControl {
                 (target as NSObject).perform(Selector(action))
             }
         }
+    }
+}
+
+private extension UIImage {
+    static func make(with color: UIColor) -> UIImage {
+        let rect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        UIGraphicsBeginImageContext(rect.size)
+        let context = UIGraphicsGetCurrentContext()!
+        context.setFillColor(color.cgColor)
+        context.fill(rect)
+        let image = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return image
     }
 }
