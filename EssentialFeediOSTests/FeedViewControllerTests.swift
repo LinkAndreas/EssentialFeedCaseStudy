@@ -32,8 +32,8 @@ final class FeedViewControllerTests: XCTestCase {
         sut.simulateUserInitiatedFeedReload()
         XCTAssertTrue(sut.isShowingLoadingIndicator, "Expected loading indicator once user initiated load")
 
-        loaderSpy.completeFeedLoading(with: .success([]), atIndex: 1)
-        XCTAssertFalse(sut.isShowingLoadingIndicator, "Expected no loading indicator once user initiated load is complete")
+        loaderSpy.completeFeedLoading(with: .failure(anyNSError()), atIndex: 1)
+        XCTAssertFalse(sut.isShowingLoadingIndicator, "Expected no loading indicator once user initiated load failed")
     }
 
     func test_loadFeedCompletion_rendersSuccessfullyLoadedFeed() {
@@ -46,21 +46,34 @@ final class FeedViewControllerTests: XCTestCase {
 
         sut.loadViewIfNeeded()
 
-        XCTAssertEqual(sut.numberOfRenderedFeedImageViews(), 0)
+        assertThat(sut, renders: [])
 
-        loaderSpy.completeFeedLoading(with: .success([image0]), atIndex: 0)
+        loaderSpy.completeFeedLoading(with: .success([image0]))
 
-        XCTAssertEqual(sut.numberOfRenderedFeedImageViews(), 1)
-
-        assertThat(sut, renders: [image0 ])
+        assertThat(sut, renders: [image0])
 
         sut.simulateUserInitiatedFeedReload()
 
         loaderSpy.completeFeedLoading(with: .success([image0, image1, image2, image3]), atIndex: 1)
-        XCTAssertEqual(sut.numberOfRenderedFeedImageViews(), 4)
 
         assertThat(sut, renders: [image0, image1, image2, image3])
+    }
 
+    func test_loadFeedCompletion_doesNotAlterCurrentRenderingStateOnError() {
+        let image0 = makeImage(description: "a description", location: "a location")
+        let (loaderSpy, sut) = makeSUT()
+
+        sut.loadViewIfNeeded()
+
+        loaderSpy.completeFeedLoading(with: .success([image0]))
+
+        assertThat(sut, renders: [image0])
+
+        sut.simulateUserInitiatedFeedReload()
+
+        loaderSpy.completeFeedLoading(with: .failure(anyNSError()), atIndex: 1)
+
+        assertThat(sut, renders: [image0])
     }
 
     // MARK: - Helpers
