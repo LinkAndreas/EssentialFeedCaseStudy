@@ -3,14 +3,6 @@
 import EssentialFeed
 import UIKit
 
-public protocol FeedImageDataLoaderTask {
-    func cancel()
-}
-
-public protocol FeedImageDataLoader {
-    func loadImageData(from url: URL) -> FeedImageDataLoaderTask
-}
-
 public final class FeedViewController: UITableViewController {
     private var feedLoader: FeedLoader?
     private var imageLoader: FeedImageDataLoader?
@@ -57,7 +49,11 @@ public final class FeedViewController: UITableViewController {
         cell.descriptionLabel.text = cellModel.description
         cell.locationContainer.isHidden = cellModel.location == nil
         cell.locationLabel.text = cellModel.location
-        tasks[indexPath] = imageLoader?.loadImageData(from: cellModel.url)
+        cell.feedImageContainer.startShimmering()
+        tasks[indexPath] = imageLoader?.loadImageData(from: cellModel.url) { [weak cell] _ in
+            cell?.feedImageContainer.stopShimmering()
+        }
+
         return cell
     }
 
