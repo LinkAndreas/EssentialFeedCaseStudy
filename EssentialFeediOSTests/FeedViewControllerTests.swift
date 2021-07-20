@@ -8,16 +8,16 @@ final class FeedViewControllerTests: XCTestCase {
     func test_loadFeedActions_requestsFeedFromLoader() {
         let (loaderSpy, sut) = makeSUT()
 
-        XCTAssertEqual(loaderSpy.callCount, 0, "Expected no loading requests before view is loaded")
+        XCTAssertEqual(loaderSpy.loadFeedCallCount, 0, "Expected no loading requests before view is loaded")
 
         sut.loadViewIfNeeded()
-        XCTAssertEqual(loaderSpy.callCount, 1, "Expected a loading request once the view is loaded")
+        XCTAssertEqual(loaderSpy.loadFeedCallCount, 1, "Expected a loading request once the view is loaded")
 
         sut.simulateUserInitiatedFeedReload()
-        XCTAssertEqual(loaderSpy.callCount, 2, "Expected another load request once user initiated the load")
+        XCTAssertEqual(loaderSpy.loadFeedCallCount, 2, "Expected another load request once user initiated the load")
 
         sut.simulateUserInitiatedFeedReload()
-        XCTAssertEqual(loaderSpy.callCount, 3, "Expected a third load request once user initiated another load")
+        XCTAssertEqual(loaderSpy.loadFeedCallCount, 3, "Expected a third load request once user initiated another load")
     }
 
     func test_loadingFeedIndicator_isVisibleWhileLoadingFeed() {
@@ -76,13 +76,33 @@ final class FeedViewControllerTests: XCTestCase {
         assertThat(sut, renders: [image0])
     }
 
+    func test_feedImageView_loadsImageURLWhenVisible() {
+        let image0 = makeImage(url: URL(string: "http://url-0.com")!)
+        let image1 = makeImage(url: URL(string: "http://url-0.com")!)
+
+        let (loaderSpy, sut) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+
+        XCTAssertEqual(loaderSpy.loadedImageURLs, [], "Expected no image URL requests until views become visible")
+
+        sut.simulateFeedImageViewVisible(atIndex: 0)
+
+        XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url], "Expected first image URL request once first view becomes visible")
+
+        sut.simulateFeedImageViewVisible(atIndex: 0)
+
+        XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url, image1.url], "Expected second image URL request once second view becomes visible")
+    }
+
     // MARK: - Helpers
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> (loaderSpy: LoaderSpy, sut: FeedViewController) {
         let loaderSpy = LoaderSpy()
-        let sut = FeedViewController(loader: loaderSpy)
+        let sut = FeedViewController(loader: loaderSpy, imageLoader: loaderSpy)
         trackForMemoryLeaks(loaderSpy, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (loaderSpy, sut)
@@ -156,16 +176,23 @@ final class FeedViewControllerTests: XCTestCase {
         )
     }
 
-    final class LoaderSpy: FeedLoader {
-        var completions: [(FeedLoader.Result) -> Void] = []
-        var callCount: Int { completions.count }
+    final class LoaderSpy: FeedLoader, FeedImageDataLoader {
+        var feedRequests: [(FeedLoader.Result) -> Void] = []
+        var loadFeedCallCount: Int { feedRequests.count }
+        private (set) var loadedImageURLs: [URL] = []
 
+        // MARK: - FeedLoader
         func fetchFeed(completion: @escaping (FeedLoader.Result) -> Void) {
-            completions.append(completion)
+            feedRequests.append(completion)
         }
 
         func completeFeedLoading(with result: FeedLoader.Result, atIndex index: Int = 0) {
-            completions[index](result)
+            feedRequests[index](result)
+        }
+ 
+        // MARK: - FeedImageDataLoader
+        func loadImageData(from url: URL) {
+            loadedImageURLs.append(url)
         }
     }
 }
@@ -174,6 +201,10 @@ private extension FeedViewController {
     func simulateUserInitiatedFeedReload() {
         refreshControl?.simulatePullToRefresh()
     }
+
+    func simulateFeedImageViewVisible(atIndex index: Int) {
+        _ = feedImageView(atIndex: index)
+     }
 
     var isShowingLoadingIndicator: Bool {
         return refreshControl?.isRefreshing == true
