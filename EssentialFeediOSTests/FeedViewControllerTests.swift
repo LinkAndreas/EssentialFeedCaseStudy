@@ -197,6 +197,28 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(view0?.isShowingRetryAction, true, "Expected retry for first image when loading first image completed with invalid data")
     }
 
+    func test_feedImageViewRetryAction_retriesImageLoad() {
+        let image0 = makeImage(url: URL(string: "htttp://url-0.com")!)
+        let image1 = makeImage(url: URL(string: "htttp://url-1.com")!)
+        let (loaderSpy, sut) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+
+        let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
+        let view1 = sut.simulateFeedImageViewVisible(atIndex: 1)
+
+        XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url, image1.url], "Expected only two image URL requests before retry action")
+
+        view0?.simulateRetryAction()
+
+        XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url, image1.url, image0.url], "Expected third imageURL request after first view retry action")
+
+        view1?.simulateRetryAction()
+
+        XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url, image1.url, image0.url, image1.url], "Expected forth imageURL request after second view retry action")
+    }
+
     // MARK: - Helpers
     private func makeSUT(
         file: StaticString = #filePath,
@@ -376,6 +398,20 @@ extension FeedImageCell {
 
     var isShowingRetryAction: Bool {
         return !feedImageRetryButton.isHidden
+    }
+
+    func simulateRetryAction() {
+        feedImageRetryButton.simulateTap()
+    }
+}
+
+private extension UIButton {
+    func simulateTap() {
+        allTargets.forEach { target in
+            actions(forTarget: target, forControlEvent: .touchUpInside)?.forEach { action in
+                (target as NSObject).perform(Selector(action))
+            }
+        }
     }
 }
 
