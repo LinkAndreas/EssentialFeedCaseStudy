@@ -13,11 +13,6 @@ final class FeedImageCellController {
         self.imageLoader = imageLoader
     }
 
-    deinit {
-        task?.cancel()
-        task = nil
-    }
-
     func view() -> UITableViewCell {
         let cell = FeedImageCell()
         cell.descriptionLabel.text = model.description
@@ -44,5 +39,10 @@ final class FeedImageCellController {
 
     func preload() {
         task = imageLoader.loadImageData(from: self.model.url) { _ in }
+    }
+
+    func cancelLoad() {
+        task?.cancel()
+        task = nil
     }
 }
