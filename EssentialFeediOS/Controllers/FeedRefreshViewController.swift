@@ -19,8 +19,8 @@ final class FeedRefreshViewController: NSObject {
 
         super.init()
 
-        self.viewModel.onIsLoadingChanged = { [weak view] model in
-            model.isLoading ? view?.beginRefreshing() : view?.endRefreshing()
+        self.viewModel.onIsLoadingChanged = { [weak view] isLoading in
+            isLoading ? view?.beginRefreshing() : view?.endRefreshing()
         }
 
         self.viewModel.onFeedChanged = { [weak self] feed in

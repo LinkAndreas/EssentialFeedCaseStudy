@@ -7,19 +7,15 @@ final class FeedViewModel {
 
     private let feedLoader: FeedLoader
 
-    var onIsLoadingChanged: Observer<FeedViewModel>?
+    var onIsLoadingChanged: Observer<Bool>?
     var onFeedChanged: Observer<[FeedImage]>?
 
     init(feedLoader: FeedLoader) {
         self.feedLoader = feedLoader
     }
 
-    private (set) var isLoading: Bool = false {
-        didSet { onIsLoadingChanged?(self) }
-    }
-
     func refresh() {
-        isLoading = true
+        onIsLoadingChanged?(true)
         feedLoader.fetchFeed { [weak self] result in
             guard let self = self else { return }
 
@@ -27,7 +23,7 @@ final class FeedViewModel {
                 self.onFeedChanged?(feed)
             }
 
-            self.isLoading = false
+            self.onIsLoadingChanged?(false)
         }
     }
 }
