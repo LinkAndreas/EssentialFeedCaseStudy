@@ -5,9 +5,10 @@ import UIKit
 
 public enum FeedUIComposer {
     public static func feedComposedWith(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        let refreshController = FeedRefreshViewController(feedLoader: feedLoader)
+        let viewModel = FeedViewModel(feedLoader: feedLoader)
+        let refreshController = FeedRefreshViewController(viewModel: viewModel)
         let feedController = FeedViewController(refreshController: refreshController)
-        refreshController.onRefresh = { [weak feedController] feed in
+        viewModel.onFeedChanged = { [weak feedController] feed in
             feedController?.tableModel = feed.map { image in
                 FeedImageCellController(model: image, imageLoader: imageLoader)
             }
