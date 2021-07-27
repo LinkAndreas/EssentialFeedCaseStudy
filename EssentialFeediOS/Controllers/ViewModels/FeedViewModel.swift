@@ -8,13 +8,12 @@ final class FeedViewModel {
     enum State {
         case pending
         case loading
-        case loaded([FeedImage])
-        case failed
     }
 
     private let feedLoader: FeedLoader
 
     var onChange: Observer<FeedViewModel>?
+    var onFeedChange: Observer<[FeedImage]>?
 
     init(feedLoader: FeedLoader) {
         self.feedLoader = feedLoader
@@ -30,10 +29,10 @@ final class FeedViewModel {
             guard let self = self else { return }
 
             if let feed = try? result.get() {
-                self.state = .loaded(feed)
-            } else {
-                self.state = .failed
+                self.onFeedChange?(feed)
             }
+
+            self.state = .pending
         }
     }
 }

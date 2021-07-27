@@ -26,13 +26,13 @@ final class FeedRefreshViewController: NSObject {
             case .loading:
                 self.view.beginRefreshing()
 
-            case .failed, .pending:
-                self.view.endRefreshing()
-
-            case let .loaded(feed):
-                self.onRefresh?(feed)
+            case .pending:
                 self.view.endRefreshing()
             }
+        }
+
+        self.viewModel.onFeedChange = { [weak self] feed in
+            self?.onRefresh?(feed)
         }
     }
 
