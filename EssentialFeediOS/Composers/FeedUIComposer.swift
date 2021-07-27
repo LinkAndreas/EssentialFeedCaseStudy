@@ -10,7 +10,8 @@ public enum FeedUIComposer {
         let feedController = FeedViewController(refreshController: refreshController)
         viewModel.onFeedChanged = { [weak feedController] feed in
             feedController?.tableModel = feed.map { image in
-                FeedImageCellController(model: image, imageLoader: imageLoader)
+                let viewModel = FeedImageViewModel(model: image, imageLoader: imageLoader, imageDataTransformer: UIImage.init)
+                return FeedImageCellController(viewModel: viewModel)
             }
         }
 
