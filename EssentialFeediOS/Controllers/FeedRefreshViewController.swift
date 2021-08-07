@@ -2,20 +2,24 @@
 
 import UIKit
 
+protocol FeedRefreshViewControllerDelegate: AnyObject {
+    func didTriggerRefresh()
+}
+
 final class FeedRefreshViewController: NSObject, FeedLoadingView {
-    private let onRefresh: () -> Void
+    private var delegate: FeedRefreshViewControllerDelegate
 
     private (set) lazy var view: UIRefreshControl = loadView()
 
-    init(onRefresh: @escaping () -> Void) {
-        self.onRefresh = onRefresh
+    init(delegate: FeedRefreshViewControllerDelegate) {
+        self.delegate = delegate
 
         super.init()
     }
 
     @objc
     func refresh() {
-        onRefresh()
+        delegate.didTriggerRefresh()
     }
 
     private func loadView() -> UIRefreshControl {
