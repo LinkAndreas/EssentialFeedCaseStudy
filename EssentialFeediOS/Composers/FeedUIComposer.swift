@@ -5,12 +5,38 @@ import UIKit
 
 public enum FeedUIComposer {
     public static func feedComposedWith(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        let presenter = FeedPresenter(feedLoader: feedLoader)
-        let refreshController = FeedRefreshViewController(onRefresh: presenter.refresh)
+        let presenter = FeedPresenter()
+        let presentationAdapter = FeedLoaderPresentationAdapter(feedLoader: feedLoader, presenter: presenter)
+        let refreshController = FeedRefreshViewController(onRefresh: presentationAdapter.refresh)
         let feedController = FeedViewController(refreshController: refreshController)
         presenter.loadingView = WeakRef(refreshController)
         presenter.feedView = FeedViewAdapter(controller: feedController, imageLoader: imageLoader)
         return feedController
+    }
+}
+
+final class FeedLoaderPresentationAdapter {
+    private let feedLoader: FeedLoader
+    private let presenter: FeedPresenter
+
+    init(feedLoader: FeedLoader, presenter: FeedPresenter) {
+        self.feedLoader = feedLoader
+        self.presenter = presenter
+    }
+
+    func refresh() {
+        presenter.didStartLoadingFeed()
+        feedLoader.fetchFeed { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case let .success(feed):
+                self.presenter.didFinishLoading(feed: feed)
+
+            case let .failure(error):
+                self.presenter.didFinishLoading(with: error)
+            }
+        }
     }
 }
 
