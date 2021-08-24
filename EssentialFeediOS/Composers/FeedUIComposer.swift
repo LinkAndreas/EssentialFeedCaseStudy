@@ -16,6 +16,27 @@ public enum FeedUIComposer {
     }
 }
 
+public final class FeedViewAdapter: FeedView {
+    private weak var controller: FeedViewController?
+    private let imageLoader: FeedImageDataLoader
+
+    init(controller: FeedViewController, imageLoader: FeedImageDataLoader) {
+        self.controller = controller
+        self.imageLoader = imageLoader
+    }
+
+    func display(_ viewModel: FeedViewModel) {
+        controller?.tableModel = viewModel.feed.map { image in
+            let viewModel = FeedImageViewModel(
+                model: image,
+                imageLoader: imageLoader,
+                imageDataTransformer: UIImage.init
+            )
+            return FeedImageCellController(viewModel: viewModel)
+        }
+    }
+}
+
 final class FeedLoaderPresentationAdapter: FeedRefreshViewControllerDelegate {
     var presenter: FeedPresenter?
 
@@ -52,26 +73,5 @@ struct WeakRef<T: AnyObject> {
 extension WeakRef: FeedLoadingView where T: FeedLoadingView {
     func display(_ viewModel: FeedLoadingViewModel) {
         object?.display(viewModel)
-    }
-}
-
-public final class FeedViewAdapter: FeedView {
-    private weak var controller: FeedViewController?
-    private let imageLoader: FeedImageDataLoader
-
-    init(controller: FeedViewController, imageLoader: FeedImageDataLoader) {
-        self.controller = controller
-        self.imageLoader = imageLoader
-    }
-
-    func display(_ viewModel: FeedViewModel) {
-        controller?.tableModel = viewModel.feed.map { image in
-            let viewModel = FeedImageViewModel(
-                model: image,
-                imageLoader: imageLoader,
-                imageDataTransformer: UIImage.init
-            )
-            return FeedImageCellController(viewModel: viewModel)
-        }
     }
 }
