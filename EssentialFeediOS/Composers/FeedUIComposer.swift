@@ -30,13 +30,51 @@ public final class FeedViewAdapter: FeedView {
 
     func display(_ viewModel: FeedViewModel) {
         controller?.tableModel = viewModel.feed.map { image in
-            let viewModel = FeedImageViewModel(
+            let adapter = FeedImageDataLoaderPresentationAdapter<WeakRef<FeedImageCellController>, UIImage>(
                 model: image,
-                imageLoader: imageLoader,
-                imageDataTransformer: UIImage.init
+                imageLoader: imageLoader
             )
-            return FeedImageCellController(viewModel: viewModel)
+            let view = FeedImageCellController(delegate: adapter)
+            adapter.presenter = FeedImagePresenter(view: WeakRef(view), imageDataTransformer: UIImage.init)
+            return view
         }
+    }
+}
+
+private final class FeedImageDataLoaderPresentationAdapter<View: FeedImageView, Image>: FeedImageCellControllerDelegate where View.Image == Image {
+    var presenter: FeedImagePresenter<View, Image>?
+
+    private let model: FeedImage
+    private let imageLoader: FeedImageDataLoader
+    private var task: FeedImageDataLoaderTask?
+
+    init(model: FeedImage, imageLoader: FeedImageDataLoader) {
+        self.model = model
+        self.imageLoader = imageLoader
+    }
+
+    func didRequestImage() {
+        presenter?.didStartLoadingImageData(for: model)
+        task = self.imageLoader.loadImageData(from: self.model.url) { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case let .success(imageData):
+                self.presenter?.didFinishLoadingImageData(with: imageData, for: self.model)
+
+            case let .failure(error):
+                self.presenter?.didFinishLoadingImageData(with: error, for: self.model)
+            }
+        }
+    }
+
+    func didTriggerPreload() {
+        task = imageLoader.loadImageData(from: self.model.url) { _ in }
+    }
+
+    func didCancelLoad() {
+        task?.cancel()
+        task = nil
     }
 }
 
@@ -76,5 +114,11 @@ struct WeakRef<T: AnyObject> {
 extension WeakRef: FeedLoadingView where T: FeedLoadingView {
     func display(_ viewModel: FeedLoadingViewModel) {
         object?.display(viewModel)
+    }
+}
+
+extension WeakRef: FeedImageView where T: FeedImageView, T.Image == UIImage {
+    func display(_ model: FeedImageViewModel<UIImage>) {
+        object?.display(model)
     }
 }
