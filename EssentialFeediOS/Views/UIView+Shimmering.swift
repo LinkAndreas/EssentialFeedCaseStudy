@@ -8,7 +8,8 @@ public extension UIView {
     }
 
     var isShimmering: Bool {
-        return layer.mask?.animation(forKey: shimmerAnimationKey) != nil
+        set { newValue ? startShimmering() : stopShimmering() }
+        get { layer.mask?.animation(forKey: shimmerAnimationKey) != nil }
     }
 
     func startShimmering() {
