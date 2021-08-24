@@ -10,11 +10,10 @@ public enum FeedUIComposer {
         let bundle = Bundle(for: FeedViewController.self)
         let storyboard = UIStoryboard(name: "Feed", bundle: bundle)
         let feedController = storyboard.instantiateInitialViewController() as! FeedViewController
-        let refreshController = feedController.refreshController
-        refreshController?.delegate = presentationAdapter
+        feedController.delegate = presentationAdapter
         presentationAdapter.presenter = FeedPresenter(
             feedView: FeedViewAdapter(controller: feedController, imageLoader: imageLoader),
-            loadingView: WeakRef(refreshController)
+            loadingView: WeakRef(feedController)
         )
         return feedController
     }
@@ -41,7 +40,7 @@ public final class FeedViewAdapter: FeedView {
     }
 }
 
-final class FeedLoaderPresentationAdapter: FeedRefreshViewControllerDelegate {
+final class FeedLoaderPresentationAdapter: FeedViewControllerDelegate {
     var presenter: FeedPresenter?
 
     private let feedLoader: FeedLoader
@@ -68,7 +67,7 @@ final class FeedLoaderPresentationAdapter: FeedRefreshViewControllerDelegate {
 
 struct WeakRef<T: AnyObject> {
     private weak var object: T?
- 
+
     init(_ object: T?) {
         self.object = object
     }
