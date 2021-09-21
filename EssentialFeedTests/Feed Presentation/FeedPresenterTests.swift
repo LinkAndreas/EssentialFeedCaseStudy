@@ -56,8 +56,8 @@ extension FeedPresenterTests {
 
         let sut = FeedPresenter(
             feedView: feedViewSpy,
-            feedLoadingView: feedViewSpy,
-            feedErrorView: feedViewSpy
+            loadingView: feedViewSpy,
+            errorView: feedViewSpy
         )
 
         trackForMemoryLeaks(feedViewSpy, file: file, line: line)
