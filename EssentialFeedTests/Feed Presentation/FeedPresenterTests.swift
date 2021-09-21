@@ -44,46 +44,44 @@ final class FeedPresenter {
 
 final class FeedPresenterTests: XCTestCase {
     func test_init_doesNotSendMessagesToView() {
-        let (_, feedViewSpy, feedLoadingViewSpy, feedErrorViewSpy) = makeSUT()
+        let (_, feedViewSpy) = makeSUT()
 
         XCTAssertEqual(feedViewSpy.receivedMessages, [])
-        XCTAssertEqual(feedLoadingViewSpy.receivedMessages, [])
-        XCTAssertEqual(feedErrorViewSpy.receivedMessages, [])
     }
 
     func test_didStartLoadingFeed_displaysNoErrorMessageAndStartsLoading() {
-        let (sut, _, feedLoadingViewSpy, feedErrorViewSpy) = makeSUT()
+        let (sut, feedViewSpy) = makeSUT()
 
         sut.didStartLoadingFeed()
 
-        XCTAssertEqual(feedErrorViewSpy.receivedMessages, [.display(errorMessage: .none)])
-        XCTAssertEqual(feedLoadingViewSpy.receivedMessages, [.display(isLoading: true)])
+        XCTAssertEqual(feedViewSpy.receivedMessages, [
+            .display(errorMessage: .none),
+            .display(isLoading: true)
+        ])
     }
 }
 
 extension FeedPresenterTests {
-    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedPresenter, FeedViewSpy, FeedLoadingViewSpy, FeedErrorViewSpy) {
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedPresenter, FeedViewSpy) {
         let feedViewSpy = FeedViewSpy()
-        let feedLoadingViewSpy = FeedLoadingViewSpy()
-        let feedErrorViewSpy = FeedErrorViewSpy()
 
         let sut = FeedPresenter(
             feedView: feedViewSpy,
-            feedLoadingView: feedLoadingViewSpy,
-            feedErrorView: feedErrorViewSpy
+            feedLoadingView: feedViewSpy,
+            feedErrorView: feedViewSpy
         )
 
         trackForMemoryLeaks(feedViewSpy, file: file, line: line)
-        trackForMemoryLeaks(feedLoadingViewSpy, file: file, line: line)
-        trackForMemoryLeaks(feedErrorViewSpy, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
 
-        return (sut, feedViewSpy, feedLoadingViewSpy, feedErrorViewSpy)
+        return (sut, feedViewSpy)
     }
 
-    final class FeedViewSpy: FeedView {
+    final class FeedViewSpy: FeedView, FeedLoadingView, FeedErrorView {
         enum Message: Equatable {
             case display(FeedViewModel)
+            case display(isLoading: Bool)
+            case display(errorMessage: String?)
         }
 
         private (set) var receivedMessages: [Message] = []
@@ -91,26 +89,10 @@ extension FeedPresenterTests {
         func display(_ viewModel: FeedViewModel) {
             receivedMessages.append(.display(viewModel))
         }
-    }
-
-    final class FeedLoadingViewSpy: FeedLoadingView {
-        enum Message: Equatable {
-            case display(isLoading: Bool)
-        }
-
-        private (set) var receivedMessages: [Message] = []
 
         func display(_ viewModel: FeedLoadingViewModel) {
             receivedMessages.append(.display(isLoading: viewModel.isLoading))
         }
-    }
-
-    final class FeedErrorViewSpy: FeedErrorView {
-        enum Message: Equatable {
-            case display(errorMessage: String?)
-        }
-
-        private (set) var receivedMessages: [Message] = []
 
         func display(_ viewModel: FeedErrorViewModel) {
             receivedMessages.append(.display(errorMessage: viewModel.message))
