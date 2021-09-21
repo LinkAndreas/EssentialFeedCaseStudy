@@ -15,7 +15,10 @@ protocol FeedErrorView {
 }
 
 struct FeedViewModel: Equatable {}
-struct FeedLoadingViewModel: Equatable {}
+struct FeedLoadingViewModel: Equatable {
+    let isLoading: Bool
+}
+
 struct FeedErrorViewModel: Equatable {
     let message: String?
 
@@ -35,6 +38,7 @@ final class FeedPresenter {
 
     func didStartLoadingFeed() {
         feedErrorView.display(.noError)
+        feedLoadingView.display(FeedLoadingViewModel(isLoading: true))
     }
 }
 
@@ -47,12 +51,13 @@ final class FeedPresenterTests: XCTestCase {
         XCTAssertEqual(feedErrorViewSpy.receivedMessages, [])
     }
 
-    func test_didStartLoadingFeed_displaysNoErrorMessage() {
-        let (sut, _, _, feedErrorViewSpy) = makeSUT()
+    func test_didStartLoadingFeed_displaysNoErrorMessageAndStartsLoading() {
+        let (sut, _, feedLoadingViewSpy, feedErrorViewSpy) = makeSUT()
 
         sut.didStartLoadingFeed()
 
-        XCTAssertEqual(feedErrorViewSpy.receivedMessages, [.display(.noError)])
+        XCTAssertEqual(feedErrorViewSpy.receivedMessages, [.display(errorMessage: .none)])
+        XCTAssertEqual(feedLoadingViewSpy.receivedMessages, [.display(isLoading: true)])
     }
 }
 
@@ -90,25 +95,25 @@ extension FeedPresenterTests {
 
     final class FeedLoadingViewSpy: FeedLoadingView {
         enum Message: Equatable {
-            case display(FeedLoadingViewModel)
+            case display(isLoading: Bool)
         }
 
         private (set) var receivedMessages: [Message] = []
 
         func display(_ viewModel: FeedLoadingViewModel) {
-            receivedMessages.append(.display(viewModel))
+            receivedMessages.append(.display(isLoading: viewModel.isLoading))
         }
     }
 
     final class FeedErrorViewSpy: FeedErrorView {
         enum Message: Equatable {
-            case display(FeedErrorViewModel)
+            case display(errorMessage: String?)
         }
 
         private (set) var receivedMessages: [Message] = []
 
         func display(_ viewModel: FeedErrorViewModel) {
-            receivedMessages.append(.display(viewModel))
+            receivedMessages.append(.display(errorMessage: viewModel.message))
         }
     }
 }
