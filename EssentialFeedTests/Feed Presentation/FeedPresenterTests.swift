@@ -14,7 +14,7 @@ protocol FeedErrorView {
     func display(_ viewModel: FeedErrorViewModel)
 }
 
-struct FeedViewModel: Equatable {}
+struct FeedViewModel: Hashable {}
 struct FeedLoadingViewModel: Equatable {
     let isLoading: Bool
 }
@@ -78,24 +78,24 @@ extension FeedPresenterTests {
     }
 
     final class FeedViewSpy: FeedView, FeedLoadingView, FeedErrorView {
-        enum Message: Equatable {
+        enum Message: Hashable {
             case display(FeedViewModel)
             case display(isLoading: Bool)
             case display(errorMessage: String?)
         }
 
-        private (set) var receivedMessages: [Message] = []
+        private (set) var receivedMessages: Set<Message> = []
 
         func display(_ viewModel: FeedViewModel) {
-            receivedMessages.append(.display(viewModel))
+            receivedMessages.insert(.display(viewModel))
         }
 
         func display(_ viewModel: FeedLoadingViewModel) {
-            receivedMessages.append(.display(isLoading: viewModel.isLoading))
+            receivedMessages.insert(.display(isLoading: viewModel.isLoading))
         }
 
         func display(_ viewModel: FeedErrorViewModel) {
-            receivedMessages.append(.display(errorMessage: viewModel.message))
+            receivedMessages.insert(.display(errorMessage: viewModel.message))
         }
     }
 }
