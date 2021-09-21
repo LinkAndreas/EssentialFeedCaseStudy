@@ -1,6 +1,7 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
 import XCTest
+import EssentialFeed
 
 protocol FeedView {
     func display(_ viewModel: FeedViewModel)
@@ -14,7 +15,10 @@ protocol FeedErrorView {
     func display(_ viewModel: FeedErrorViewModel)
 }
 
-struct FeedViewModel: Hashable {}
+struct FeedViewModel: Hashable {
+    let feed: [FeedImage]
+}
+
 struct FeedLoadingViewModel: Equatable {
     let isLoading: Bool
 }
@@ -40,6 +44,11 @@ final class FeedPresenter {
         feedErrorView.display(.noError)
         feedLoadingView.display(FeedLoadingViewModel(isLoading: true))
     }
+
+    func didStopLoadingFeed(with feed: [FeedImage]) {
+        feedView.display(FeedViewModel(feed: feed))
+        feedLoadingView.display(FeedLoadingViewModel(isLoading: false))
+    }
 }
 
 final class FeedPresenterTests: XCTestCase {
@@ -57,6 +66,18 @@ final class FeedPresenterTests: XCTestCase {
         XCTAssertEqual(feedViewSpy.receivedMessages, [
             .display(errorMessage: .none),
             .display(isLoading: true)
+        ])
+    }
+
+    func test_didStopLoadingFeed_displaysFeedAndStopsLoading() {
+        let (sut, feedViewSpy) = makeSUT()
+        let feed = uniqueImageFeed().models
+
+        sut.didStopLoadingFeed(with: feed)
+
+        XCTAssertEqual(feedViewSpy.receivedMessages, [
+            .display(feed: feed),
+            .display(isLoading: false)
         ])
     }
 }
@@ -79,7 +100,7 @@ extension FeedPresenterTests {
 
     final class FeedViewSpy: FeedView, FeedLoadingView, FeedErrorView {
         enum Message: Hashable {
-            case display(FeedViewModel)
+            case display(feed: [FeedImage])
             case display(isLoading: Bool)
             case display(errorMessage: String?)
         }
@@ -87,7 +108,7 @@ extension FeedPresenterTests {
         private (set) var receivedMessages: Set<Message> = []
 
         func display(_ viewModel: FeedViewModel) {
-            receivedMessages.insert(.display(viewModel))
+            receivedMessages.insert(.display(feed: viewModel.feed))
         }
 
         func display(_ viewModel: FeedLoadingViewModel) {
