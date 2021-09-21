@@ -15,7 +15,8 @@ public enum FeedUIComposer {
                 controller: feedController,
                 imageLoader: MainQueueDispatchDecorator(decoratee: imageLoader)
             ),
-            loadingView: WeakRef(feedController)
+            loadingView: WeakRef(feedController),
+            errorView: WeakRef(feedController)
         )
         return feedController
     }
@@ -41,7 +42,7 @@ public final class FeedViewAdapter: FeedView {
         self.imageLoader = imageLoader
     }
 
-    func display(_ viewModel: FeedViewModel) {
+    public func display(_ viewModel: FeedViewModel) {
         controller?.tableModel = viewModel.feed.map { image in
             let adapter = FeedImageDataLoaderPresentationAdapter<WeakRef<FeedImageCellController>, UIImage>(
                 model: image,
@@ -107,10 +108,10 @@ final class FeedLoaderPresentationAdapter: FeedViewControllerDelegate {
 
             switch result {
             case let .success(feed):
-                self.presenter?.didFinishLoading(feed: feed)
+                self.presenter?.didStopLoadingFeed(with: feed)
 
             case let .failure(error):
-                self.presenter?.didFinishLoading(with: error)
+                self.presenter?.didStopLoadingFeed(with: error)
             }
         }
     }
@@ -126,6 +127,12 @@ struct WeakRef<T: AnyObject> {
 
 extension WeakRef: FeedLoadingView where T: FeedLoadingView {
     func display(_ viewModel: FeedLoadingViewModel) {
+        object?.display(viewModel)
+    }
+}
+
+extension WeakRef: FeedErrorView where T: FeedErrorView {
+    func display(_ viewModel: FeedErrorViewModel) {
         object?.display(viewModel)
     }
 }

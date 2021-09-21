@@ -1,5 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import EssentialFeed
 @testable import EssentialFeediOS
 import XCTest
 

@@ -28,6 +28,11 @@ extension FeedUIIntegrationTests {
             feedRequests[index](result)
         }
 
+        func completeFeedLoadingWithError(atIndex index: Int = 0) {
+            let error = NSError(domain: "an error", code: 0)
+            feedRequests[index](.failure(error))
+        }
+
         // MARK: - FeedImageDataLoader
         func loadImageData(
             from url: URL,

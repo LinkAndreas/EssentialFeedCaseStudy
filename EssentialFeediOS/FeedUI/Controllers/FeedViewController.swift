@@ -1,17 +1,19 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import EssentialFeed
 import UIKit
 
 protocol FeedViewControllerDelegate: AnyObject {
     func didTriggerRefresh()
 }
 
-public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedLoadingView {
+public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedLoadingView, FeedErrorView {
     var delegate: FeedViewControllerDelegate?
-
     var tableModel: [FeedImageCellController] = [] {
         didSet { tableView.reloadData() }
     }
+
+    @IBOutlet private(set) public var errorView: ErrorView?
 
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,8 +21,16 @@ public final class FeedViewController: UITableViewController, UITableViewDataSou
         refresh()
     }
 
-    func display(_ viewModel: FeedLoadingViewModel) {
-        viewModel.isLoading ? refreshControl?.beginRefreshing() : refreshControl?.endRefreshing()
+    public func display(_ viewModel: FeedLoadingViewModel) {
+        refreshControl?.update(isRefreshing: viewModel.isLoading)
+    }
+
+    public func display(_ viewModel: FeedErrorViewModel) {
+        if let errorMessage = viewModel.message {
+            errorView?.show(message: errorMessage)
+        } else {
+            errorView?.hideMessage()
+        }
     }
 
     @IBAction func refresh() {
