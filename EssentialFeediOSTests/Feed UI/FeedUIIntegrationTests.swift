@@ -302,6 +302,19 @@ final class FeedUIIntegrationTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
+    func test_loadFeedCompletion_rendersConnectionErrorUntilUserInitiatedReloadSucceeded() {
+        let (loaderSpy, sut) = makeSUT()
+
+        XCTAssertEqual(sut.errorMessage, .none)
+
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoadingWithError(atIndex: 0)
+        XCTAssertEqual(sut.errorMessage, localized("FEED_VIEW_CONNECTION_ERROR"))
+
+        sut.simulateUserInitiatedFeedReload()
+        loaderSpy.completeFeedLoading(with: .success([makeImage()]), atIndex: 1)
+        XCTAssertEqual(sut.errorMessage, .none)
+    }
     // MARK: - Helpers
     private func makeSUT(
         file: StaticString = #filePath,

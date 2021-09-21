@@ -53,4 +53,12 @@ extension FeedViewController {
         let indexPath: IndexPath = .init(row: index, section: 0)
         return dataSource?.tableView(tableView, cellForRowAt: indexPath)
     }
+
+    var errorMessage: String? {
+        return errorView?.message
+    }
+
+    func simulateErrorMessageButtonTap() {
+        errorView?.button.simulateTap()
+    }
 }

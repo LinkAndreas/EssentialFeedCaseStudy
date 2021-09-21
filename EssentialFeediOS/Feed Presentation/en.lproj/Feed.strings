@@ -1,3 +1,4 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
 "FEED_VIEW_TITLE" = "My Feed";
+"FEED_VIEW_CONNECTION_ERROR" = "Couldn't connect to server.";
