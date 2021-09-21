@@ -16,8 +16,8 @@ public protocol FeedErrorView {
 
 public final class FeedPresenter {
     private let feedView: FeedView
-    private let feedLoadingView: FeedLoadingView
-    private let feedErrorView: FeedErrorView
+    private let loadingView: FeedLoadingView
+    private let errorView: FeedErrorView
 
     public static var title: String {
         return NSLocalizedString(
@@ -37,24 +37,24 @@ public final class FeedPresenter {
         )
     }
 
-    public init(feedView: FeedView, feedLoadingView: FeedLoadingView, feedErrorView: FeedErrorView) {
+    public init(feedView: FeedView, loadingView: FeedLoadingView, errorView: FeedErrorView) {
         self.feedView = feedView
-        self.feedLoadingView = feedLoadingView
-        self.feedErrorView = feedErrorView
+        self.loadingView = loadingView
+        self.errorView = errorView
     }
 
     public func didStartLoadingFeed() {
-        feedErrorView.display(.noError)
-        feedLoadingView.display(FeedLoadingViewModel(isLoading: true))
+        errorView.display(.noError)
+        loadingView.display(FeedLoadingViewModel(isLoading: true))
     }
 
     public func didStopLoadingFeed(with feed: [FeedImage]) {
         feedView.display(FeedViewModel(feed: feed))
-        feedLoadingView.display(FeedLoadingViewModel(isLoading: false))
+        loadingView.display(FeedLoadingViewModel(isLoading: false))
     }
 
     public func didStopLoadingFeed(with error: Error) {
-        feedErrorView.display(.error(message: feedLoadError))
-        feedLoadingView.display(FeedLoadingViewModel(isLoading: false))
+        errorView.display(.error(message: feedLoadError))
+        loadingView.display(FeedLoadingViewModel(isLoading: false))
     }
 }
