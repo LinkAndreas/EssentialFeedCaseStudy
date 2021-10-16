@@ -3,24 +3,6 @@
 import EssentialFeed
 import XCTest
 
-protocol FeedImageView {
-    associatedtype Image: Hashable
-
-    func display(model: FeedImageViewModel<Image>)
-}
-
-struct FeedImageViewModel<Image: Hashable>: Hashable {
-    let description: String?
-    let location: String?
-    let image: Image?
-    let isLoading: Bool
-    let shouldRetry: Bool
-
-    var hasLocation: Bool {
-        location != nil
-    }
-}
-
 final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == Image {
     private let view: View
     private let imageTransformer: (Data) -> Image?
@@ -32,7 +14,7 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
 
     func didStartLoadingImageData(for model: FeedImage) {
         view.display(
-            model: FeedImageViewModel(
+            FeedImageViewModel<Image>(
                 description: model.description,
                 location: model.location,
                 image: nil,
@@ -46,7 +28,7 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
         let image: Image? = imageTransformer(data)
 
         view.display(
-            model: FeedImageViewModel(
+            FeedImageViewModel<Image>(
                 description: model.description,
                 location: model.location,
                 image: image,
@@ -58,7 +40,7 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
 
     func didFinishLoadingImageData(with error: NSError, for model: FeedImage) {
         view.display(
-            model: FeedImageViewModel(
+            FeedImageViewModel<Image>(
                 description: model.description,
                 location: model.location,
                 image: nil,
@@ -156,7 +138,7 @@ final class FeedImagePresenterTests: XCTestCase {
         line: UInt = #line
     ) -> (ViewSpy, FeedImagePresenter<ViewSpy, AnyImage>) {
         let view = ViewSpy()
-        let sut = FeedImagePresenter<ViewSpy, AnyImage>(view: view, imageTransformer: imageTransformer)
+        let sut = FeedImagePresenter(view: view, imageTransformer: imageTransformer)
         trackForMemoryLeaks(view, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (view, sut)
@@ -165,10 +147,10 @@ final class FeedImagePresenterTests: XCTestCase {
     final class ViewSpy: FeedImageView {
         typealias Image = AnyImage
 
-        var messages: Set<FeedImageViewModel<AnyImage>> = []
+        var messages: [FeedImageViewModel<AnyImage>] = []
 
-        func display(model: FeedImageViewModel<AnyImage>) {
-            messages.insert(model)
+        func display(_ model: FeedImageViewModel<AnyImage>) {
+            messages.append(model)
         }
     }
 }

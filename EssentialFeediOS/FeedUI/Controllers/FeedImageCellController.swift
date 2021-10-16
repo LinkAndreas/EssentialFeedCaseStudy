@@ -1,5 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import EssentialFeed
 import UIKit
 
 protocol FeedImageCellControllerDelegate: AnyObject {
