@@ -23,9 +23,9 @@ struct FeedImageViewModel<Image: Hashable>: Hashable {
 
 final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == Image {
     private let view: View
-    private let imageTransformer: (Data) -> Image
+    private let imageTransformer: (Data) -> Image?
 
-    init(view: View, imageTransformer: @escaping (Data) -> Image) {
+    init(view: View, imageTransformer: @escaping (Data) -> Image?) {
         self.view = view
         self.imageTransformer = imageTransformer
     }
@@ -43,13 +43,15 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
     }
 
     func didFinishLoadingImageData(with data: Data, for model: FeedImage) {
+        let image: Image? = imageTransformer(data)
+
         view.display(
             model: FeedImageViewModel(
                 description: model.description,
                 location: model.location,
-                image: imageTransformer(data),
+                image: image,
                 isLoading: false,
-                shouldRetry: false
+                shouldRetry: image == nil
             )
         )
     }
@@ -94,6 +96,22 @@ final class FeedImagePresenterTests: XCTestCase {
         XCTAssertEqual(message?.shouldRetry, false)
     }
 
+    func test_didFinishLoadingImageData_displaysRetryOnFailedTransformation() {
+        let image = anyFeedImage()
+        let data = anyData()
+        let (view, presenter) = makeSUT(imageTransformer: failingImageTransformer)
+
+        presenter.didFinishLoadingImageData(with: data, for: image)
+
+        let message = view.messages.first
+        XCTAssertEqual(view.messages.count, 1)
+        XCTAssertEqual(message?.description, image.description)
+        XCTAssertEqual(message?.location, image.location)
+        XCTAssertEqual(message?.image, nil)
+        XCTAssertEqual(message?.isLoading, false)
+        XCTAssertEqual(message?.shouldRetry, true)
+    }
+
     // MARK: - Helpers
 
     struct AnyImage: Hashable {}
@@ -102,8 +120,10 @@ final class FeedImagePresenterTests: XCTestCase {
         return .init(id: UUID(), description: description, location: location, url: anyURL())
     }
 
+    private var failingImageTransformer: (Data) -> AnyImage? = { _ in nil }
+
     private func makeSUT(
-        imageTransformer: @escaping (Data) -> AnyImage = { data in AnyImage() },
+        imageTransformer: @escaping (Data) -> AnyImage? = { data in AnyImage() },
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> (ViewSpy, FeedImagePresenter<ViewSpy, AnyImage>) {
