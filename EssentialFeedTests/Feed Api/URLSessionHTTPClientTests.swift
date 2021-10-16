@@ -14,7 +14,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
 
     func test_loadFromURL_performsGETRequestWithURL() {
         let url: URL = anyURL()
-        let sut = makeSut()
+        let sut = makeSUT()
 
         let exp = expectation(description: "Wait for observer")
         var receivedRequests: [URLRequest] = []
@@ -54,7 +54,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
     }
 
     func test_loadFromURL_succeedsOnHTTPUrlResponseWithData() {
-        let sut = makeSut()
+        let sut = makeSUT()
         let url: URL = anyURL()
         let expectedData: Data = anyData()
         let expectedResponse: HTTPURLResponse = anyHttpResponse()
@@ -90,6 +90,26 @@ final class URLSessionHTTPClientTests: XCTestCase {
         XCTAssertEqual(receivedValues?.data, emptyData)
         XCTAssertEqual(receivedValues?.response.url, expectedResponse.url)
         XCTAssertEqual(receivedValues?.response.statusCode, expectedResponse.statusCode)
+    }
+
+    func test_cancelGetFromURLTask_cancelsURLRequest() {
+        let url = anyURL()
+        let sut = makeSUT()
+        let exp = expectation(description: "Wait for request")
+
+        let task = sut.load(from: url) { result in
+            switch result {
+            case let .failure(error as NSError) where error.code == URLError.cancelled.rawValue:
+                exp.fulfill()
+
+            default:
+                XCTFail("Expected cancelled result, got \(result) instead")
+            }
+        }
+
+        task.cancel()
+
+        wait(for: [exp], timeout: 1.0)
     }
 
     // MARK: - Helpers
@@ -130,7 +150,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line
     ) -> HTTPClient.Result? {
-        let sut = makeSut()
+        let sut = makeSUT()
         let url: URL = anyURL()
 
         URLProtocolStub.stub(data: data, response: response, error: error)
@@ -219,7 +239,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         }
     }
 
-    func makeSut() -> HTTPClient {
+    func makeSUT() -> HTTPClient {
         let sut: URLSessionHTTPClient = .init()
         trackForMemoryLeaks(sut)
         return sut
