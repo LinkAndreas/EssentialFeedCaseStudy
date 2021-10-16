@@ -9,6 +9,10 @@ final class RemoteImageDataLoader {
     init(client: HTTPClient) {
         self.client = client
     }
+
+    func loadImageData(from url: URL, completion: (Data) -> Void) {
+        client.load(from: url) { _ in }
+    }
 }
 
 final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
@@ -16,6 +20,15 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let (spy, _) = makeSUT()
 
         XCTAssertEqual(spy.requestedURLs, [], "Requested URLs must be empty.")
+    }
+
+    func test_loadImageDataFromURL_requestsImageDataFromURL() {
+        let url = anyURL()
+        let (spy, sut) = makeSUT()
+
+        sut.loadImageData(from: url) { _ in }
+
+        XCTAssertEqual(spy.requestedURLs, [url])
     }
 
     // MARK: - Helper
