@@ -2,6 +2,10 @@
 
 import Foundation
 
+func anyData() -> Data {
+    return "Any data".data(using: .utf8)!
+}
+
 func anyURL() -> URL {
     return URL(string: "http://any.url")!
 }
