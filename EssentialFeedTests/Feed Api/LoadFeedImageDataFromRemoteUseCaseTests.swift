@@ -10,14 +10,27 @@ final class RemoteImageDataLoader {
 
     typealias Result = Swift.Result<Data, Swift.Error>
 
+    private struct HTTPTaskWrapper: FeedImageDataLoaderTask {
+        private let wrapped: HTTPClientTask
+
+        init(wrapped: HTTPClientTask) {
+            self.wrapped = wrapped
+        }
+
+        func cancel() {
+            wrapped.cancel()
+        }
+    }
+
     let client: HTTPClient
 
     init(client: HTTPClient) {
         self.client = client
     }
 
-    func loadImageData(from url: URL, completion: @escaping (Result) -> Void) {
-        client.load(from: url) { [weak self] result in
+    @discardableResult
+    func loadImageData(from url: URL, completion: @escaping (Result) -> Void) -> FeedImageDataLoaderTask  {
+        return HTTPTaskWrapper(wrapped: client.load(from: url) { [weak self] result in
             guard self != nil else { return }
 
             switch result {
@@ -36,7 +49,7 @@ final class RemoteImageDataLoader {
             default:
                 break
             }
-        }
+        })
     }
 }
 
@@ -104,7 +117,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
 
     func test_loadImageDataFromURL_doesNotDeliverResultAfterInstanceGotDeallocated() {
         let url = anyURL()
-        let nonEmptyData = "Non empty data".data(using: .utf8)!
+        let data = anyData()
         let client = HttpClientSpy()
         var sut: RemoteImageDataLoader? = RemoteImageDataLoader(client: client)
 
@@ -116,9 +129,20 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
 
         sut = nil
 
-        client.complete(data: nonEmptyData)
+        client.complete(withStatusCode: 200, data: data)
 
         wait(for: [exp], timeout: 1.0)
+    }
+
+    func test_loadImageDataFromURL_doesNotDeliverResultWhenTaskGotCancelled() {
+        let url = anyURL()
+        let (spy, sut) = makeSUT()
+
+        let task = sut.loadImageData(from: url) { _ in }
+
+        task.cancel()
+
+        XCTAssertEqual(spy.cancelledURLs, [url])
     }
 
     // MARK: - Helper
