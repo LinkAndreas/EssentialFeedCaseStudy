@@ -31,6 +31,16 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         XCTAssertEqual(spy.requestedURLs, [url])
     }
 
+    func test_loadImageDataFromURLTwice_requestsImageDataFromURLTwice() {
+        let url = anyURL()
+        let (spy, sut) = makeSUT()
+
+        sut.loadImageData(from: url) { _ in }
+        sut.loadImageData(from: url) { _ in }
+
+        XCTAssertEqual(spy.requestedURLs, [url, url])
+    }
+
     // MARK: - Helper
     private func makeSUT(
         file: StaticString = #filePath,
