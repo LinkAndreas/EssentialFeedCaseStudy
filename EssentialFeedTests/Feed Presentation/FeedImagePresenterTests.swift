@@ -43,16 +43,14 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
 
 final class FeedImagePresenterTests: XCTestCase {
     func test_init_doesNotSendMessageToView() {
-        let view = ViewSpy()
-        _ = FeedImagePresenter(view: view)
+        let (view, _) = makeSUT()
 
         XCTAssertEqual(view.messages, [], "Expect no view messages")
     }
 
     func test_didStartLoadingImageData_displaysLoadingImage() {
         let image = anyFeedImage()
-        let view = ViewSpy()
-        let presenter = FeedImagePresenter(view: view)
+        let (view, presenter) = makeSUT()
 
         presenter.didStartLoadingImageData(for: image)
 
@@ -68,8 +66,16 @@ final class FeedImagePresenterTests: XCTestCase {
 
     struct AnyImage: Hashable {}
 
-    func anyFeedImage(description: String = "anyDescription", location: String = "anyLocation") -> FeedImage {
+    private func anyFeedImage(description: String = "anyDescription", location: String = "anyLocation") -> FeedImage {
         return .init(id: UUID(), description: description, location: location, url: anyURL())
+    }
+
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (ViewSpy, FeedImagePresenter<ViewSpy, AnyImage>) {
+        let view = ViewSpy()
+        let sut = FeedImagePresenter<ViewSpy, AnyImage>(view: view)
+        trackForMemoryLeaks(view, file: file, line: line)
+        trackForMemoryLeaks(sut, file: file, line: line)
+        return (view, sut)
     }
 
     final class ViewSpy: FeedImageView {
