@@ -4,15 +4,30 @@ import EssentialFeed
 import XCTest
 
 final class RemoteImageDataLoader {
+    enum Error: Swift.Error {
+        case invalidData
+    }
+
+    typealias Result = Swift.Result<Data, Swift.Error>
+
     let client: HTTPClient
 
     init(client: HTTPClient) {
         self.client = client
     }
 
-    func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
+    func loadImageData(from url: URL, completion: @escaping (Result) -> Void) {
         client.load(from: url) { result in
-            completion(.failure(anyNSError()))
+            switch result {
+            case let .success(data, response) where response.statusCode != 200:
+                completion(.failure(Error.invalidData))
+
+            case let .failure(error):
+                completion(.failure(error))
+
+            default:
+                break
+            }
         }
     }
 }
@@ -52,6 +67,15 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         })
     }
 
+    func test_loadImageDataFromURL_deliversInvalidDataErrorOnNon200HTTPResponse() {
+        let (spy, sut) = makeSUT()
+        let data = anyData()
+
+        expect(sut, toCompleteWith: .failure(RemoteImageDataLoader.Error.invalidData), when: {
+            spy.complete(withStatusCode: 243, data: data)
+        })
+    }
+
     // MARK: - Helper
     private func makeSUT(
         file: StaticString = #filePath,
@@ -66,7 +90,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
 
     private func expect(
         _ sut: RemoteImageDataLoader,
-        toCompleteWith expectedResult: Result<Data, Error>,
+        toCompleteWith expectedResult: RemoteImageDataLoader.Result,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
