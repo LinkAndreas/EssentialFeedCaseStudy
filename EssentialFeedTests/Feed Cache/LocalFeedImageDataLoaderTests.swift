@@ -1,10 +1,21 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
 import XCTest
+import EssentialFeed
+
+protocol FeedImageDataStore {
+    func retrieve(dataForURL url: URL)
+}
 
 final class LocalFeedImageDataLoader {
-    init(store: Any) {
+    private let store: FeedImageDataStore
 
+    init(store: FeedImageDataStore) {
+        self.store = store
+    }
+
+    func loadImageData(from url: URL, completion: @escaping (Any) -> Void) {
+        store.retrieve(dataForURL: url)
     }
 }
 
@@ -15,15 +26,36 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         XCTAssertTrue(spy.receivedMessages.isEmpty)
     }
 
+    func test_loadImageData_requestsStoreDataForURL() {
+        let url = anyURL()
+        let (spy, sut) = makeSUT()
+
+        sut.loadImageData(from: url) { _ in }
+
+        XCTAssertEqual(spy.receivedMessages, [.retrieve(dataFor: url)])
+    }
+
     // MARK: - Helper
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> (FeedStoreSpy, LocalFeedImageDataLoader) {
-        let store = FeedStoreSpy()
+    ) -> (StoreSpy, LocalFeedImageDataLoader) {
+        let store = StoreSpy()
         let sut = LocalFeedImageDataLoader(store: store)
         trackForMemoryLeaks(store, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (store, sut)
+    }
+
+    private class StoreSpy: FeedImageDataStore {
+        enum Message: Equatable {
+            case retrieve(dataFor: URL)
+        }
+
+        var receivedMessages: [Message] = []
+
+        func retrieve(dataForURL url: URL) {
+            receivedMessages.append(.retrieve(dataFor: url))
+        }
     }
 }
