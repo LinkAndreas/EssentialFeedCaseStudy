@@ -4,6 +4,7 @@ import Foundation
 
 public final class RemoteImageDataLoader: FeedImageDataLoader {
     public enum Error: Swift.Error {
+        case connectivity
         case invalidData
     }
 
@@ -54,8 +55,8 @@ public final class RemoteImageDataLoader: FeedImageDataLoader {
             case let .success((_, response)) where response.statusCode != 200:
                 task.complete(with: .failure(Error.invalidData))
 
-            case let .failure(error):
-                task.complete(with: .failure(error))
+            case .failure:
+                task.complete(with: .failure(Error.connectivity))
 
             default:
                 break
