@@ -42,7 +42,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
 
     // MARK: - Helpers
     private func loadImageData(file: StaticString = #file, line: UInt = #line) -> RemoteImageDataLoader.Result? {
-        let testServerURL: URL = URL(string: "https://essentialdeveloper.com/feed-case-study/test-api/feed/73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")!
+        let testServerURL: URL = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
         let configuration = URLSessionConfiguration.ephemeral
         let session = URLSession(configuration: configuration)
         let client = URLSessionHTTPClient(session: session)
@@ -61,9 +61,8 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
     }
 
     private func loadFeedResult(file: StaticString = #file, line: UInt = #line) -> FeedLoader.Result? {
-        let testServerURL: URL = URL(string: "http://essentialdeveloper.com/feed-case-study/test-api/feed")!
         let client: URLSessionHTTPClient = .init(session: .init(configuration: .ephemeral))
-        let loader: RemoteFeedLoader = .init(url: testServerURL, client: client)
+        let loader: RemoteFeedLoader = .init(url: feedTestServerURL, client: client)
 
         trackForMemoryLeaks(client, file: file, line: line)
         trackForMemoryLeaks(loader, file: file, line: line)
@@ -87,6 +86,10 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
             description: description(at: index),
             location: location(at: index),
             url: imageURL(at: index))
+    }
+
+    private var feedTestServerURL: URL {
+        return URL(string: "https://essentialdeveloper.com/feed-case-study/test-api/feed")!
     }
 
     private func id(at index: Int) -> UUID {
