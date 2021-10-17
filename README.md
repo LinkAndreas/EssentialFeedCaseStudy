@@ -135,7 +135,7 @@ Empty cache - course (sad path):
 1. System delivers error.
 
 #### Empty cache course (sad path):
-1. System delivers no image data.
+1. System delivers not found error.
 
 ---
 
