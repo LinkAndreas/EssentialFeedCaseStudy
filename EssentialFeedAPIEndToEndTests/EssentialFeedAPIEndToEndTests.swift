@@ -24,7 +24,42 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         }
     }
 
+    func test_endToEndTestServerLoadImageData_deliversImageData() {
+        switch loadImageData() {
+        case let .success(imageData):
+            XCTAssertFalse(imageData.isEmpty, "Expected non empty image data.")
+
+        case .failure(RemoteImageDataLoader.Error.connectivity):
+            XCTFail("Excpected fetch image data to succeed, but received connectivity error instead.")
+
+        case .failure(RemoteImageDataLoader.Error.invalidData):
+            XCTFail("Excpected fetch image data to succeed, but received invalid data error instead.")
+
+        default:
+            XCTFail("Expected to receive successful response.")
+        }
+    }
+
     // MARK: - Helpers
+    private func loadImageData(file: StaticString = #file, line: UInt = #line) -> RemoteImageDataLoader.Result? {
+        let testServerURL: URL = URL(string: "https://essentialdeveloper.com/feed-case-study/test-api/feed/73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")!
+        let configuration = URLSessionConfiguration.ephemeral
+        let session = URLSession(configuration: configuration)
+        let client = URLSessionHTTPClient(session: session)
+        let loader = RemoteImageDataLoader(client: client)
+
+        let expectation = expectation(description: "Wait for response.")
+        var receivedResult: RemoteImageDataLoader.Result?
+        _ = loader.loadImageData(from: testServerURL) { result in
+            receivedResult = result
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 5.0)
+
+        return receivedResult
+    }
+
     private func loadFeedResult(file: StaticString = #file, line: UInt = #line) -> FeedLoader.Result? {
         let testServerURL: URL = URL(string: "http://essentialdeveloper.com/feed-case-study/test-api/feed")!
         let client: URLSessionHTTPClient = .init(session: .init(configuration: .ephemeral))
