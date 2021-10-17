@@ -134,15 +134,17 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
-    func test_loadImageDataFromURL_doesNotDeliverResultWhenTaskGotCancelled() {
+    func test_cancelLoadImageDataURLTask_cancelsClientURLRequest() {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
         let task = sut.loadImageData(from: url) { _ in }
 
+        XCTAssertEqual(spy.cancelledURLs, [], "Expected no cancelled URLs until the task got cancelled.")
+
         task.cancel()
 
-        XCTAssertEqual(spy.cancelledURLs, [url])
+        XCTAssertEqual(spy.cancelledURLs, [url], "Expected requested URL to be cancelled after cancelling the task.")
     }
 
     // MARK: - Helper
