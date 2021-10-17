@@ -10,5 +10,6 @@ public protocol HTTPClient {
     typealias Result = Swift.Result<(Data, HTTPURLResponse), Error>
 
     // The comletion can be called in any Thread. Clients are responsible to dispatch in appropriate threads if needed.
+    @discardableResult
     func load(from url: URL, completion: @escaping (Result) -> Void) -> HTTPClientTask
 }
