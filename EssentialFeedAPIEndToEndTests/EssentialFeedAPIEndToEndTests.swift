@@ -43,10 +43,9 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
     // MARK: - Helpers
     private func loadImageData(file: StaticString = #file, line: UInt = #line) -> RemoteImageDataLoader.Result? {
         let testServerURL: URL = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
-        let configuration = URLSessionConfiguration.ephemeral
-        let session = URLSession(configuration: configuration)
-        let client = URLSessionHTTPClient(session: session)
-        let loader = RemoteImageDataLoader(client: client)
+        let loader = RemoteImageDataLoader(client: ephemeralClient())
+
+        trackForMemoryLeaks(loader, file: file, line: line)
 
         let expectation = expectation(description: "Wait for response.")
         var receivedResult: RemoteImageDataLoader.Result?
@@ -61,10 +60,8 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
     }
 
     private func loadFeedResult(file: StaticString = #file, line: UInt = #line) -> FeedLoader.Result? {
-        let client: URLSessionHTTPClient = .init(session: .init(configuration: .ephemeral))
-        let loader: RemoteFeedLoader = .init(url: feedTestServerURL, client: client)
+        let loader: RemoteFeedLoader = .init(url: feedTestServerURL, client: ephemeralClient())
 
-        trackForMemoryLeaks(client, file: file, line: line)
         trackForMemoryLeaks(loader, file: file, line: line)
 
         let expectation: XCTestExpectation = .init(description: "Wait for response.")
@@ -86,6 +83,14 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
             description: description(at: index),
             location: location(at: index),
             url: imageURL(at: index))
+    }
+
+    private func ephemeralClient(file: StaticString = #filePath, line: UInt = #line) -> URLSessionHTTPClient {
+        let configuration = URLSessionConfiguration.ephemeral
+        let session = URLSession(configuration: configuration)
+        let client: URLSessionHTTPClient = .init(session: session)
+        trackForMemoryLeaks(client, file: file, line: line)
+        return client
     }
 
     private var feedTestServerURL: URL {
