@@ -45,13 +45,13 @@ public final class RemoteImageDataLoader: FeedImageDataLoader {
             guard self != nil else { return }
 
             switch result {
-            case let .success((data, response)) where response.statusCode == 200 && !data.isEmpty:
+            case let .success((data, response)) where response.isOK && !data.isEmpty:
                 task.complete(with: .success(data))
 
-            case let .success((data, response)) where response.statusCode == 200 && data.isEmpty:
+            case let .success((data, response)) where response.isOK && data.isEmpty:
                 task.complete(with: .failure(Error.invalidData))
 
-            case let .success((_, response)) where response.statusCode != 200:
+            case let .success((_, response)) where !response.isOK:
                 task.complete(with: .failure(Error.invalidData))
 
             case .failure:
