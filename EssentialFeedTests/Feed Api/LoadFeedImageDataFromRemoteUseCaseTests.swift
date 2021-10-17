@@ -10,15 +10,26 @@ final class RemoteImageDataLoader {
 
     typealias Result = Swift.Result<Data, Swift.Error>
 
-    private struct HTTPTaskWrapper: FeedImageDataLoaderTask {
-        private let wrapped: HTTPClientTask
+    private class HTTPTaskWrapper: FeedImageDataLoaderTask {
+        var wrapped: HTTPClientTask?
 
-        init(wrapped: HTTPClientTask) {
-            self.wrapped = wrapped
+        private var completion: ((Result) -> Void)?
+
+        init(completion: @escaping (Result) -> Void) {
+            self.completion = completion
         }
 
         func cancel() {
-            wrapped.cancel()
+            preventFurtherCompletions()
+            wrapped?.cancel()
+        }
+
+        func complete(with result: Result) {
+            completion?(result)
+        }
+
+        private func preventFurtherCompletions() {
+            completion = nil
         }
     }
 
@@ -30,26 +41,29 @@ final class RemoteImageDataLoader {
 
     @discardableResult
     func loadImageData(from url: URL, completion: @escaping (Result) -> Void) -> FeedImageDataLoaderTask  {
-        return HTTPTaskWrapper(wrapped: client.load(from: url) { [weak self] result in
+        let task = HTTPTaskWrapper(completion: completion)
+        task.wrapped = client.load(from: url) { [weak self] result in
             guard self != nil else { return }
 
             switch result {
             case let .success((data, response)) where response.statusCode == 200 && !data.isEmpty:
-                completion(.success(data))
+                task.complete(with: .success(data))
 
             case let .success((data, response)) where response.statusCode == 200 && data.isEmpty:
-                completion(.failure(Error.invalidData))
+                task.complete(with: .failure(Error.invalidData))
 
             case let .success((_, response)) where response.statusCode != 200:
-                completion(.failure(Error.invalidData))
+                task.complete(with: .failure(Error.invalidData))
 
             case let .failure(error):
-                completion(.failure(error))
+                task.complete(with: .failure(error))
 
             default:
                 break
             }
-        })
+        }
+
+        return task
     }
 }
 
@@ -145,6 +159,23 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         task.cancel()
 
         XCTAssertEqual(spy.cancelledURLs, [url], "Expected requested URL to be cancelled after cancelling the task.")
+    }
+
+    func test_loadImageDataFromURL_doesNotDeliverResultAfterTheTaskGotCancelled() {
+        let nonEmptyData = "Non empty data".data(using: .utf8)!
+        let url = anyURL()
+        let (spy, sut) = makeSUT()
+
+        var receivedResults: [RemoteImageDataLoader.Result] = []
+        let task = sut.loadImageData(from: url) { result in receivedResults.append(result) }
+
+        task.cancel()
+
+        spy.complete(withStatusCode: 404, data: anyData())
+        spy.complete(withStatusCode: 200, data: nonEmptyData)
+        spy.complete(with: anyNSError())
+
+        XCTAssertTrue(receivedResults.isEmpty, "Expected not to receive any result.")
     }
 
     // MARK: - Helper
