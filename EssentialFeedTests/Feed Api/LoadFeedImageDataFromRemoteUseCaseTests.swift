@@ -14,7 +14,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
 
         XCTAssertEqual(spy.requestedURLs, [url])
     }
@@ -23,8 +23,8 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        sut.loadImageData(from: url) { _ in }
-        sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
 
         XCTAssertEqual(spy.requestedURLs, [url, url])
     }
@@ -73,7 +73,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
 
         let exp = expectation(description: "Completion should not get called")
         exp.isInverted = true
-        sut?.loadImageData(from: url) { _ in
+        _ = sut?.loadImageData(from: url) { _ in
             exp.fulfill()
         }
 
@@ -136,7 +136,8 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let url = anyURL()
         let exp = expectation(description: "Wait for load completion")
         var receivedResult: Result<Data, Error>?
-        sut.loadImageData(from: url) { result in
+
+        _ = sut.loadImageData(from: url) { result in
             receivedResult = result
             exp.fulfill()
         }

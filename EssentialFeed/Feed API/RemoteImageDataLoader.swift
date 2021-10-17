@@ -39,7 +39,6 @@ public final class RemoteImageDataLoader: FeedImageDataLoader {
         self.client = client
     }
 
-    @discardableResult
     public func loadImageData(from url: URL, completion: @escaping (Result) -> Void) -> FeedImageDataLoaderTask  {
         let task = HTTPTaskWrapper(completion: completion)
         task.wrapped = client.load(from: url) { [weak self] result in
