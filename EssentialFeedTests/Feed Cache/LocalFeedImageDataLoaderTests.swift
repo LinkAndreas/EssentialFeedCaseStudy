@@ -4,17 +4,18 @@ import XCTest
 import EssentialFeed
 
 protocol FeedImageDataStore {
-    typealias Result = Swift.Result<Data, Swift.Error>
+    typealias Result = Swift.Result<Data?, Error>
 
     func retrieve(dataForURL url: URL, completion: @escaping (Result) -> Void)
 }
 
 final class LocalFeedImageDataLoader {
     enum Error: Swift.Error {
-
+        case failed
+        case notFound
     }
 
-    typealias Result = Swift.Result<Data, Swift.Error>
+    typealias Result = Swift.Result<Data?, Swift.Error>
 
     private let store: FeedImageDataStore
 
@@ -25,11 +26,14 @@ final class LocalFeedImageDataLoader {
     func loadImageData(from url: URL, completion: @escaping (Result) -> Void) {
         store.retrieve(dataForURL: url) { result in
             switch result {
-            case let .success(data):
+            case let .success(data?):
                 completion(.success(data))
 
-            case let .failure(error):
-                completion(.failure(error))
+            case let .success(.none):
+                completion(.failure(Error.notFound))
+
+            case .failure:
+                completion(.failure(Error.failed))
             }
         }
     }
@@ -55,13 +59,29 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         let error = anyNSError()
         let (spy, sut) = makeSUT()
 
-        expect(sut, toCompleteWith: .failure(error), when: {
+        expect(sut, toCompleteWith: failed(), when: {
             spy.completeDataRetrieval(with: .failure(error))
+        })
+    }
+
+    func test_loadImageData_deliversNotFoundErrorOnNotFound() {
+        let (spy, sut) = makeSUT()
+
+        expect(sut, toCompleteWith: notFound(), when: {
+            spy.completeDataRetrieval(with: .success(.none))
         })
     }
 
 
     // MARK: - Helper
+    private func failed() -> LocalFeedImageDataLoader.Result {
+        return .failure(LocalFeedImageDataLoader.Error.failed)
+    }
+
+    private func notFound() -> LocalFeedImageDataLoader.Result {
+        return .failure(LocalFeedImageDataLoader.Error.notFound)
+    }
+
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
@@ -94,10 +114,18 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
 
         switch (receivedResult, expectedResult) {
         case let (.success(receivedData)?, .success(expectedData)):
-            XCTAssertEqual(receivedData, expectedData, "Expected to receive \(receivedData), but received \(receivedData) instead.")
+            XCTAssertEqual(
+                receivedData,
+                expectedData,
+                "Expected to receive \(String(describing: receivedData)), but received \(String(describing: receivedData)) instead."
+            )
 
         case let (.failure(receivedError as NSError)?, .failure(expectedError as NSError)):
-            XCTAssertEqual(receivedError, expectedError, "Expected to receive \(expectedError), but received \(receivedError) instead.")
+            XCTAssertEqual(
+                receivedError,
+                expectedError,
+                "Expected to receive \(expectedError), but received \(receivedError) instead."
+            )
 
         default:
             XCTFail("Expected to receive \(expectedResult), but received \(String(describing: receivedResult)) instead.")

@@ -8,7 +8,7 @@ public final class RemoteImageDataLoader: FeedImageDataLoader {
         case invalidData
     }
 
-    public typealias Result = Swift.Result<Data, Swift.Error>
+    public typealias Result = Swift.Result<Data?, Swift.Error>
 
     private class HTTPTaskWrapper: FeedImageDataLoaderTask {
         var wrapped: HTTPClientTask?

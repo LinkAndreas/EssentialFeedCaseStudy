@@ -135,7 +135,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
     ) {
         let url = anyURL()
         let exp = expectation(description: "Wait for load completion")
-        var receivedResult: Result<Data, Error>?
+        var receivedResult: RemoteImageDataLoader.Result?
 
         _ = sut.loadImageData(from: url) { result in
             receivedResult = result
