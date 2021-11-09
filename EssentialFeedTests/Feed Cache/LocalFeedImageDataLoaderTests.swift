@@ -72,6 +72,15 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         })
     }
 
+    func test_loadImageData_deliversStoredDataOnFoundData() {
+        let (spy, sut) = makeSUT()
+        let foundData = anyData()
+
+        expect(sut, toCompleteWith: .success(foundData), when: {
+            spy.completeDataRetrieval(with: .success(foundData))
+        })
+    }
+
 
     // MARK: - Helper
     private func failed() -> LocalFeedImageDataLoader.Result {
