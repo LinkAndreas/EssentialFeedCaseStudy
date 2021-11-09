@@ -9,6 +9,26 @@ protocol FeedImageDataStore {
     func retrieve(dataForURL url: URL, completion: @escaping (Result) -> Void)
 }
 
+final class Task: FeedImageDataLoaderTask {
+    private var completion: ((FeedImageDataLoader.Result) -> Void)?
+
+    init(completion: @escaping (FeedImageDataLoader.Result) -> Void) {
+        self.completion = completion
+    }
+
+    func complete(with result: FeedImageDataLoader.Result) {
+        completion?(result)
+    }
+
+    func cancel() {
+        preventFurtherCompletions()
+    }
+
+    private func preventFurtherCompletions() {
+        completion = nil
+    }
+}
+
 final class LocalFeedImageDataLoader {
     enum Error: Swift.Error {
         case failed
@@ -23,19 +43,24 @@ final class LocalFeedImageDataLoader {
         self.store = store
     }
 
-    func loadImageData(from url: URL, completion: @escaping (Result) -> Void) {
-        store.retrieve(dataForURL: url) { result in
+    func loadImageData(from url: URL, completion: @escaping (Result) -> Void) -> FeedImageDataLoaderTask {
+        let task = Task(completion: completion)
+        store.retrieve(dataForURL: url) { [weak self] result in
+            guard self != nil else { return }
+
             switch result {
             case let .success(data?):
-                completion(.success(data))
+                task.complete(with: .success(data))
 
-            case let .success(.none):
-                completion(.failure(Error.notFound))
+            case .success(.none):
+                task.complete(with: .failure(Error.notFound))
 
             case .failure:
-                completion(.failure(Error.failed))
+                task.complete(with: .failure(Error.failed))
             }
         }
+
+        return task
     }
 }
 
@@ -50,7 +75,7 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
 
         XCTAssertEqual(spy.receivedMessages, [.retrieve(dataFor: url)])
     }
@@ -81,6 +106,42 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         })
     }
 
+    func test_loadImageData_doesNotDeliverResultAfterCancellingTask() {
+        let url = anyURL()
+        let (spy, sut) = makeSUT()
+
+        var receivedResults: [LocalFeedImageDataLoader.Result] = []
+        let task = sut.loadImageData(from: url) { result in
+            receivedResults.append(result)
+        }
+
+        task.cancel()
+
+        spy.completeDataRetrieval(with: .success(.none))
+        spy.completeDataRetrieval(with: .success(anyData()))
+        spy.completeDataRetrieval(with: .failure(anyNSError()))
+
+        XCTAssertTrue(receivedResults.isEmpty, "Should not receive result after cancelling task.")
+    }
+
+    func test_loadImageData_doesNotDeliverResultAfterSUTInstanceGotDeallocated() {
+        let url = anyURL()
+        let spy = StoreSpy()
+        var sut: LocalFeedImageDataLoader? = LocalFeedImageDataLoader(store: spy)
+
+        var receivedResults: [LocalFeedImageDataLoader.Result] = []
+        _ = sut?.loadImageData(from: url) { result in
+            receivedResults.append(result)
+        }
+
+        sut = nil
+
+        spy.completeDataRetrieval(with: .success(.none))
+        spy.completeDataRetrieval(with: .success(anyData()))
+        spy.completeDataRetrieval(with: .failure(anyNSError()))
+
+        XCTAssertTrue(receivedResults.isEmpty, "Should not receive result after cancelling task.")
+    }
 
     // MARK: - Helper
     private func failed() -> LocalFeedImageDataLoader.Result {
@@ -112,7 +173,7 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         let expectation = expectation(description: "Wait for load result.")
         var receivedResult: FeedImageDataLoader.Result?
 
-        sut.loadImageData(from: url) { result in
+        _ = sut.loadImageData(from: url) { result in
             receivedResult = result
             expectation.fulfill()
         }
