@@ -65,7 +65,7 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
 
     func test_loadImageData_doesNotDeliverResultAfterSUTInstanceGotDeallocated() {
         let url = anyURL()
-        let spy = StoreSpy()
+        let spy = FeedImageDataStoreSpy()
         var sut: LocalFeedImageDataLoader? = LocalFeedImageDataLoader(store: spy)
 
         var receivedResults: [LocalFeedImageDataLoader.LoadResult] = []
@@ -104,8 +104,8 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> (StoreSpy, LocalFeedImageDataLoader) {
-        let store = StoreSpy()
+    ) -> (FeedImageDataStoreSpy, LocalFeedImageDataLoader) {
+        let store = FeedImageDataStoreSpy()
         let sut = LocalFeedImageDataLoader(store: store)
         trackForMemoryLeaks(store, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
@@ -148,35 +148,6 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
 
         default:
             XCTFail("Expected to receive \(expectedResult), but received \(String(describing: receivedResult)) instead.")
-        }
-    }
-
-    private class StoreSpy: FeedImageDataStore {
-        enum Message: Equatable {
-            case retrieve(dataFor: URL)
-            case insert(imageData: Data, url: URL)
-        }
-
-        private (set) var receivedMessages: [Message] = []
-        private var retrievalCompletions: [(FeedImageDataStore.RetrievalResult) -> Void] = []
-        private var insertionCompletions: [(FeedImageDataStore.InsertionResult) -> Void] = []
-
-        func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.RetrievalResult) -> Void) {
-            receivedMessages.append(.retrieve(dataFor: url))
-            retrievalCompletions.append(completion)
-        }
-
-        func insert(_ imageData: Data, for url: URL, completion: @escaping (FeedImageDataStore.InsertionResult) -> Void) {
-            receivedMessages.append(.insert(imageData: imageData, url: url))
-            insertionCompletions.append(completion)
-        }
-
-        func completeDataRetrieval(with result: FeedImageDataStore.RetrievalResult, atIndex index: Int = 0) {
-            retrievalCompletions[index](result)
-        }
-
-        func completeDataInsertion(with result: FeedImageDataStore.InsertionResult, atIndex index: Int = 0) {
-            insertionCompletions[index](result)
         }
     }
 }
