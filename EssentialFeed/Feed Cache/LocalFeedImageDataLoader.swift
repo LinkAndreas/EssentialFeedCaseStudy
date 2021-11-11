@@ -3,15 +3,22 @@
 import Foundation
 
 public final class LocalFeedImageDataLoader {
-    public enum Error: Swift.Error {
+    private let store: FeedImageDataStore
+
+    public init(store: FeedImageDataStore) {
+        self.store = store
+    }
+}
+
+extension LocalFeedImageDataLoader {
+    public enum LoadError: Error {
         case failed
         case notFound
     }
 
-    public typealias Result = Swift.Result<Data?, Swift.Error>
-    public typealias InsertionResult = Swift.Result<Void, Swift.Error>
+    public typealias LoadResult = Swift.Result<Data?, Error>
 
-    private final class Task: FeedImageDataLoaderTask {
+    private final class LoadImageDataTask: FeedImageDataLoaderTask {
         private var completion: ((FeedImageDataLoader.Result) -> Void)?
 
         init(completion: @escaping (FeedImageDataLoader.Result) -> Void) {
@@ -31,14 +38,8 @@ public final class LocalFeedImageDataLoader {
         }
     }
 
-    private let store: FeedImageDataStore
-
-    public init(store: FeedImageDataStore) {
-        self.store = store
-    }
-
-    public func loadImageData(from url: URL, completion: @escaping (Result) -> Void) -> FeedImageDataLoaderTask {
-        let task = Task(completion: completion)
+    public func loadImageData(from url: URL, completion: @escaping (LoadResult) -> Void) -> FeedImageDataLoaderTask {
+        let task = LoadImageDataTask(completion: completion)
         store.retrieve(dataForURL: url) { [weak self] result in
             guard self != nil else { return }
 
@@ -47,17 +48,21 @@ public final class LocalFeedImageDataLoader {
                 task.complete(with: .success(data))
 
             case .success(.none):
-                task.complete(with: .failure(Error.notFound))
+                task.complete(with: .failure(LoadError.notFound))
 
             case .failure:
-                task.complete(with: .failure(Error.failed))
+                task.complete(with: .failure(LoadError.failed))
             }
         }
 
         return task
     }
+}
 
-    public func save(_ imageData: Data, for url: URL, completion: @escaping (InsertionResult) -> Void) {
+extension LocalFeedImageDataLoader {
+    public typealias SaveResult = Swift.Result<Void, Swift.Error>
+
+    public func save(_ imageData: Data, for url: URL, completion: @escaping (SaveResult) -> Void) {
         store.insert(imageData, for: url, completion: completion)
     }
 }

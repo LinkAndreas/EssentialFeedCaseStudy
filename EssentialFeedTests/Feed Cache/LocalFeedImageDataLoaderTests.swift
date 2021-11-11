@@ -49,7 +49,7 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        var receivedResults: [LocalFeedImageDataLoader.Result] = []
+        var receivedResults: [LocalFeedImageDataLoader.LoadResult] = []
         let task = sut.loadImageData(from: url) { result in
             receivedResults.append(result)
         }
@@ -68,7 +68,7 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         let spy = StoreSpy()
         var sut: LocalFeedImageDataLoader? = LocalFeedImageDataLoader(store: spy)
 
-        var receivedResults: [LocalFeedImageDataLoader.Result] = []
+        var receivedResults: [LocalFeedImageDataLoader.LoadResult] = []
         _ = sut?.loadImageData(from: url) { result in
             receivedResults.append(result)
         }
@@ -93,12 +93,12 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
     }
 
     // MARK: - Helper
-    private func failed() -> LocalFeedImageDataLoader.Result {
-        return .failure(LocalFeedImageDataLoader.Error.failed)
+    private func failed() -> LocalFeedImageDataLoader.LoadResult {
+        return .failure(LocalFeedImageDataLoader.LoadError.failed)
     }
 
-    private func notFound() -> LocalFeedImageDataLoader.Result {
-        return .failure(LocalFeedImageDataLoader.Error.notFound)
+    private func notFound() -> LocalFeedImageDataLoader.LoadResult {
+        return .failure(LocalFeedImageDataLoader.LoadError.notFound)
     }
 
     private func makeSUT(
@@ -158,12 +158,12 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         }
 
         private (set) var receivedMessages: [Message] = []
-        private var completions: [(FeedImageDataStore.Result) -> Void] = []
+        private var retrievalCompletions: [(FeedImageDataStore.RetrievalResult) -> Void] = []
         private var insertionCompletions: [(FeedImageDataStore.InsertionResult) -> Void] = []
 
-        func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.Result) -> Void) {
+        func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.RetrievalResult) -> Void) {
             receivedMessages.append(.retrieve(dataFor: url))
-            completions.append(completion)
+            retrievalCompletions.append(completion)
         }
 
         func insert(_ imageData: Data, for url: URL, completion: @escaping (FeedImageDataStore.InsertionResult) -> Void) {
@@ -171,8 +171,8 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
             insertionCompletions.append(completion)
         }
 
-        func completeDataRetrieval(with result: FeedImageDataStore.Result, atIndex index: Int = 0) {
-            completions[index](result)
+        func completeDataRetrieval(with result: FeedImageDataStore.RetrievalResult, atIndex index: Int = 0) {
+            retrievalCompletions[index](result)
         }
 
         func completeDataInsertion(with result: FeedImageDataStore.InsertionResult, atIndex index: Int = 0) {
