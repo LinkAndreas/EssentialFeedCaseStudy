@@ -9,6 +9,7 @@ public final class LocalFeedImageDataLoader {
     }
 
     public typealias Result = Swift.Result<Data?, Swift.Error>
+    public typealias InsertionResult = Swift.Result<Void, Swift.Error>
 
     private final class Task: FeedImageDataLoaderTask {
         private var completion: ((FeedImageDataLoader.Result) -> Void)?
@@ -54,5 +55,9 @@ public final class LocalFeedImageDataLoader {
         }
 
         return task
+    }
+
+    public func save(_ imageData: Data, for url: URL, completion: @escaping (InsertionResult) -> Void) {
+        store.insert(imageData, for: url, completion: completion)
     }
 }

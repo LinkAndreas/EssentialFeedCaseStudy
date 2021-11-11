@@ -2,7 +2,7 @@
 
 import Foundation
 
-public final class RemoteImageDataLoader: FeedImageDataLoader {
+public final class RemoteImageDataLoader {
     public enum Error: Swift.Error {
         case connectivity
         case invalidData

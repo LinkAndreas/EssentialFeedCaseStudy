@@ -82,6 +82,16 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
         XCTAssertTrue(receivedResults.isEmpty, "Should not receive result after cancelling task.")
     }
 
+    func test_saveImageDataForURL_requestsImageDataInsertionForURLIntoStore() {
+        let imageData = anyData()
+        let url = anyURL()
+        let (spy, sut) = makeSUT()
+
+        sut.save(imageData, for: url) { _ in }
+
+        XCTAssertEqual(spy.receivedMessages, [.insert(imageData: imageData, url: url)])
+    }
+
     // MARK: - Helper
     private func failed() -> LocalFeedImageDataLoader.Result {
         return .failure(LocalFeedImageDataLoader.Error.failed)
@@ -144,18 +154,29 @@ final class LocalFeedImageDataLoaderTests: XCTestCase {
     private class StoreSpy: FeedImageDataStore {
         enum Message: Equatable {
             case retrieve(dataFor: URL)
+            case insert(imageData: Data, url: URL)
         }
 
         private (set) var receivedMessages: [Message] = []
         private var completions: [(FeedImageDataStore.Result) -> Void] = []
+        private var insertionCompletions: [(FeedImageDataStore.InsertionResult) -> Void] = []
 
         func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.Result) -> Void) {
             receivedMessages.append(.retrieve(dataFor: url))
             completions.append(completion)
         }
 
+        func insert(_ imageData: Data, for url: URL, completion: @escaping (FeedImageDataStore.InsertionResult) -> Void) {
+            receivedMessages.append(.insert(imageData: imageData, url: url))
+            insertionCompletions.append(completion)
+        }
+
         func completeDataRetrieval(with result: FeedImageDataStore.Result, atIndex index: Int = 0) {
             completions[index](result)
+        }
+
+        func completeDataInsertion(with result: FeedImageDataStore.InsertionResult, atIndex index: Int = 0) {
+            insertionCompletions[index](result)
         }
     }
 }
