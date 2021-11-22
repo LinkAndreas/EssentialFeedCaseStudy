@@ -82,16 +82,6 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
         XCTAssertTrue(receivedResults.isEmpty, "Should not receive result after cancelling task.")
     }
 
-    func test_saveImageDataForURL_requestsImageDataInsertionForURLIntoStore() {
-        let imageData = anyData()
-        let url = anyURL()
-        let (spy, sut) = makeSUT()
-
-        sut.save(imageData, for: url) { _ in }
-
-        XCTAssertEqual(spy.receivedMessages, [.insert(imageData: imageData, url: url)])
-    }
-
     // MARK: - Helper
     private func failed() -> LocalFeedImageDataLoader.LoadResult {
         return .failure(LocalFeedImageDataLoader.LoadError.failed)
