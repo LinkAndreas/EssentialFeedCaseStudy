@@ -8,10 +8,9 @@ extension CoreDataFeedStore: FeedImageDataStore {
     ) {
         perform { context in
             completion(Result {
-                guard let image = try? ManagedFeedImage.first(in: context, for: url) else { return }
-
-                image.data = imageData
-                try? context.save()
+                try ManagedFeedImage.first(in: context, for: url)
+                    .map { $0.data = imageData }
+                    .map(context.save)
             })
         }
     }
