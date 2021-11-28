@@ -16,46 +16,48 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         undoStoreSideEffects()
     }
 
+    // MARK: - LocalFeedLoader Tests
     func test_load_deliversNoItemsOnEmptyCache() {
-        let sut = makeFeedLoader()
+        let feedLoader = makeFeedLoader()
 
-        expect(sut, toCompleteLoadWith: .success([]))
+        expect(feedLoader, toCompleteLoadWith: .success([]))
     }
 
     func test_load_deliversItemsSavedOnASeparateInstance() {
-        let sutToPerformSave = makeFeedLoader()
-        let sutToPerformLoad = makeFeedLoader()
+        let feedLoaderToPerformSave = makeFeedLoader()
+        let feedLoaderToPerformLoad = makeFeedLoader()
         let imageFeed = uniqueImageFeed().models
 
-        save(imageFeed, with: sutToPerformSave)
+        save(imageFeed, with: feedLoaderToPerformSave)
 
-        expect(sutToPerformLoad, toCompleteLoadWith: .success(imageFeed))
+        expect(feedLoaderToPerformLoad, toCompleteLoadWith: .success(imageFeed))
     }
 
     func test_save_overridesItemsSavedOnASeparateInstance() {
-        let sutToPerformFirstSave = makeFeedLoader()
-        let sutToPerformLastSave = makeFeedLoader()
-        let sutToPerformLoad = makeFeedLoader()
+        let feedLoaderToPerformFirstSave = makeFeedLoader()
+        let feedLoaderToPerformLastSave = makeFeedLoader()
+        let feedLoaderToPerformLoad = makeFeedLoader()
         let firstFeed = uniqueImageFeed().models
         let latestFeed = uniqueImageFeed().models
 
-        save(firstFeed, with: sutToPerformFirstSave)
-        save(latestFeed, with: sutToPerformLastSave)
+        save(firstFeed, with: feedLoaderToPerformFirstSave)
+        save(latestFeed, with: feedLoaderToPerformLastSave)
 
-        expect(sutToPerformLoad, toCompleteLoadWith: .success(latestFeed))
+        expect(feedLoaderToPerformLoad, toCompleteLoadWith: .success(latestFeed))
     }
 
+    // MARK: - LocalFeedImageDataLoader Tests
     func test_loadImageData_deliversSavedDataOnASeparateInstance() {
-        let sutToPerformSave = makeImageLoader()
-        let sutToPerformLoad = makeImageLoader()
+        let imageLoaderToPerformSave = makeImageLoader()
+        let imageLoaderToPerformLoad = makeImageLoader()
         let feedLoader = makeFeedLoader()
         let image = uniqueImage()
         let imageData = anyData()
 
         save([image], with: feedLoader)
-        save(imageData, in: sutToPerformSave, for: image.url)
+        save(imageData, in: imageLoaderToPerformSave, for: image.url)
 
-        expect(sutToPerformLoad, toCompleteLoadWith: .success(imageData), for: image.url)
+        expect(imageLoaderToPerformLoad, toCompleteLoadWith: .success(imageData), for: image.url)
     }
 
     // MARK: - Helpers
