@@ -42,6 +42,28 @@ class CoreDataFeedImageDataStoreTests: XCTestCase {
 
         expect(sut, toCompleteWith: found(lastInsertedData), for: url)
     }
+
+    func test_sideEffects_runSerially() {
+        let sut = makeSUT()
+        let url = anyURL()
+
+        let operation1 = expectation(description: "Operation 1")
+        sut.insert(feed: [localImage(for: url)], timestamp: Date()) { _ in
+            operation1.fulfill()
+        }
+
+        let operation2 = expectation(description: "Operation 2")
+        sut.insert(anyData(), for: url) { _ in
+            operation2.fulfill()
+        }
+
+        let operation3 = expectation(description: "Operation 3")
+        sut.insert(anyData(), for: url) { _ in
+            operation3.fulfill()
+        }
+
+        wait(for: [operation1, operation2, operation3], timeout: 5.0, enforceOrder: true)
+    }
 }
 
 extension CoreDataFeedImageDataStoreTests {
@@ -120,13 +142,15 @@ extension CoreDataFeedImageDataStoreTests {
             switch result {
             case .success:
                 sut.insert(data, for: url) { result in
-                    guard case let .failure(receivedError) = result else { return }
+                    if case let .failure(receivedError) = result {
+                        XCTFail(
+                            "Expected data store insertion to succeed, but recieved error instead: \(receivedError)",
+                            file: file,
+                            line: line
+                        )
+                    }
 
-                    XCTFail(
-                        "Expected data store insertion to succeed, but recieved error instead: \(receivedError)",
-                        file: file,
-                        line: line
-                    )
+                    expectation.fulfill()
                 }
 
             case let .failure(receivedError):
@@ -135,9 +159,9 @@ extension CoreDataFeedImageDataStoreTests {
                     file: file,
                     line: line
                 )
-            }
 
-            expectation.fulfill()
+                expectation.fulfill()
+            }
         }
 
         wait(for: [expectation], timeout: 1.0)
