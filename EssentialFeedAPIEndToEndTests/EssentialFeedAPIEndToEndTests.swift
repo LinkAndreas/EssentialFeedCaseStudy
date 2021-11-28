@@ -26,7 +26,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
 
     func test_endToEndTestServerLoadImageData_deliversImageData() {
         switch loadImageData() {
-        case let .success(imageData):
+        case let .success(.some(imageData)):
             XCTAssertFalse(imageData.isEmpty, "Expected non empty image data.")
 
         case .failure(RemoteImageDataLoader.Error.connectivity):
