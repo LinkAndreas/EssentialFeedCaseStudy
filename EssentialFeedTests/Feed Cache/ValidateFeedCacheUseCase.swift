@@ -113,6 +113,17 @@ final class ValidateFeedCacheUseCase: XCTestCase {
         })
     }
 
+    func test_validateCache_succeedsOnNonExpiredCache() {
+        let feed = uniqueImageFeed()
+        let fixedCurrentDate = Date()
+        let nonExpiredTimeStamp = fixedCurrentDate.minusFeedCacheMaxAge().adding(seconds: 1)
+        let (sut, spy) = makeSUT(currentDate: { fixedCurrentDate })
+
+        expect(sut, toCompleteWith: .success(()), when: {
+            spy.completeRetrievalSuccessfully(with: feed.locals, timestamp: nonExpiredTimeStamp)
+        })
+    }
+
     // MARK: - Helper
     private func makeSUT(
         currentDate: @escaping () -> Date = { .init() },
