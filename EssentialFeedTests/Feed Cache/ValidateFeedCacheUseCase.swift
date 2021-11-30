@@ -105,6 +105,14 @@ final class ValidateFeedCacheUseCase: XCTestCase {
         })
     }
 
+    func test_validateCache_succeedsOnEmptyCache() {
+        let (sut, spy) = makeSUT()
+
+        expect(sut, toCompleteWith: .success(()), when: {
+            spy.completeRetrivalWithEmptyCache()
+        })
+    }
+
     // MARK: - Helper
     private func makeSUT(
         currentDate: @escaping () -> Date = { .init() },
