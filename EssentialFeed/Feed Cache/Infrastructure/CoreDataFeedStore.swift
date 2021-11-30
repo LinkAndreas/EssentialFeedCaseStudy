@@ -5,16 +5,26 @@ import CoreData
 public final class CoreDataFeedStore {
     enum Constants {
         static let modelName = "FeedStore"
+        static let model = NSManagedObjectModel.with(name: modelName, in: Bundle(for: CoreDataFeedStore.self))
     }
 
     private let container: NSPersistentContainer
     private let context: NSManagedObjectContext
 
+    enum StoreError: Error {
+        case modelNotFound
+        case failedToLoadPersistentContainer(Error)
+    }
+
     public init(storeURL: URL) throws {
-        let bundle: Bundle = Bundle(for: CoreDataFeedStore.self)
-        let model: NSManagedObjectModel = .with(name: Constants.modelName, in: bundle)!
-        container = try .load(name: Constants.modelName, model: model, url: storeURL)
-        context = container.newBackgroundContext()
+        guard let model: NSManagedObjectModel = Constants.model else { throw StoreError.modelNotFound }
+
+        do {
+            container = try .load(name: Constants.modelName, model: model, url: storeURL)
+            context = container.newBackgroundContext()
+        } catch {
+            throw StoreError.failedToLoadPersistentContainer(error)
+        }
     }
 
     deinit {
