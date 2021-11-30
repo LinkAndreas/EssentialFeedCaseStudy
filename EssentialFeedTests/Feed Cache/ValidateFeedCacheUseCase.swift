@@ -95,6 +95,16 @@ final class ValidateFeedCacheUseCase: XCTestCase {
             spy.completeDeletion(with: deletionError)
         })
     }
+
+    func test_validateCache_suceedsOnSuccessfulDeletionOfFailedRetrieval() {
+        let (sut, spy) = makeSUT()
+
+        expect(sut, toCompleteWith: .success(()), when: {
+            spy.completeRetrieval(with: anyNSError())
+            spy.completeDeletionSuccessfully()
+        })
+    }
+
     // MARK: - Helper
     private func makeSUT(
         currentDate: @escaping () -> Date = { .init() },
