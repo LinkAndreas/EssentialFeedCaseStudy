@@ -77,6 +77,17 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         expect(imageLoaderToPerformLoad, toCompleteLoadWith: .success(lastImageData), for: image.url)
     }
 
+    func test_validateFeedCache_doesNotDeleteRecentlySavedFeed() {
+        let feedLoaderToPerformSave = makeFeedLoader()
+        let feedLoaderToPerformValidation = makeFeedLoader()
+        let feed = uniqueImageFeed().models
+
+        save(feed, with: feedLoaderToPerformSave)
+        validateCache(with: feedLoaderToPerformValidation)
+
+        expect(feedLoaderToPerformSave, toCompleteLoadWith: .success(feed))
+    }
+
     // MARK: - Helpers
     private func makeFeedLoader(file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
         let storeURL = testSpecificStoreURL()
@@ -177,6 +188,27 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
 
+    private func validateCache(
+        with loader: LocalFeedLoader,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let saveExpectation = expectation(description: "Wait for save completion.")
+        loader.validateCache() { result in
+            if case let .failure(error) = result {
+                XCTFail(
+                    "Expected cache validation to succeed. But received error instead: \(error).",
+                    file: file,
+                    line: line
+                )
+            }
+
+            saveExpectation.fulfill()
+        }
+
+        wait(for: [saveExpectation], timeout: 1.0)
+    }
+
     private func save(
         _ imageFeed: [FeedImage],
         with sut: LocalFeedLoader,
@@ -204,6 +236,33 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
     }
 
     private func save(
+        _ imageData: Data,
+        in sut: LocalFeedImageDataLoader,
+        for url: URL,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let exp = expectation(description: "Wait for result")
+        sut.save(imageData, for: url) { result in
+            switch result {
+            case .success:
+                break
+
+            case let .failure(receivedError):
+                XCTFail(
+                    "Expected to succeed, but received \(receivedError) instead.",
+                    file: file,
+                    line: line
+                )
+            }
+
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 1.0)
+    }
+
+    private func validate(
         _ imageData: Data,
         in sut: LocalFeedImageDataLoader,
         for url: URL,
