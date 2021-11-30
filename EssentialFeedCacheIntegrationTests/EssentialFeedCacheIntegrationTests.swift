@@ -60,6 +60,23 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         expect(imageLoaderToPerformLoad, toCompleteLoadWith: .success(imageData), for: image.url)
     }
 
+    func test_saveImageData_overridesSavedImageDataOnASeparateInstance() {
+        let imageLoaderToPerformFirstSave = makeImageLoader()
+        let imageLoaderToPerformLastSave = makeImageLoader()
+        let imageLoaderToPerformLoad = makeImageLoader()
+
+        let feedLoader = makeFeedLoader()
+        let image = uniqueImage()
+        let firstImageData = Data("first".utf8)
+        let lastImageData = Data("last".utf8)
+
+        save([image], with: feedLoader)
+        save(firstImageData, in: imageLoaderToPerformFirstSave, for: image.url)
+        save(lastImageData, in: imageLoaderToPerformLastSave, for: image.url)
+
+        expect(imageLoaderToPerformLoad, toCompleteLoadWith: .success(lastImageData), for: image.url)
+    }
+
     // MARK: - Helpers
     private func makeFeedLoader(file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
         let storeURL = testSpecificStoreURL()
