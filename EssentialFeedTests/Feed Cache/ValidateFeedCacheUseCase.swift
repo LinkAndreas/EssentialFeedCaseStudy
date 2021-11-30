@@ -13,7 +13,7 @@ final class ValidateFeedCacheUseCase: XCTestCase {
     func test_validateCache_deletesCacheOnRetrievalError() {
         let (sut, store) = makeSUT()
 
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrieval(with: anyNSError())
 
         XCTAssertEqual(store.receivedMessages, [.retrieve, .deleteCachedFeed])
@@ -22,7 +22,7 @@ final class ValidateFeedCacheUseCase: XCTestCase {
     func test_validateCache_doesNotDeleteCacheOnEmptyCache() {
         let (sut, store) = makeSUT()
 
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrivalWithEmptyCache()
 
         XCTAssertEqual(store.receivedMessages, [.retrieve])
@@ -34,7 +34,7 @@ final class ValidateFeedCacheUseCase: XCTestCase {
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         let nonExpiredTimestamp: Date = fixedCurrentDate.minusFeedCacheMaxAge().adding(seconds: 1)
 
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrievalSuccessfully(with: feed.locals, timestamp: nonExpiredTimestamp)
 
         XCTAssertEqual(store.receivedMessages, [.retrieve])
@@ -46,7 +46,7 @@ final class ValidateFeedCacheUseCase: XCTestCase {
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         let expirationTimestamp: Date = fixedCurrentDate.minusFeedCacheMaxAge()
 
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrievalSuccessfully(with: feed.locals, timestamp: expirationTimestamp)
 
         XCTAssertEqual(store.receivedMessages, [.retrieve, .deleteCachedFeed])
@@ -58,7 +58,7 @@ final class ValidateFeedCacheUseCase: XCTestCase {
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         let expiredTimestamp: Date = fixedCurrentDate.minusFeedCacheMaxAge().adding(seconds: -1)
 
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrievalSuccessfully(with: feed.locals, timestamp: expiredTimestamp)
 
         XCTAssertEqual(store.receivedMessages, [.retrieve, .deleteCachedFeed])
@@ -68,7 +68,7 @@ final class ValidateFeedCacheUseCase: XCTestCase {
         let store: FeedStoreSpy = .init()
         var sut: LocalFeedLoader? = .init(store: store, currentDate: Date.init)
 
-        sut?.validateCache()
+        sut?.validateCache { _ in }
         sut = nil
         store.completeRetrieval(with: anyNSError())
 
@@ -79,7 +79,7 @@ final class ValidateFeedCacheUseCase: XCTestCase {
         let store: FeedStoreSpy = .init()
         var sut: LocalFeedLoader? = .init(store: store, currentDate: Date.init)
 
-        sut?.validateCache()
+        sut?.validateCache { _ in }
         sut = nil
         store.completeRetrieval(with: anyNSError())
 
