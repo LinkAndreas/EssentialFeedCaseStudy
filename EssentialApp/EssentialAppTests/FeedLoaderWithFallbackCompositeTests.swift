@@ -9,7 +9,7 @@ import EssentialFeed
 import EssentialApp
 import XCTest
 
-class FeedLoaderWithFallbackTests: XCTestCase {
+class FeedLoaderWithFallbackCompositeTests: XCTestCase {
     func test_load_deliversPrimaryFeedOnPrimaryLoaderSuccess() {
         let primaryFeed = uniqueFeed()
         let fallbackFeed = uniqueFeed()
@@ -33,26 +33,22 @@ class FeedLoaderWithFallbackTests: XCTestCase {
     }
 }
 
-extension FeedLoaderWithFallbackTests {
+extension FeedLoaderWithFallbackCompositeTests {
     private func makeSUT(
         primaryResult: FeedLoader.Result,
         fallbackResult: FeedLoader.Result
     ) -> FeedLoaderWithFallbackComposite {
         let primaryLoader = FeedLoaderStub(result: primaryResult)
         let fallbackLoader = FeedLoaderStub(result: fallbackResult)
-        return FeedLoaderWithFallbackComposite(primary: primaryLoader, fallback: fallbackLoader)
+        let sut = FeedLoaderWithFallbackComposite(primary: primaryLoader, fallback: fallbackLoader)
+        trackForMemoryLeaks(primaryLoader)
+        trackForMemoryLeaks(fallbackLoader)
+        trackForMemoryLeaks(sut)
+        return sut
     }
 
     private func uniqueFeed() -> [FeedImage] {
         return [FeedImage(id: UUID(), description: "any", location: "any", url: anyURL())]
-    }
-
-    private func anyURL() -> URL {
-        return URL(string: "http://any.url")!
-    }
-
-    private func anyNSError() -> NSError {
-        return .init(domain: "any domain", code: 42, userInfo: nil)
     }
 
     final class FeedLoaderStub: FeedLoader {
@@ -106,5 +102,19 @@ extension FeedLoaderWithFallbackTests {
         }
 
         wait(for: [expectation], timeout: 1.0)
+    }
+
+    private func anyURL() -> URL {
+        return URL(string: "http://any.url")!
+    }
+
+    private func anyNSError() -> NSError {
+        return .init(domain: "any domain", code: 42, userInfo: nil)
+    }
+
+    private func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #file, line: UInt = #line) {
+        addTeardownBlock { [weak instance] in
+            XCTAssertNil(instance, "Instance should have been deallocated. Potential memory leak.", file: file, line: line)
+        }
     }
 }
