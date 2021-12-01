@@ -18,7 +18,16 @@ class FeedLoaderWithFallbackComposite: FeedLoader {
     }
 
     func fetchFeed(completion: @escaping (FeedLoader.Result) -> Void) {
-        primary.fetchFeed(completion: completion)
+        primary.fetchFeed { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case let .success(feed):
+                completion(result)
+
+            case .failure:
+                self.fallback.fetchFeed(completion: completion)
+            }
+        }
     }
 }
 
@@ -29,6 +38,13 @@ class FeedLoaderWithFallbackTests: XCTestCase {
         let sut = makeSUT(primaryResult: .success(primaryFeed), fallbackResult: .success(fallbackFeed))
 
         expect(sut, toCompleteWith: .success(primaryFeed))
+    }
+
+    func test_load_deliversFallbackFeedOnPrimaryLoaderFailure() {
+        let fallbackFeed = uniqueFeed()
+        let sut = makeSUT(primaryResult: .failure(anyNSError()), fallbackResult: .success(fallbackFeed))
+
+        expect(sut, toCompleteWith: .success(fallbackFeed))
     }
 }
 
@@ -48,6 +64,10 @@ extension FeedLoaderWithFallbackTests {
 
     private func anyURL() -> URL {
         return URL(string: "http://any.url")!
+    }
+
+    private func anyNSError() -> NSError {
+        return .init(domain: "any domain", code: 42, userInfo: nil)
     }
 
     final class FeedLoaderStub: FeedLoader {
