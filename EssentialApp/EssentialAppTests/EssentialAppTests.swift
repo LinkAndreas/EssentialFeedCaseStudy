@@ -46,6 +46,13 @@ class FeedLoaderWithFallbackTests: XCTestCase {
 
         expect(sut, toCompleteWith: .success(fallbackFeed))
     }
+
+    func test_load_deliversFailureOnBothPrimaryAndFallbackLoaderFailure() {
+        let fallbackError = anyNSError()
+        let sut = makeSUT(primaryResult: .failure(anyNSError()), fallbackResult: .failure(fallbackError))
+
+        expect(sut, toCompleteWith: .failure(fallbackError))
+    }
 }
 
 extension FeedLoaderWithFallbackTests {
@@ -101,7 +108,9 @@ extension FeedLoaderWithFallbackTests {
                 )
 
             case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-                XCTFail(
+                XCTAssertEqual(
+                    receivedError,
+                    expectedError,
                     "Expected to receive \(expectedError), but received \(receivedError) instead.",
                     file: file,
                     line: line
