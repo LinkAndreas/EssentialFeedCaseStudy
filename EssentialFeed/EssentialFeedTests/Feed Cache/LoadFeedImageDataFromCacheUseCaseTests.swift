@@ -104,13 +104,13 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
 
     private func expect(
         _ sut: LocalFeedImageDataLoader,
-        toCompleteWith expectedResult: FeedImageDataLoader.Result,
+        toCompleteWith expectedResult: LocalFeedImageDataLoader.LoadResult,
         when action: () -> Void
     ) {
         let url = anyURL()
 
         let expectation = expectation(description: "Wait for load result.")
-        var receivedResult: FeedImageDataLoader.Result?
+        var receivedResult: LocalFeedImageDataLoader.LoadResult?
 
         _ = sut.loadImageData(from: url) { result in
             receivedResult = result

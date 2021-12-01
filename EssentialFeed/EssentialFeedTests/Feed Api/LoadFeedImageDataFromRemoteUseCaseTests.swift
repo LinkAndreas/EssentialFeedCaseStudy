@@ -33,7 +33,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
         let error = anyNSError()
 
-        expect(sut, toCompleteWith: .failure(RemoteImageDataLoader.Error.connectivity), when: {
+        expect(sut, toCompleteWith: .failure(RemoteFeedImageDataLoader.Error.connectivity), when: {
             spy.complete(with: error)
         })
     }
@@ -42,7 +42,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
         let data = anyData()
 
-        expect(sut, toCompleteWith: .failure(RemoteImageDataLoader.Error.invalidData), when: {
+        expect(sut, toCompleteWith: .failure(RemoteFeedImageDataLoader.Error.invalidData), when: {
             spy.complete(withStatusCode: 243, data: data)
         })
     }
@@ -51,7 +51,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
         let emptyData = Data()
 
-        expect(sut, toCompleteWith: .failure(RemoteImageDataLoader.Error.invalidData), when: {
+        expect(sut, toCompleteWith: .failure(RemoteFeedImageDataLoader.Error.invalidData), when: {
             spy.complete(withStatusCode: 200, data: emptyData)
         })
     }
@@ -69,7 +69,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let url = anyURL()
         let data = anyData()
         let client = HttpClientSpy()
-        var sut: RemoteImageDataLoader? = RemoteImageDataLoader(client: client)
+        var sut: RemoteFeedImageDataLoader? = RemoteFeedImageDataLoader(client: client)
 
         let exp = expectation(description: "Completion should not get called")
         exp.isInverted = true
@@ -102,7 +102,7 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        var receivedResults: [RemoteImageDataLoader.Result] = []
+        var receivedResults: [FeedImageDataLoader.LoadResult] = []
         let task = sut.loadImageData(from: url) { result in receivedResults.append(result) }
 
         task.cancel()
@@ -118,24 +118,24 @@ final class LoadFeedImageDataFromRemoteUseCaseTests: XCTestCase {
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> (HttpClientSpy, RemoteImageDataLoader) {
+    ) -> (HttpClientSpy, RemoteFeedImageDataLoader) {
         let client = HttpClientSpy()
-        let sut = RemoteImageDataLoader(client: client)
+        let sut = RemoteFeedImageDataLoader(client: client)
         trackForMemoryLeaks(client, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (client, sut)
     }
 
     private func expect(
-        _ sut: RemoteImageDataLoader,
-        toCompleteWith expectedResult: RemoteImageDataLoader.Result,
+        _ sut: RemoteFeedImageDataLoader,
+        toCompleteWith expectedResult: FeedImageDataLoader.LoadResult,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
         let url = anyURL()
         let exp = expectation(description: "Wait for load completion")
-        var receivedResult: RemoteImageDataLoader.Result?
+        var receivedResult: FeedImageDataLoader.LoadResult?
 
         _ = sut.loadImageData(from: url) { result in
             receivedResult = result

@@ -29,10 +29,10 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         case let .success(.some(imageData)):
             XCTAssertFalse(imageData.isEmpty, "Expected non empty image data.")
 
-        case .failure(RemoteImageDataLoader.Error.connectivity):
+        case .failure(RemoteFeedImageDataLoader.Error.connectivity):
             XCTFail("Excpected fetch image data to succeed, but received connectivity error instead.")
 
-        case .failure(RemoteImageDataLoader.Error.invalidData):
+        case .failure(RemoteFeedImageDataLoader.Error.invalidData):
             XCTFail("Excpected fetch image data to succeed, but received invalid data error instead.")
 
         default:
@@ -41,14 +41,14 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
     }
 
     // MARK: - Helpers
-    private func loadImageData(file: StaticString = #file, line: UInt = #line) -> RemoteImageDataLoader.Result? {
+    private func loadImageData(file: StaticString = #file, line: UInt = #line) -> RemoteFeedImageDataLoader.Result? {
         let testServerURL: URL = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
-        let loader = RemoteImageDataLoader(client: ephemeralClient())
+        let loader = RemoteFeedImageDataLoader(client: ephemeralClient())
 
         trackForMemoryLeaks(loader, file: file, line: line)
 
         let expectation = expectation(description: "Wait for response.")
-        var receivedResult: RemoteImageDataLoader.Result?
+        var receivedResult: RemoteFeedImageDataLoader.Result?
         _ = loader.loadImageData(from: testServerURL) { result in
             receivedResult = result
             expectation.fulfill()

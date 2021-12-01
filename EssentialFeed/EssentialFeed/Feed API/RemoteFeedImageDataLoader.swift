@@ -2,20 +2,18 @@
 
 import Foundation
 
-public final class RemoteImageDataLoader {
+public final class RemoteFeedImageDataLoader: FeedImageDataLoader {
     public enum Error: Swift.Error {
         case connectivity
         case invalidData
     }
-
-    public typealias Result = Swift.Result<Data?, Swift.Error>
-
+    
     private class HTTPTaskWrapper: FeedImageDataLoaderTask {
         var wrapped: HTTPClientTask?
 
-        private var completion: ((Result) -> Void)?
+        private var completion: ((LoadResult) -> Void)?
 
-        init(completion: @escaping (Result) -> Void) {
+        init(completion: @escaping (LoadResult) -> Void) {
             self.completion = completion
         }
 
@@ -24,7 +22,7 @@ public final class RemoteImageDataLoader {
             wrapped?.cancel()
         }
 
-        func complete(with result: Result) {
+        func complete(with result: LoadResult) {
             completion?(result)
         }
 
@@ -39,7 +37,7 @@ public final class RemoteImageDataLoader {
         self.client = client
     }
 
-    public func loadImageData(from url: URL, completion: @escaping (Result) -> Void) -> FeedImageDataLoaderTask  {
+    public func loadImageData(from url: URL, completion: @escaping (LoadResult) -> Void) -> FeedImageDataLoaderTask  {
         let task = HTTPTaskWrapper(completion: completion)
         task.wrapped = client.load(from: url) { [weak self] result in
             guard self != nil else { return }

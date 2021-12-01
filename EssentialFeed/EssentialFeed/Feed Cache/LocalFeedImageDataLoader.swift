@@ -19,13 +19,13 @@ extension LocalFeedImageDataLoader {
     public typealias LoadResult = Swift.Result<Data?, Error>
 
     private final class LoadImageDataTask: FeedImageDataLoaderTask {
-        private var completion: ((FeedImageDataLoader.Result) -> Void)?
+        private var completion: ((LoadResult) -> Void)?
 
-        init(completion: @escaping (FeedImageDataLoader.Result) -> Void) {
+        init(completion: @escaping (LoadResult) -> Void) {
             self.completion = completion
         }
 
-        func complete(with result: FeedImageDataLoader.Result) {
+        func complete(with result: LoadResult) {
             completion?(result)
         }
 
