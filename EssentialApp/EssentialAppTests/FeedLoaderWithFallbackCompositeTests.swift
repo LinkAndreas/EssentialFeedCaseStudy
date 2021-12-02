@@ -98,12 +98,4 @@ extension FeedLoaderWithFallbackCompositeTests {
 
         wait(for: [expectation], timeout: 1.0)
     }
-
-    private func anyURL() -> URL {
-        return URL(string: "http://any.url")!
-    }
-
-    private func anyNSError() -> NSError {
-        return .init(domain: "any domain", code: 42, userInfo: nil)
-    }
 }

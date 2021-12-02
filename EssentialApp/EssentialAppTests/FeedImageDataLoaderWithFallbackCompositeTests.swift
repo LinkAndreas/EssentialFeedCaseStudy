@@ -176,16 +176,4 @@ extension FeedImageDataLoaderWithFallbackCompositeTests {
 
         wait(for: [expectation], timeout: 1.0)
     }
-
-    private func anyData() -> Data {
-        return "Any data".data(using: .utf8)!
-    }
-
-    private func anyURL() -> URL {
-        return URL(string: "http://any.url")!
-    }
-
-    private func anyNSError() -> NSError {
-        return .init(domain: "any domain", code: 42, userInfo: nil)
-    }
 }
