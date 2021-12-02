@@ -1,9 +1,4 @@
-//
-//  FeedLoaderWithComposite.swift
-//  EssentialApp
-//
-//  Created by Andreas Link on 02.12.21.
-//
+//  Copyright © 2021 Andreas Link. All rights reserved.
 
 import EssentialFeed
 

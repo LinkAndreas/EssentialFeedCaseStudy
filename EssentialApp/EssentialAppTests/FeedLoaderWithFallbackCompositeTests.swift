@@ -1,9 +1,4 @@
-//
-//  EssentialAppTests.swift
-//  EssentialAppTests
-//
-//  Created by Andreas Link on 01.12.21.
-//
+//  Copyright © 2021 Andreas Link. All rights reserved.
 
 import EssentialFeed
 import EssentialApp
