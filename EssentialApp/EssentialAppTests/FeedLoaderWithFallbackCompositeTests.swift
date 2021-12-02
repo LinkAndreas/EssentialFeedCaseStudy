@@ -4,7 +4,7 @@ import EssentialFeed
 import EssentialApp
 import XCTest
 
-class FeedLoaderWithFallbackCompositeTests: XCTestCase {
+class FeedLoaderWithFallbackCompositeTests: XCTestCase, FeedLoaderTestCase {
     func test_load_deliversPrimaryFeedOnPrimaryLoaderSuccess() {
         let primaryFeed = uniqueFeed()
         let fallbackFeed = uniqueFeed()
@@ -40,62 +40,5 @@ extension FeedLoaderWithFallbackCompositeTests {
         trackForMemoryLeaks(fallbackLoader)
         trackForMemoryLeaks(sut)
         return sut
-    }
-
-    private func uniqueFeed() -> [FeedImage] {
-        return [FeedImage(id: UUID(), description: "any", location: "any", url: anyURL())]
-    }
-
-    final class FeedLoaderStub: FeedLoader {
-        private let result: FeedLoader.Result
-
-        init(result: FeedLoader.Result) {
-            self.result = result
-        }
-
-        func fetchFeed(completion: @escaping (FeedLoader.Result) -> Void) {
-            completion(result)
-        }
-    }
-
-    private func expect(
-        _ sut: FeedLoaderWithFallbackComposite,
-        toCompleteWith expectedResult: FeedLoader.Result,
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) {
-        let expectation = expectation(description: "Wait for result.")
-        sut.fetchFeed { receivedResult in
-            switch (receivedResult, expectedResult) {
-            case let (.success(receivedFeed), .success(expectedFeed)):
-                XCTAssertEqual(
-                    receivedFeed,
-                    expectedFeed,
-                    "Expected to receive \(expectedFeed), but received \(receivedFeed) instead.",
-                    file: file,
-                    line: line
-                )
-
-            case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-                XCTAssertEqual(
-                    receivedError,
-                    expectedError,
-                    "Expected to receive \(expectedError), but received \(receivedError) instead.",
-                    file: file,
-                    line: line
-                )
-
-            default:
-                XCTFail(
-                    "Expected to receive \(expectedResult), but received \(receivedResult) instead.",
-                    file: file,
-                    line: line
-                )
-            }
-
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1.0)
     }
 }

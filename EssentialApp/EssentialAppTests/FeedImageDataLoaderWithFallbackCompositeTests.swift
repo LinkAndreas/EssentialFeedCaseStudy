@@ -87,9 +87,9 @@ class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase {
 }
 
 extension FeedImageDataLoaderWithFallbackCompositeTests {
-    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (LoaderSpy, LoaderSpy, FeedImageDataLoaderWithFallbackComposite) {
-        let primaryLoader = LoaderSpy()
-        let fallbackLoader = LoaderSpy()
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedImageDataLoaderSpy, FeedImageDataLoaderSpy, FeedImageDataLoaderWithFallbackComposite) {
+        let primaryLoader = FeedImageDataLoaderSpy()
+        let fallbackLoader = FeedImageDataLoaderSpy()
         let sut = FeedImageDataLoaderWithFallbackComposite(primary: primaryLoader, fallback: fallbackLoader)
         trackForMemoryLeaks(primaryLoader, file: file, line: line)
         trackForMemoryLeaks(fallbackLoader, file: file, line: line)
@@ -97,7 +97,7 @@ extension FeedImageDataLoaderWithFallbackCompositeTests {
         return (primaryLoader, fallbackLoader, sut)
     }
 
-    final class LoaderSpy: FeedImageDataLoader {
+    final class FeedImageDataLoaderSpy: FeedImageDataLoader {
         private final class Task: FeedImageDataLoaderTask {
             private let callback: () -> Void
 
