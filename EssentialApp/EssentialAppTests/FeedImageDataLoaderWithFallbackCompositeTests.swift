@@ -4,7 +4,7 @@ import EssentialFeed
 import EssentialApp
 import XCTest
 
-class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase {
+class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase, FeedImageDataLoaderTestCase {
     func test_init_doesNotLoadImageData() {
         let (primaryLoader, fallbackLoader, _) = makeSUT()
 
@@ -95,85 +95,5 @@ extension FeedImageDataLoaderWithFallbackCompositeTests {
         trackForMemoryLeaks(fallbackLoader, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (primaryLoader, fallbackLoader, sut)
-    }
-
-    final class FeedImageDataLoaderSpy: FeedImageDataLoader {
-        private final class Task: FeedImageDataLoaderTask {
-            private let callback: () -> Void
-
-            init(callback: @escaping () -> Void) {
-                self.callback = callback
-            }
-
-            func cancel() {
-                callback()
-            }
-        }
-
-        private (set) var receivedMessages: [(url: URL, completion: ((LoadResult) -> Void))] = []
-        var loadedURLs: [URL] { receivedMessages.map(\.url) }
-        var cancelledURLs: [URL] = []
-        private var completions: [(LoadResult) -> Void] { receivedMessages.map(\.completion) }
-
-        func loadImageData(from url: URL, completion: @escaping (LoadResult) -> Void) -> FeedImageDataLoaderTask {
-            receivedMessages.append((url, completion))
-            return Task { [weak self] in
-                self?.cancelledURLs.append(url)
-            }
-        }
-
-        func complete(with data: Data, atIndex index: Int = 0) {
-            completions[index](.success(data))
-        }
-
-        func complete(with error: Error, atIndex index: Int = 0) {
-            completions[index](.failure(error))
-        }
-    }
-
-    private func expect(
-        _ sut: FeedImageDataLoaderWithFallbackComposite,
-        toCompleteWith expectedResult: FeedImageDataLoader.LoadResult,
-        when action: () -> Void,
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) {
-        let url = anyURL()
-        let expectation = expectation(description: "Wait for result.")
-
-        _ = sut.loadImageData(from: url) { receivedResult in
-            switch (receivedResult, expectedResult) {
-            case let (.success(receivedFeed), .success(expectedFeed)):
-                XCTAssertEqual(
-                    receivedFeed,
-                    expectedFeed,
-                    "Expected to receive \(expectedFeed), but received \(receivedFeed) instead.",
-                    file: file,
-                    line: line
-                )
-
-            case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
-                XCTAssertEqual(
-                    receivedError,
-                    expectedError,
-                    "Expected to receive \(expectedError), but received \(receivedError) instead.",
-                    file: file,
-                    line: line
-                )
-
-            default:
-                XCTFail(
-                    "Expected to receive \(expectedResult), but received \(receivedResult) instead.",
-                    file: file,
-                    line: line
-                )
-            }
-
-            expectation.fulfill()
-        }
-
-        action()
-
-        wait(for: [expectation], timeout: 1.0)
     }
 }
