@@ -119,14 +119,14 @@ extension FeedImageDataLoaderCacheDecoratorTests {
         }
 
         private (set) var messages: [Message] = []
-        private var completions: [(InsertionResult) -> Void] = []
+        private var completions: [(SaveResult) -> Void] = []
 
-        func save(_ imageData: Data, for url: URL, completion: @escaping (InsertionResult) -> Void) {
+        func save(_ imageData: Data, for url: URL, completion: @escaping (SaveResult) -> Void) {
             messages.append(.save(imageData: imageData))
             completions.append(completion)
         }
 
-        func complete(with result: InsertionResult, atIndex index: Int = 0) {
+        func complete(with result: SaveResult, atIndex index: Int = 0) {
             completions[index](result)
         }
     }
