@@ -10,13 +10,11 @@ public final class LocalFeedImageDataLoader {
     }
 }
 
-extension LocalFeedImageDataLoader {
+extension LocalFeedImageDataLoader: FeedImageDataLoader {
     public enum LoadError: Error {
         case failed
         case notFound
     }
-
-    public typealias LoadResult = Swift.Result<Data?, Error>
 
     private final class LoadImageDataTask: FeedImageDataLoaderTask {
         private var completion: ((LoadResult) -> Void)?

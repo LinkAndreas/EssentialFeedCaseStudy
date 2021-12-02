@@ -26,7 +26,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
 
     func test_endToEndTestServerLoadImageData_deliversImageData() {
         switch loadImageData() {
-        case let .success(.some(imageData)):
+        case let .success(imageData):
             XCTAssertFalse(imageData.isEmpty, "Expected non empty image data.")
 
         case .failure(RemoteFeedImageDataLoader.Error.connectivity):
@@ -41,14 +41,14 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
     }
 
     // MARK: - Helpers
-    private func loadImageData(file: StaticString = #file, line: UInt = #line) -> RemoteFeedImageDataLoader.Result? {
+    private func loadImageData(file: StaticString = #file, line: UInt = #line) -> FeedImageDataLoader.LoadResult? {
         let testServerURL: URL = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
         let loader = RemoteFeedImageDataLoader(client: ephemeralClient())
 
         trackForMemoryLeaks(loader, file: file, line: line)
 
         let expectation = expectation(description: "Wait for response.")
-        var receivedResult: RemoteFeedImageDataLoader.Result?
+        var receivedResult: FeedImageDataLoader.LoadResult?
         _ = loader.loadImageData(from: testServerURL) { result in
             receivedResult = result
             expectation.fulfill()
