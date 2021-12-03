@@ -32,6 +32,7 @@
 		38FA5D0D275775B900645A56 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 38FA5D0C275775B900645A56 /* Assets.xcassets */; };
 		38FA5D10275775B900645A56 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 38FA5D0E275775B900645A56 /* LaunchScreen.storyboard */; };
 		38FE1C74275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C73275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift */; };
+		38FE1C7D275A584300D39EF0 /* DebuggingSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C7C275A584300D39EF0 /* DebuggingSceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +95,7 @@
 		38FA5D11275775B900645A56 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		38FE1C71275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialAppUIAcceptanceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		38FE1C73275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EssentialAppUIAcceptanceTests.swift; sourceTree = "<group>"; };
+		38FE1C7C275A584300D39EF0 /* DebuggingSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebuggingSceneDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,6 +190,7 @@
 				38ED976A27590181006E0C96 /* FeedLoaderCacheDecorator.swift */,
 				38D1BD682757A5240040CA23 /* FeedLoaderWithFallbackComposite.swift */,
 				38FA5D05275775B800645A56 /* SceneDelegate.swift */,
+				38FE1C7C275A584300D39EF0 /* DebuggingSceneDelegate.swift */,
 				38FA5D07275775B800645A56 /* ViewController.swift */,
 				38FA5D0C275775B900645A56 /* Assets.xcassets */,
 				38FA5D0E275775B900645A56 /* LaunchScreen.storyboard */,
@@ -358,6 +361,7 @@
 				38FA5D04275775B800645A56 /* AppDelegate.swift in Sources */,
 				38D1BD692757A5240040CA23 /* FeedLoaderWithFallbackComposite.swift in Sources */,
 				38D1BD6D2758BA7F0040CA23 /* FeedImageDataLoaderWithFallbackComposite.swift in Sources */,
+				38FE1C7D275A584300D39EF0 /* DebuggingSceneDelegate.swift in Sources */,
 				38ED976B27590181006E0C96 /* FeedLoaderCacheDecorator.swift in Sources */,
 				38FA5D06275775B800645A56 /* SceneDelegate.swift in Sources */,
 				38ED977327590A20006E0C96 /* FeedImageDataLoaderCacheDecorator.swift in Sources */,
