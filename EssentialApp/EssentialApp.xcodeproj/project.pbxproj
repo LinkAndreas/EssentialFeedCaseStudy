@@ -32,7 +32,6 @@
 		38FA5D0D275775B900645A56 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 38FA5D0C275775B900645A56 /* Assets.xcassets */; };
 		38FA5D10275775B900645A56 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 38FA5D0E275775B900645A56 /* LaunchScreen.storyboard */; };
 		38FE1C74275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C73275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift */; };
-		38FE1C76275A497F00D39EF0 /* EssentialAppUIAcceptanceTestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C75275A497F00D39EF0 /* EssentialAppUIAcceptanceTestsLaunchTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,7 +94,6 @@
 		38FA5D11275775B900645A56 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		38FE1C71275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialAppUIAcceptanceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		38FE1C73275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EssentialAppUIAcceptanceTests.swift; sourceTree = "<group>"; };
-		38FE1C75275A497F00D39EF0 /* EssentialAppUIAcceptanceTestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EssentialAppUIAcceptanceTestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,7 +200,6 @@
 			isa = PBXGroup;
 			children = (
 				38FE1C73275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift */,
-				38FE1C75275A497F00D39EF0 /* EssentialAppUIAcceptanceTestsLaunchTests.swift */,
 			);
 			path = EssentialAppUIAcceptanceTests;
 			sourceTree = "<group>";
@@ -371,7 +368,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				38FE1C76275A497F00D39EF0 /* EssentialAppUIAcceptanceTestsLaunchTests.swift in Sources */,
 				38FE1C74275A497F00D39EF0 /* EssentialAppUIAcceptanceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

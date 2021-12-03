@@ -231,7 +231,7 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         line: UInt = #line
     ) {
         let exp = expectation(description: "Wait for result")
-        sut.save(feed: imageFeed) { result in
+        sut.save(imageFeed) { result in
             switch result {
             case .success:
                 break

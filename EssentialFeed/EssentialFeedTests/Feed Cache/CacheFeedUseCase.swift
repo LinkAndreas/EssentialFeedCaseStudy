@@ -13,7 +13,7 @@ class CacheFeedUseCase: XCTestCase {
     func test_save_requestsCacheDeletion() {
         let (sut, store) = makeSUT()
 
-        sut.save(feed: [uniqueImage(), uniqueImage()]) { _ in }
+        sut.save([uniqueImage(), uniqueImage()]) { _ in }
 
         XCTAssertEqual(store.deletionCompletions.count, 1)
     }
@@ -22,7 +22,7 @@ class CacheFeedUseCase: XCTestCase {
         let (sut, store) = makeSUT()
         let deletionError: Error = anyNSError()
 
-        sut.save(feed: uniqueImageFeed().models) { _ in }
+        sut.save(uniqueImageFeed().models) { _ in }
         store.completeDeletion(with: deletionError, atIndex: 0)
 
         XCTAssertEqual(store.receivedMessages, [.deleteCachedFeed])
@@ -33,7 +33,7 @@ class CacheFeedUseCase: XCTestCase {
         let timestamp: Date = .init()
         let (sut, store) = makeSUT(currentDate: { timestamp })
 
-        sut.save(feed: models) { _ in }
+        sut.save(models) { _ in }
         store.completeDeletionSuccessfully()
 
         XCTAssertEqual(store.receivedMessages, [.deleteCachedFeed, .insert(feed: locals, timestamp: timestamp)])
@@ -73,7 +73,7 @@ class CacheFeedUseCase: XCTestCase {
         let deletionError: NSError = anyNSError()
 
         var receivedResult: Result<Void, Error>?
-        sut?.save(feed: uniqueImageFeed().models) { result in
+        sut?.save(uniqueImageFeed().models) { result in
             receivedResult = result
         }
 
@@ -89,7 +89,7 @@ class CacheFeedUseCase: XCTestCase {
         let insertionError: NSError = anyNSError()
 
         var receivedResult: Result<Void, Error>?
-        sut?.save(feed: uniqueImageFeed().models) { result in
+        sut?.save(uniqueImageFeed().models) { result in
             receivedResult = result
         }
 
@@ -111,7 +111,7 @@ class CacheFeedUseCase: XCTestCase {
         let exp: XCTestExpectation = .init(description: "expectation")
         var receivedResult: Result<Void, Error>?
 
-        sut.save(feed: uniqueImageFeed().models) { result in
+        sut.save(uniqueImageFeed().models) { result in
             switch result {
             case .success:
                 receivedResult = .success(())
