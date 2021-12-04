@@ -45,42 +45,42 @@ final class DebuggingHTTPClient: HTTPClient {
     }
 
     private func makeSuccessfulResponse(for url: URL) -> (Data, HTTPURLResponse) {
-            let response = HTTPURLResponse(
-                url: url,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )!
-            return (makeData(for: url), response)
-        }
+        let response = HTTPURLResponse(
+            url: url,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        return (makeData(for: url), response)
+    }
 
-        private func makeData(for url: URL) -> Data {
-            switch url.absoluteString {
-            case "http://image.com":
-                return makeImageData()
+    private func makeData(for url: URL) -> Data {
+        switch url.absoluteString {
+        case "http://image.com":
+            return makeImageData()
 
-            default:
-                return makeFeedData()
-            }
+        default:
+            return makeFeedData()
         }
+    }
 
-        private func makeImageData() -> Data {
-            let rect = CGRect(x: 0, y: 0, width: 1, height: 1)
-            UIGraphicsBeginImageContext(rect.size)
-            let context = UIGraphicsGetCurrentContext()!
-            context.setFillColor(UIColor.red.cgColor)
-            context.fill(rect)
-            let img = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            return img!.pngData()!
-        }
+    private func makeImageData() -> Data {
+        let rect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        UIGraphicsBeginImageContext(rect.size)
+        let context = UIGraphicsGetCurrentContext()!
+        context.setFillColor(UIColor.red.cgColor)
+        context.fill(rect)
+        let img = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return img!.pngData()!
+    }
 
-        private func makeFeedData() -> Data {
-            return try! JSONSerialization.data(withJSONObject: ["items": [
-                ["id": UUID().uuidString, "image": "http://image.com"],
-                ["id": UUID().uuidString, "image": "http://image.com"]
-            ]])
-        }
+    private func makeFeedData() -> Data {
+        return try! JSONSerialization.data(withJSONObject: ["items": [
+            ["id": UUID().uuidString, "image": "http://image.com"],
+            ["id": UUID().uuidString, "image": "http://image.com"]
+        ]])
+    }
 }
 #endif
 
