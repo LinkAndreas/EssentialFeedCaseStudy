@@ -3,18 +3,18 @@
 import EssentialFeed
 import UIKit
 
-protocol FeedImageCellControllerDelegate: AnyObject {
+public protocol FeedImageCellControllerDelegate: AnyObject {
     func didTriggerPreload()
     func didRequestImage()
     func didCancelLoad()
 }
 
-final class FeedImageCellController: FeedImageView {
-    let delegate: FeedImageCellControllerDelegate
+public final class FeedImageCellController: FeedImageView {
+    public let delegate: FeedImageCellControllerDelegate
 
     private var cell: FeedImageCell?
 
-    init(delegate: FeedImageCellControllerDelegate) {
+    public init(delegate: FeedImageCellControllerDelegate) {
         self.delegate = delegate
     }
 
@@ -33,7 +33,7 @@ final class FeedImageCellController: FeedImageView {
         delegate.didCancelLoad()
     }
 
-    func display(_ viewModel: FeedImageViewModel<UIImage>) {
+    public func display(_ viewModel: FeedImageViewModel<UIImage>) {
         cell?.locationContainer?.isHidden = !viewModel.hasLocation
         cell?.locationLabel?.text = viewModel.location
         cell?.descriptionLabel?.text = viewModel.description

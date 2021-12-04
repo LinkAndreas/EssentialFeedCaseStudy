@@ -1,6 +1,7 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
 import EssentialFeed
+import EssentialFeediOS
 import UIKit
 
 public enum FeedUIComposer {

@@ -1,6 +1,7 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
 import EssentialFeed
+import EssentialFeediOS
 
 final class FeedImageDataLoaderPresentationAdapter<View: FeedImageView, Image>: FeedImageCellControllerDelegate where View.Image == Image {
     var presenter: FeedImagePresenter<View, Image>?

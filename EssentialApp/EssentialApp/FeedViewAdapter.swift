@@ -1,6 +1,7 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
 import EssentialFeed
+import EssentialFeediOS
 import UIKit
 
 public final class FeedViewAdapter: FeedView {
@@ -13,7 +14,7 @@ public final class FeedViewAdapter: FeedView {
     }
 
     public func display(_ viewModel: FeedViewModel) {
-        controller?.tableModel = viewModel.feed.map { image in
+        controller?.display(viewModel.feed.map { image in
             let adapter = FeedImageDataLoaderPresentationAdapter<WeakRef<FeedImageCellController>, UIImage>(
                 model: image,
                 imageLoader: imageLoader
@@ -21,6 +22,6 @@ public final class FeedViewAdapter: FeedView {
             let view = FeedImageCellController(delegate: adapter)
             adapter.presenter = FeedImagePresenter(view: WeakRef(view), imageDataTransformer: UIImage.init)
             return view
-        }
+        })
     }
 }
