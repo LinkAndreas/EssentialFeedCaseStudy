@@ -27,6 +27,12 @@ class EssentialAppUIAcceptanceTests: XCTestCase {
         XCTAssertEqual(offlineFeed.renderedFeedImageData(atIndex: 0), makeImageData())
         XCTAssertEqual(offlineFeed.renderedFeedImageData(atIndex: 1), makeImageData())
     }
+
+    func test_onLaunch_displaysEmptyFeedWhenCustomerHasNoConnectivityAndNoCache() {
+        let feed = launch(httpClient: .offline, store: .empty)
+
+        XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 0)
+    }
 }
 
 extension EssentialAppUIAcceptanceTests {
