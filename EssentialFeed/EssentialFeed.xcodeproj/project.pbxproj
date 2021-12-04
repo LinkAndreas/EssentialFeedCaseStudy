@@ -100,6 +100,10 @@
 		38EF491E26553D5200EE6AF8 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38AAD475261B4549004D6AF6 /* EssentialFeed.framework */; };
 		38EF49242655492100EE6AF8 /* XCTTestCase+MemoryLeakTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3860172626499D250066F663 /* XCTTestCase+MemoryLeakTracking.swift */; };
 		38F8DEC42652C3360090CD73 /* URLSessionHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F8DEC12652C2F20090CD73 /* URLSessionHTTPClient.swift */; };
+		38FE1C83275B6D7600D39EF0 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C82275B6D7600D39EF0 /* WeakRef.swift */; };
+		38FE1C85275B6DC300D39EF0 /* FeedLoaderPresentationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C84275B6DC300D39EF0 /* FeedLoaderPresentationAdapter.swift */; };
+		38FE1C87275B6DDE00D39EF0 /* FeedImageDataLoaderPresentationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C86275B6DDE00D39EF0 /* FeedImageDataLoaderPresentationAdapter.swift */; };
+		38FE1C89275B6E1200D39EF0 /* FeedViewAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FE1C88275B6E1200D39EF0 /* FeedViewAdapter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -249,6 +253,10 @@
 		38EF491B26553D5200EE6AF8 /* EssentialFeedAPIEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EssentialFeedAPIEndToEndTests.swift; sourceTree = "<group>"; };
 		38EF491D26553D5200EE6AF8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		38F8DEC12652C2F20090CD73 /* URLSessionHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionHTTPClient.swift; sourceTree = "<group>"; };
+		38FE1C82275B6D7600D39EF0 /* WeakRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakRef.swift; sourceTree = "<group>"; };
+		38FE1C84275B6DC300D39EF0 /* FeedLoaderPresentationAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedLoaderPresentationAdapter.swift; sourceTree = "<group>"; };
+		38FE1C86275B6DDE00D39EF0 /* FeedImageDataLoaderPresentationAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedImageDataLoaderPresentationAdapter.swift; sourceTree = "<group>"; };
+		38FE1C88275B6E1200D39EF0 /* FeedViewAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedViewAdapter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -381,8 +389,12 @@
 		385EB0BC26AF12440068EAD7 /* Composers */ = {
 			isa = PBXGroup;
 			children = (
+				38FE1C86275B6DDE00D39EF0 /* FeedImageDataLoaderPresentationAdapter.swift */,
+				38FE1C84275B6DC300D39EF0 /* FeedLoaderPresentationAdapter.swift */,
 				385EB0BD26AF12660068EAD7 /* FeedUIComposer.swift */,
+				38FE1C88275B6E1200D39EF0 /* FeedViewAdapter.swift */,
 				3806049F26E4B7200057AF70 /* MainQueueDispatchDecorator.swift */,
+				38FE1C82275B6D7600D39EF0 /* WeakRef.swift */,
 			);
 			path = Composers;
 			sourceTree = "<group>";
@@ -876,11 +888,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38FE1C89275B6E1200D39EF0 /* FeedViewAdapter.swift in Sources */,
 				383A597026A7542600870FF7 /* UIView+Shimmering.swift in Sources */,
+				38FE1C87275B6DDE00D39EF0 /* FeedImageDataLoaderPresentationAdapter.swift in Sources */,
 				389D90DC26A4A7AB00216D63 /* FeedViewController.swift in Sources */,
 				383A596926A7360600870FF7 /* FeedImageCell.swift in Sources */,
 				38A1BA4C26D588AF001E38D8 /* UITableView+Dequeuing.swift in Sources */,
+				38FE1C83275B6D7600D39EF0 /* WeakRef.swift in Sources */,
 				38A1BA4E26D58A2E001E38D8 /* UIImageView+Animations.swift in Sources */,
+				38FE1C85275B6DC300D39EF0 /* FeedLoaderPresentationAdapter.swift in Sources */,
 				386712F626FA63D200C96AAC /* ErrorView.swift in Sources */,
 				386712F926FA643400C96AAC /* UIRefreshControl+Helpers.swift in Sources */,
 				380604A026E4B7200057AF70 /* MainQueueDispatchDecorator.swift in Sources */,
