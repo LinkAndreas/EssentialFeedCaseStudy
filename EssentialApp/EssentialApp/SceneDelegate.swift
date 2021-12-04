@@ -15,21 +15,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private lazy var httpClient: HTTPClient = {
         URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
     }()
+
     private lazy var store: FeedStore & FeedImageDataStore = {
         try! CoreDataFeedStore(storeURL: localStoreURL)
     }()
+
+    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore) {
+        self.init()
+        self.httpClient = httpClient
+        self.store = store
+    }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let _ = (scene as? UIWindowScene) else { return }
 
         configureWindow()
-    }
-
-    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore) {
-        self.init()
-
-        self.httpClient = httpClient
-        self.store = store
     }
 
     func configureWindow() {

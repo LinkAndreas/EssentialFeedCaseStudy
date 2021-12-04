@@ -9,20 +9,34 @@ class EssentialAppUIAcceptanceTests: XCTestCase {
     func test_onLaunch_displaysRemoteFeedWhenCustomerHasConnectivity() {
         let feed = launch(httpClient: .online(response(for:)), store: .empty)
 
-        XCTAssertEqual(feed?.numberOfRenderedFeedImageViews(), 2)
-        XCTAssertEqual(feed?.renderedFeedImageData(atIndex: 0), makeImageData())
-        XCTAssertEqual(feed?.renderedFeedImageData(atIndex: 1), makeImageData())
+        XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 2)
+        XCTAssertEqual(feed.renderedFeedImageData(atIndex: 0), makeImageData())
+        XCTAssertEqual(feed.renderedFeedImageData(atIndex: 1), makeImageData())
+    }
+
+    func test_onLaunch_displaysCachedFeedWhenCustomerHasNoConnectivity() {
+        let sharedStore = InMemoryFeedStore.empty
+        let onlineFeed = launch(httpClient: .online(response(for:)), store: sharedStore)
+
+        onlineFeed.simulateFeedImageViewVisible(atIndex: 0)
+        onlineFeed.simulateFeedImageViewVisible(atIndex: 1)
+
+        let offlineFeed = launch(httpClient: .offline, store: sharedStore)
+
+        XCTAssertEqual(offlineFeed.numberOfRenderedFeedImageViews(), 2)
+        XCTAssertEqual(offlineFeed.renderedFeedImageData(atIndex: 0), makeImageData())
+        XCTAssertEqual(offlineFeed.renderedFeedImageData(atIndex: 1), makeImageData())
     }
 }
 
 extension EssentialAppUIAcceptanceTests {
-    private func launch(httpClient: HTTPClientStub = .offline, store: InMemoryFeedStore = .empty) -> FeedViewController? {
+    private func launch(httpClient: HTTPClientStub = .offline, store: InMemoryFeedStore = .empty) -> FeedViewController {
         let sut = SceneDelegate(httpClient: httpClient, store: store)
         sut.window = UIWindow()
         sut.configureWindow()
 
         let root = sut.window?.rootViewController as? UINavigationController
-        let feed = root?.topViewController as? FeedViewController
+        let feed = root?.topViewController as! FeedViewController
         return feed
     }
 
@@ -57,6 +71,7 @@ extension EssentialAppUIAcceptanceTests {
 
         func insert(feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
             self.cachedFeed = CachedFeed(feed: feed, timestamp: timestamp)
+            completion(.success(()))
         }
 
         func retrieve(completion: @escaping RetrievalCompletion) {
@@ -65,13 +80,15 @@ extension EssentialAppUIAcceptanceTests {
 
         func deleteCachedFeed(completion: @escaping DeletionCompletion) {
             self.cachedFeed = nil
+            completion(.success(()))
         }
 
         func insert(_ imageData: Data, for url: URL, completion: @escaping (FeedImageDataStore.InsertionResult) -> Void) {
             cachedImageData[url] = imageData
+            completion(.success(()))
         }
 
-        func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.RetrievalResult) -> Void) {
+        public func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.RetrievalResult) -> Void) {
             completion(.success(cachedImageData[url]))
         }
 
