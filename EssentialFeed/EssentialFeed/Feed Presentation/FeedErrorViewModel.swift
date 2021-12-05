@@ -3,8 +3,8 @@
 public struct FeedErrorViewModel: Equatable {
     public let message: String?
 
-    static let noError: Self = .init(message: nil)
-    static func error(message: String?) -> Self {
+    public static let noError: Self = .init(message: nil)
+    public static func error(message: String?) -> Self {
         return .init(message: message)
     }
 }
