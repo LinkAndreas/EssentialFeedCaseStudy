@@ -67,7 +67,6 @@
 		38919C3826655D07000B8F5C /* LoadFeedFromCacheUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38919C3726655D07000B8F5C /* LoadFeedFromCacheUseCase.swift */; };
 		389D90C426A46B1400216D63 /* EssentialFeediOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 389D90BB26A46B1400216D63 /* EssentialFeediOS.framework */; };
 		389D90D526A4993400216D63 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38AAD475261B4549004D6AF6 /* EssentialFeed.framework */; platformFilter = ios; };
-		389D90D626A4993400216D63 /* EssentialFeed.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 38AAD475261B4549004D6AF6 /* EssentialFeed.framework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		389D90DA26A49A1000216D63 /* XCTTestCase+MemoryLeakTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3860172626499D250066F663 /* XCTTestCase+MemoryLeakTracking.swift */; };
 		389D90DC26A4A7AB00216D63 /* FeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 389D90DB26A4A7AB00216D63 /* FeedViewController.swift */; };
 		389F26BB266013BE00B11E5C /* FeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 389F26BA266013BE00B11E5C /* FeedStore.swift */; };
@@ -131,20 +130,6 @@
 			remoteInfo = EssentialFeed;
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		389D90D926A4993400216D63 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				389D90D626A4993400216D63 /* EssentialFeed.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3804FCFE2639C9310084959B /* RemoteFeedLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFeedLoader.swift; sourceTree = "<group>"; };
@@ -639,7 +624,6 @@
 				389D90B726A46B1400216D63 /* Sources */,
 				389D90B826A46B1400216D63 /* Frameworks */,
 				389D90B926A46B1400216D63 /* Resources */,
-				389D90D926A4993400216D63 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
