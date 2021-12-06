@@ -54,18 +54,29 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-
         assertThat(sut, renders: [])
 
         loaderSpy.completeFeedLoading(with: .success([image0]))
-
         assertThat(sut, renders: [image0])
 
         sut.simulateUserInitiatedFeedReload()
-
         loaderSpy.completeFeedLoading(with: .success([image0, image1, image2, image3]), atIndex: 1)
-
         assertThat(sut, renders: [image0, image1, image2, image3])
+    }
+
+    func test_loadFeedCompletion_rendersSuccessfullyLoadedFeedAfterNonEmptyFeed() {
+        let image0 = makeImage()
+        let image1 = makeImage()
+
+        let (loaderSpy, sut) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        assertThat(sut, renders: [image0, image1])
+
+        sut.simulateUserInitiatedFeedReload()
+        loaderSpy.completeFeedLoading(with: .success([]), atIndex: 1)
+        assertThat(sut, renders: [])
     }
 
     func test_loadFeedCompletion_doesNotAlterCurrentRenderingStateOnError() {

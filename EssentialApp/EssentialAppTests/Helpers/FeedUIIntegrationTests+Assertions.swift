@@ -11,12 +11,15 @@ extension FeedUIIntegrationTests {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        let nmberOfRenderedFeedImageViews: Int = sut.numberOfRenderedFeedImageViews()
+        sut.tableView.layoutIfNeeded()
+        RunLoop.main.run(until: Date())
+
+        let numberOfRenderedFeedImageViews: Int = sut.numberOfRenderedFeedImageViews()
 
         XCTAssertEqual(
-            nmberOfRenderedFeedImageViews,
+            numberOfRenderedFeedImageViews,
             models.count,
-            "Expected \(models.count) images, got \(nmberOfRenderedFeedImageViews)",
+            "Expected \(models.count) images, got \(numberOfRenderedFeedImageViews)",
             file: file,
             line: line
         )
