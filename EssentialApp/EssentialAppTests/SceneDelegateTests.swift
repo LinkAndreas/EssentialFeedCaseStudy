@@ -5,9 +5,20 @@ import EssentialFeediOS
 import XCTest
 
 final class SceneDelegateTests: XCTestCase {
-    func test_willConnectToScene_configuresRootViewController() {
+    func test_configureWindow_setsWindowAsKeyAndVisible() {
+        let window = UIWindowSpy()
         let sut = SceneDelegate()
-        sut.window = UIWindow()
+        sut.window = window
+
+        sut.configureWindow()
+
+        XCTAssertEqual(window.makeKeyAndVisibleCallCount, 1, "Expected to make window key and visible.")
+    }
+
+    func test_willConnectToScene_configuresRootViewController() {
+        let window = UIWindow()
+        let sut = SceneDelegate()
+        sut.window = window
 
         sut.configureWindow()
 
@@ -24,5 +35,15 @@ final class SceneDelegateTests: XCTestCase {
             topViewController is FeedViewController,
             "Expected \(String(describing: FeedViewController.self)) as topViewController, got \(String(describing: topViewController)) instead."
         )
+    }
+}
+
+private extension SceneDelegateTests {
+    final class UIWindowSpy: UIWindow {
+        private (set) var makeKeyAndVisibleCallCount: Int = 0
+
+        override func makeKeyAndVisible() {
+            makeKeyAndVisibleCallCount += 1
+        }
     }
 }
