@@ -67,7 +67,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         let expectation: XCTestExpectation = .init(description: "Wait for response.")
         var capturedResult: FeedLoader.Result?
 
-        loader.fetchFeed { result in
+        loader.load { result in
             capturedResult = result
             expectation.fulfill()
         }

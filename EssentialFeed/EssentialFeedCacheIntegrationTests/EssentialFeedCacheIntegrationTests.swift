@@ -137,7 +137,7 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         line: UInt8 = #line
     ) {
         let exp = expectation(description: "Wait for result")
-        sut.fetchFeed { receivedResult in
+        sut.load { receivedResult in
             switch (receivedResult, expectedResult) {
             case let (.success(receivedFeed), .success(expectedFeed)):
                 XCTAssertEqual(

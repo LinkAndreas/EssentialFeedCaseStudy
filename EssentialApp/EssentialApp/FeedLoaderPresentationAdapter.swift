@@ -14,7 +14,7 @@ class FeedLoaderPresentationAdapter: FeedViewControllerDelegate {
 
     func didTriggerRefresh() {
         presenter?.didStartLoadingFeed()
-        feedLoader.fetchFeed { [weak self] result in
+        feedLoader.load { [weak self] result in
             guard let self = self else { return }
 
             switch result {

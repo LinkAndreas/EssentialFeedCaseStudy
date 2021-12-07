@@ -20,7 +20,7 @@ extension FeedUIIntegrationTests {
         }
 
         // MARK: - FeedLoader
-        func fetchFeed(completion: @escaping (FeedLoader.Result) -> Void) {
+        func load(completion: @escaping (FeedLoader.Result) -> Void) {
             feedRequests.append(completion)
         }
 

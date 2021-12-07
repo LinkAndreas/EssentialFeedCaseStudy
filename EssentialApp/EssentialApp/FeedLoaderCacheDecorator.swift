@@ -11,8 +11,8 @@ public final class FeedLoaderCacheDecorator: FeedLoader {
         self.cache = cache
     }
 
-    public func fetchFeed(completion: @escaping (FeedLoader.Result) -> Void) {
-        decoratee.fetchFeed { [weak self] result in
+    public func load(completion: @escaping (FeedLoader.Result) -> Void) {
+        decoratee.load { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(feed):

@@ -13,7 +13,7 @@ extension FeedLoaderTestCase {
         line: UInt = #line
     ) {
         let expectation = expectation(description: "Wait for result.")
-        sut.fetchFeed { receivedResult in
+        sut.load { receivedResult in
             switch (receivedResult, expectedResult) {
             case let (.success(receivedFeed), .success(expectedFeed)):
                 XCTAssertEqual(
