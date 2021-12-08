@@ -2,7 +2,6 @@
 
 import Foundation
 
-
 public class URLSessionHTTPClient: HTTPClient {
     private enum Error: Swift.Error, Equatable {
         case invalidResponse

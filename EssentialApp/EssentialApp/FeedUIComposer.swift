@@ -5,7 +5,10 @@ import EssentialFeediOS
 import UIKit
 
 public enum FeedUIComposer {
-    public static func feedComposedWith(feedLoader: @escaping () -> FeedLoader.Publisher, imageLoader: FeedImageDataLoader) -> FeedViewController {
+    public static func feedComposedWith(
+        feedLoader: @escaping () -> FeedLoader.Publisher,
+        imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher
+    ) -> FeedViewController {
         let presentationAdapter = FeedLoaderPresentationAdapter(
             feedLoader: { feedLoader().dispatchOnMainQueue() }
         )
@@ -14,7 +17,7 @@ public enum FeedUIComposer {
         presentationAdapter.presenter = FeedPresenter(
             feedView: FeedViewAdapter(
                 controller: feedController,
-                imageLoader: MainQueueDispatchDecorator(decoratee: imageLoader)
+                imageLoader: { url in imageLoader(url).dispatchOnMainQueue() }
             ),
             loadingView: WeakRef(feedController),
             errorView: WeakRef(feedController)

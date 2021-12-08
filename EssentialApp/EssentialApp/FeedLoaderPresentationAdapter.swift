@@ -1,8 +1,8 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import Combine
 import EssentialFeediOS
 import EssentialFeed
-import Combine
 
 class FeedLoaderPresentationAdapter: FeedViewControllerDelegate {
     var presenter: FeedPresenter?
@@ -17,10 +17,9 @@ class FeedLoaderPresentationAdapter: FeedViewControllerDelegate {
     func didTriggerRefresh() {
         presenter?.didStartLoadingFeed()
         cancellable = feedLoader().sink(
-            receiveCompletion: { [weak self] result in
-                switch result {
-                case .finished:
-                    break
+            receiveCompletion: { [weak self] completion in
+                switch completion {
+                case .finished: break
 
                 case let .failure(error):
                     self?.presenter?.didStopLoadingFeed(with: error)
