@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3887B8452760EC13003541D6 /* CombineHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3887B8442760EC13003541D6 /* CombineHelpers.swift */; };
 		38D1BD50275776180040CA23 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38D1BD4E275776180040CA23 /* EssentialFeed.framework */; };
 		38D1BD51275776180040CA23 /* EssentialFeed.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 38D1BD4E275776180040CA23 /* EssentialFeed.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		38D1BD52275776180040CA23 /* EssentialFeediOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38D1BD4F275776180040CA23 /* EssentialFeediOS.framework */; };
@@ -71,6 +72,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3887B8442760EC13003541D6 /* CombineHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineHelpers.swift; sourceTree = "<group>"; };
 		38D1BD4E275776180040CA23 /* EssentialFeed.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = EssentialFeed.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		38D1BD4F275776180040CA23 /* EssentialFeediOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = EssentialFeediOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		38D1BD5F27579BC00040CA23 /* EssentialAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -205,6 +207,7 @@
 				38FE1C8D275B6EB200D39EF0 /* FeedViewAdapter.swift */,
 				38FE1C8C275B6EB200D39EF0 /* MainQueueDispatchDecorator.swift */,
 				38FA5D05275775B800645A56 /* SceneDelegate.swift */,
+				3887B8442760EC13003541D6 /* CombineHelpers.swift */,
 				38FA5D07275775B800645A56 /* ViewController.swift */,
 				38FE1C8E275B6EB200D39EF0 /* WeakRef.swift */,
 				38FA5D0C275775B900645A56 /* Assets.xcassets */,
@@ -352,6 +355,7 @@
 				38FE1C91275B6EB200D39EF0 /* WeakRef.swift in Sources */,
 				38FE1C90275B6EB200D39EF0 /* FeedViewAdapter.swift in Sources */,
 				38ED977327590A20006E0C96 /* FeedImageDataLoaderCacheDecorator.swift in Sources */,
+				3887B8452760EC13003541D6 /* CombineHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
