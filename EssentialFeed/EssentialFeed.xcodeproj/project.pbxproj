@@ -387,7 +387,7 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-		38869F432646E5540034435D /* Feed Api */ = {
+		38869F432646E5540034435D /* Feed API */ = {
 			isa = PBXGroup;
 			children = (
 				38870181271B414E0054F760 /* Helper */,
@@ -395,7 +395,7 @@
 				3887017F271B400D0054F760 /* LoadFeedImageDataFromRemoteUseCaseTests.swift */,
 				38869F462647CB6D0034435D /* URLSessionHTTPClientTests.swift */,
 			);
-			path = "Feed Api";
+			path = "Feed API";
 			sourceTree = "<group>";
 		};
 		38870181271B414E0054F760 /* Helper */ = {
@@ -513,7 +513,7 @@
 			children = (
 				3860172826499DA20066F663 /* Helper */,
 				38B12357265D57B700D8F93C /* Feed Cache */,
-				38869F432646E5540034435D /* Feed Api */,
+				38869F432646E5540034435D /* Feed API */,
 				3888771026FA483B0038C727 /* Feed Presentation */,
 				38AAD485261B4549004D6AF6 /* Info.plist */,
 			);
