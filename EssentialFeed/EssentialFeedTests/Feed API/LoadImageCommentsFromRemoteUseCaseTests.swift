@@ -40,12 +40,12 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
         })
     }
 
-    func test_load_deliversErrorOnNon200HttpResponse() {
+    func test_load_deliversErrorOnNon2xxHttpResponse() {
         let validJsonData: Data = makeJSONData(items: [])
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        let samples: [Int] = [199, 201, 300, 400, 500]
+        let samples: [Int] = [199, 150, 300, 400, 500]
         samples.enumerated().forEach { index, statusCode in
             expect(sut: sut, toCompleteWith: failure(.invalidData), when: {
                 client.complete(withStatusCode: statusCode, data: validJsonData, atIndex: index)
@@ -53,55 +53,64 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
         }
     }
 
-    func test_load_deliversErrorOn200HttpResponseWithInvalidJson() {
+    func test_load_deliversErrorOn2xxHttpResponseWithInvalidJson() {
         let invalidJsonData: Data = invalidJsonData()
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        expect(sut: sut, toCompleteWith: failure(.invalidData), when: {
-            client.complete(withStatusCode: 200, data: invalidJsonData)
-        })
+        let samples: [Int] = [200, 201, 250, 280, 299]
+        samples.enumerated().forEach { index, statusCode in
+            expect(sut: sut, toCompleteWith: failure(.invalidData), when: {
+                client.complete(withStatusCode: statusCode, data: invalidJsonData, atIndex: index)
+            })
+        }
     }
 
-    func test_load_deliversNoItemsOn200HttpResponseWithEmptyJSONList() {
+    func test_load_deliversNoItemsOn2xxHttpResponseWithEmptyJSONList() {
         let jsonWithEmptyListData: Data = makeJSONData(items: [])
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        expect(sut: sut, toCompleteWith: .success([]), when: {
-            client.complete(withStatusCode: 200, data: jsonWithEmptyListData)
-        })
+        let samples: [Int] = [200, 201, 250, 280, 299]
+        samples.enumerated().forEach { index, statusCode in
+            expect(sut: sut, toCompleteWith: .success([]), when: {
+                client.complete(withStatusCode: statusCode, data: jsonWithEmptyListData, atIndex: index)
+            })
+        }
     }
 
-    func test_load_deliversItemsOn200HttpResponseWithJSONList() {
-        let item1 = makeItem(
-            id: .init(),
-            description: "Description 1",
-            location: "Location 1",
-            imageURL: anyURL()
+    func test_load_deliversItemsOn2xxHttpResponseWithJSONList() {
+        let comment1 = makeComment(
+            id: UUID(),
+            message: "message",
+            createdAt: (Date(timeIntervalSince1970: 1598627222), "2020-08-28T15:07:02+00:00"),
+            username: "a username"
         )
 
-        let item2 = makeItem(
-            id: .init(),
-            description: "Description 2",
-            location: "Location 2",
-            imageURL: anyURL()
+        let comment2 = makeComment(
+            id: UUID(),
+            message: "another message",
+            createdAt: (Date(timeIntervalSince1970: 1577881882), "2020-01-01T12:31:22+00:00"),
+            username: "another username"
         )
 
-        let jsonWithListData: Data = makeJSONData(items: [item1.json, item2.json])
+        let jsonWithListData: Data = makeJSONData(items: [comment1.json, comment2.json])
         let url: URL = anyURL()
         let (sut, client) = makeSut(url: url)
 
-        expect(sut: sut, toCompleteWith: .success([item1.model, item2.model]), when: {
-            client.complete(withStatusCode: 200, data: jsonWithListData)
-        })
+        let samples: [Int] = [200, 201, 250, 280, 299]
+        samples.enumerated().forEach { index, statusCode in
+            expect(sut: sut, toCompleteWith: .success([comment1.model, comment2.model]), when: {
+                client.complete(withStatusCode: statusCode, data: jsonWithListData, atIndex: index)
+            })
+        }
     }
 
     func test_load_shouldNotDeliverResultAfterBeingDeallocated() {
         let client: HttpClientSpy = .init()
         var sut: RemoteImageCommentsLoader? = .init(url: anyURL(), client: client)
 
-        var capturedResults: [Result<[FeedImage], Error>] = []
+        var capturedResults: [Result<[ImageComment], Error>] = []
         sut?.load { capturedResults.append($0) }
         sut = nil
         client.complete(withStatusCode: 200, data: makeJSONData(items: []))
@@ -112,7 +121,7 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
     // MARK: Helpers:
     func expect(
         sut: RemoteImageCommentsLoader,
-        toCompleteWith expectedResult: FeedLoader.Result,
+        toCompleteWith expectedResult: RemoteImageCommentsLoader.Result,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -147,17 +156,19 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
         return (sut, client)
     }
 
-    func failure(_ error: RemoteImageCommentsLoader.Error) -> FeedLoader.Result {
+    func failure(_ error: RemoteImageCommentsLoader.Error) -> RemoteImageCommentsLoader.Result {
         return .failure(error)
     }
 
-    func makeItem(id: UUID, description: String?, location: String?, imageURL: URL) -> (model: FeedImage, json: [String: Any]) {
-        let item: FeedImage = .init(id: id, description: description, location: location, url: imageURL)
+    func makeComment(id: UUID, message: String, createdAt: (Date, String), username: String) -> (model: ImageComment, json: [String: Any]) {
+        let item: ImageComment = .init(id: id, message: message, createdAt: createdAt.0, username: username)
         let json: [String: Any] = [
             "id": id.uuidString,
-            "description": description,
-            "location": location,
-            "image": imageURL.absoluteString
+            "message": message,
+            "created_at": createdAt.1,
+            "author": [
+                "username": username
+            ]
         ].compactMapValues { $0 }
 
         return (item, json)
