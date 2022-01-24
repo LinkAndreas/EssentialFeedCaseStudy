@@ -4,42 +4,6 @@ import EssentialFeed
 import XCTest
 
 class LoadFeedFromRemoteUseCaseTests: XCTestCase {
-    func test_init_doesNotRequestDataFromURL() {
-        let url = anyURL()
-        let (_, client) = makeSut(url: url)
-
-        XCTAssertEqual(client.requestedURLs, [])
-    }
-
-    func test_load_requestsDataFromURL() {
-        let url: URL = anyURL()
-        let (sut, client) = makeSut(url: url)
-
-        sut.load { _ in }
-
-        XCTAssertEqual(client.requestedURLs, [url])
-    }
-
-    func test_loadTwice_requestsDataFromURLTwice() {
-        let url: URL = anyURL()
-        let (sut, client) = makeSut(url: url)
-
-        sut.load { _ in }
-        sut.load { _ in }
-
-        XCTAssertEqual(client.requestedURLs, [url, url])
-    }
-
-    func test_load_deliversErrorOnClientError() {
-        let url: URL = anyURL()
-        let (sut, client) = makeSut(url: url)
-
-        expect(sut: sut, toCompleteWith: failure(.connectivity), when: {
-            let error = NSError(domain: "domain", code: 42, userInfo: nil)
-            client.complete(with: error)
-        })
-    }
-
     func test_load_deliversErrorOnNon200HttpResponse() {
         let validJsonData: Data = makeJSONData(items: [])
         let url: URL = anyURL()
@@ -95,18 +59,6 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         expect(sut: sut, toCompleteWith: .success([item1.model, item2.model]), when: {
             client.complete(withStatusCode: 200, data: jsonWithListData)
         })
-    }
-
-    func test_load_shouldNotDeliverResultAfterBeingDeallocated() {
-        let client: HttpClientSpy = .init()
-        var sut: RemoteFeedLoader? = .init(url: anyURL(), client: client)
-
-        var capturedResults: [RemoteFeedLoader.Result] = []
-        sut?.load { capturedResults.append($0) }
-        sut = nil
-        client.complete(withStatusCode: 200, data: makeJSONData(items: []))
-
-        XCTAssertTrue(capturedResults.isEmpty, "Result should not have been delivered.")
     }
 
     // MARK: Helpers:
