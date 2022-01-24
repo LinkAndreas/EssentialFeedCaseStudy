@@ -1,6 +1,6 @@
 //  Copyright © 2022 Andreas Link. All rights reserved.
 
-internal enum ImageCommentsMapper {
+public enum ImageCommentsMapper {
     private struct Root: Decodable {
         private let items: [Item]
 
@@ -22,7 +22,7 @@ internal enum ImageCommentsMapper {
         }
     }
 
-    internal static func map(
+    public static func map(
         data: Data,
         response: HTTPURLResponse
     ) throws -> [ImageComment] {
