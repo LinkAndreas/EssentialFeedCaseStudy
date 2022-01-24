@@ -147,11 +147,15 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
         wait(for: [expectation], timeout: 1.0)
     }
 
-    func makeSut(url: URL) -> (sut: RemoteImageCommentsLoader, client: HttpClientSpy) {
+    func makeSut(
+        url: URL,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> (sut: RemoteImageCommentsLoader, client: HttpClientSpy) {
         let client: HttpClientSpy = .init()
         let sut: RemoteImageCommentsLoader = .init(url: url, client: client)
-        trackForMemoryLeaks(client)
-        trackForMemoryLeaks(sut)
+        trackForMemoryLeaks(client, file: file, line: line)
+        trackForMemoryLeaks(sut, file: file, line: line)
 
         return (sut, client)
     }
