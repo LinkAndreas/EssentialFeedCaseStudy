@@ -101,7 +101,7 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let client: HttpClientSpy = .init()
         var sut: RemoteFeedLoader? = .init(url: anyURL(), client: client)
 
-        var capturedResults: [Result<[FeedImage], Error>] = []
+        var capturedResults: [RemoteFeedLoader.Result] = []
         sut?.load { capturedResults.append($0) }
         sut = nil
         client.complete(withStatusCode: 200, data: makeJSONData(items: []))
@@ -123,7 +123,7 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
             case let (.success(items), .success(expectedItems)):
                 XCTAssertEqual(items, expectedItems, file: file, line: line)
 
-            case let (.failure(error as RemoteFeedLoader.Error), .failure(expectedError as RemoteFeedLoader.Error)):
+            case let (.failure(error as NSError), .failure(expectedError as NSError)):
                 XCTAssertEqual(error, expectedError, file: file, line: line)
 
             default:
