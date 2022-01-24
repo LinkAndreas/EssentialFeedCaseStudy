@@ -1,5 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import Combine
 import EssentialFeed
 import XCTest
 
@@ -59,16 +60,23 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         return receivedResult
     }
 
-    private func loadFeedResult(file: StaticString = #file, line: UInt = #line) -> FeedLoader.Result? {
-        let loader = RemoteLoader(url: feedTestServerURL, client: ephemeralClient(), mapper: FeedItemsMapper.map)
+    private func loadFeedResult(file: StaticString = #file, line: UInt = #line) -> Result<[FeedImage], Error>? {
+        let client = ephemeralClient()
 
-        trackForMemoryLeaks(loader, file: file, line: line)
+        trackForMemoryLeaks(client, file: file, line: line)
 
         let expectation: XCTestExpectation = .init(description: "Wait for response.")
-        var capturedResult: FeedLoader.Result?
+        var capturedResult: Result<[FeedImage], Error>?
 
-        loader.load { result in
-            capturedResult = result
+        client.load(from: feedTestServerURL) { result in
+            capturedResult = result.flatMap { data, response in
+                do {
+                    let items = try FeedItemsMapper.map(data: data, response: response)
+                    return .success(items)
+                } catch {
+                    return .failure(error)
+                }
+            }
             expectation.fulfill()
         }
 
