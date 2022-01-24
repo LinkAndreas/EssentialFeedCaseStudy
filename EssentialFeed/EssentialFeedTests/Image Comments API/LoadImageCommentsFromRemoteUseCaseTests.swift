@@ -110,7 +110,7 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
         let client: HttpClientSpy = .init()
         var sut: RemoteImageCommentsLoader? = .init(url: anyURL(), client: client)
 
-        var capturedResults: [Result<[ImageComment], Error>] = []
+        var capturedResults: [RemoteImageCommentsLoader.Result] = []
         sut?.load { capturedResults.append($0) }
         sut = nil
         client.complete(withStatusCode: 200, data: makeJSONData(items: []))
@@ -132,7 +132,7 @@ final class LoadImageCommentsFromRemoteUseCaseTests: XCTestCase {
             case let (.success(items), .success(expectedItems)):
                 XCTAssertEqual(items, expectedItems, file: file, line: line)
 
-            case let (.failure(error as RemoteImageCommentsLoader.Error), .failure(expectedError as RemoteImageCommentsLoader.Error)):
+            case let (.failure(error as NSError), .failure(expectedError as NSError)):
                 XCTAssertEqual(error, expectedError, file: file, line: line)
 
             default:
