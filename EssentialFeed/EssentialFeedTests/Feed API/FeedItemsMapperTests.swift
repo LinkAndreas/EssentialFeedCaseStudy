@@ -64,18 +64,7 @@ class FeedItemsMapperTests: XCTestCase {
         return (item, json)
     }
 
-    func makeJSONData(items: [[String: Any]]) -> Data {
-        let json: [String: Any] = ["items": items]
-        return try! JSONSerialization.data(withJSONObject: json)
-    }
-
     func invalidJsonData() -> Data {
         return .init("Invalid JSON".utf8)
-    }
-}
-
-private extension HTTPURLResponse {
-    convenience init(statusCode: Int) {
-        self.init(url: anyURL(), statusCode: statusCode, httpVersion: nil, headerFields: nil)!
     }
 }
