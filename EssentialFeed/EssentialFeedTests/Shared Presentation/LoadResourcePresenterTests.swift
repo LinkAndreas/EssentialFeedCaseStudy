@@ -1,11 +1,11 @@
-//  Copyright © 2021 Andreas Link. All rights reserved.
+//  Copyright © 2022 Andreas Link. All rights reserved.
 
 import EssentialFeed
 import XCTest
 
-final class FeedPresenterTests: XCTestCase {
+final class LoadResourcePresenterTests: XCTestCase {
     func test_title_isLocalized() {
-        XCTAssertEqual(FeedPresenter.title, localized("FEED_VIEW_TITLE"))
+        XCTAssertEqual(LoadResourcePresenter.title, localized("FEED_VIEW_TITLE"))
     }
 
     func test_init_doesNotSendMessagesToView() {
@@ -50,11 +50,11 @@ final class FeedPresenterTests: XCTestCase {
     }
 }
 
-extension FeedPresenterTests {
-    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedPresenter, FeedViewSpy) {
+extension LoadResourcePresenterTests {
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (LoadResourcePresenter, FeedViewSpy) {
         let feedViewSpy = FeedViewSpy()
 
-        let sut = FeedPresenter(
+        let sut = LoadResourcePresenter(
             feedView: feedViewSpy,
             loadingView: feedViewSpy,
             errorView: feedViewSpy
@@ -90,7 +90,7 @@ extension FeedPresenterTests {
 
     private func localized(_ key: String, file: StaticString = #filePath, line: UInt = #line) -> String {
         let table = "Feed"
-        let bundle = Bundle(for: FeedPresenter.self)
+        let bundle = Bundle(for: LoadResourcePresenter.self)
         let value = bundle.localizedString(forKey: key, value: nil, table: table)
 
         if value == key {
