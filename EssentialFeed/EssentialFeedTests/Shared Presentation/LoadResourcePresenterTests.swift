@@ -10,10 +10,10 @@ final class LoadResourcePresenterTests: XCTestCase {
         XCTAssertEqual(feedViewSpy.receivedMessages, [])
     }
 
-    func test_didStartLoadingFeed_displaysNoErrorMessageAndStartsLoading() {
+    func test_didStartLoading_displaysNoErrorMessageAndStartsLoading() {
         let (sut, feedViewSpy) = makeSUT()
 
-        sut.didStartLoadingFeed()
+        sut.didStartLoading()
 
         XCTAssertEqual(feedViewSpy.receivedMessages, [
             .display(errorMessage: .none),
