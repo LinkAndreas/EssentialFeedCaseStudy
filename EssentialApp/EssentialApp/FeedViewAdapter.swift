@@ -29,14 +29,16 @@ public final class FeedViewAdapter: ResourceView {
                 resourceView: WeakRef(view),
                 loadingView: WeakRef(view),
                 errorView: WeakRef(view),
-                mapper: { data in
-                    guard let image = UIImage(data: data) else { throw InvalidImageData() }
-
-                    return image
-                }
+                mapper: mapper
             )
             return view
         })
+    }
+
+    private func mapper(data: Data) throws -> UIImage {
+        guard let image = UIImage(data: data) else { throw InvalidImageData() }
+
+        return image
     }
 }
 
