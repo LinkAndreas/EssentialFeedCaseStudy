@@ -321,7 +321,7 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         sut.loadViewIfNeeded()
         loaderSpy.completeFeedLoadingWithError(atIndex: 0)
-        XCTAssertEqual(sut.errorMessage, localized("FEED_VIEW_CONNECTION_ERROR"))
+        XCTAssertEqual(sut.errorMessage, localized("GENERIC_CONNECTION_ERROR"))
 
         sut.simulateUserInitiatedFeedReload()
         loaderSpy.completeFeedLoading(with: .success([makeImage()]), atIndex: 1)
@@ -335,7 +335,7 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         sut.loadViewIfNeeded()
         loaderSpy.completeFeedLoadingWithError(atIndex: 0)
-        XCTAssertEqual(sut.errorMessage, localized("FEED_VIEW_CONNECTION_ERROR"))
+        XCTAssertEqual(sut.errorMessage, localized("GENERIC_CONNECTION_ERROR"))
 
         sut.simulateErrorMessageButtonTap()
         XCTAssertEqual(sut.errorMessage, .none)
