@@ -26,6 +26,7 @@ public final class FeedImageCellController: ResourceView, ResourceLoadingView, R
         cell?.locationContainer?.isHidden = !viewModel.hasLocation
         cell?.locationLabel?.text = viewModel.location
         cell?.descriptionLabel?.text = viewModel.description
+        cell?.feedImageRetryButton.isHidden = true
         cell?.onRetry = delegate.didRequestImage
         delegate.didRequestImage()
         return cell!

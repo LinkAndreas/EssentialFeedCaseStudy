@@ -52,9 +52,7 @@ final class LoadResourcePresenterTests: XCTestCase {
             throw anyNSError()
         })
 
-        let error = anyNSError()
-
-        sut.didStopLoading(with: anyData())
+        sut.didStopLoading(with: "any")
 
         XCTAssertEqual(spy.receivedMessages, [
             .display(
