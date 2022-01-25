@@ -15,13 +15,14 @@ public enum FeedUIComposer {
         )
 
         let feedController = FeedViewController.makeWith(delegate: presentationAdapter, title: FeedPresenter.title)
-        presentationAdapter.presenter = FeedPresenter(
-            feedView: FeedViewAdapter(
+        presentationAdapter.presenter = LoadResourcePresenter(
+            resourceView: FeedViewAdapter(
                 controller: feedController,
                 imageLoader: { url in imageLoader(url).dispatchOnMainQueue() }
             ),
             loadingView: WeakRef(feedController),
-            errorView: WeakRef(feedController)
+            errorView: WeakRef(feedController),
+            mapper: FeedPresenter.map
         )
         return feedController
     }
