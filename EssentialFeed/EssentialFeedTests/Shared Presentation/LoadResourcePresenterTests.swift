@@ -5,41 +5,41 @@ import XCTest
 
 final class LoadResourcePresenterTests: XCTestCase {
     func test_init_doesNotSendMessagesToView() {
-        let (_, feedViewSpy) = makeSUT()
+        let (_, spy) = makeSUT()
 
-        XCTAssertEqual(feedViewSpy.receivedMessages, [])
+        XCTAssertEqual(spy.receivedMessages, [])
     }
 
     func test_didStartLoading_displaysNoErrorMessageAndStartsLoading() {
-        let (sut, feedViewSpy) = makeSUT()
+        let (sut, spy) = makeSUT()
 
         sut.didStartLoading()
 
-        XCTAssertEqual(feedViewSpy.receivedMessages, [
+        XCTAssertEqual(spy.receivedMessages, [
             .display(errorMessage: .none),
             .display(isLoading: true)
         ])
     }
 
     func test_didStopLoadingResource_displaysResourceAndStopsLoading() {
-        let (sut, feedViewSpy) = makeSUT(mapper: { resource in "\(resource) view model" })
+        let (sut, spy) = makeSUT(mapper: { resource in "\(resource) view model" })
         let resource = "resource"
 
         sut.didStopLoading(with: resource)
 
-        XCTAssertEqual(feedViewSpy.receivedMessages, [
+        XCTAssertEqual(spy.receivedMessages, [
             .display(resourceViewModel: "resource view model"),
             .display(isLoading: false)
         ])
     }
 
     func test_didStopLoadingResourceWithError_displaysLocalizedErrorMessageAndStopsLoading() {
-        let (sut, feedViewSpy) = makeSUT()
+        let (sut, spy) = makeSUT()
         let error = anyNSError()
 
         sut.didStopLoading(with: error)
 
-        XCTAssertEqual(feedViewSpy.receivedMessages, [
+        XCTAssertEqual(spy.receivedMessages, [
             .display(errorMessage: localized("FEED_VIEW_CONNECTION_ERROR")),
             .display(isLoading: false)
         ])
@@ -47,29 +47,29 @@ final class LoadResourcePresenterTests: XCTestCase {
 }
 
 extension LoadResourcePresenterTests {
-    private typealias SUT = LoadResourcePresenter<String, FeedViewSpy>
+    private typealias SUT = LoadResourcePresenter<String, ViewSpy>
 
     private func makeSUT(
         mapper: @escaping SUT.Mapper = { _ in "any" },
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> (SUT, FeedViewSpy) {
-        let feedViewSpy = FeedViewSpy()
+    ) -> (SUT, ViewSpy) {
+        let spy = ViewSpy()
 
         let sut = LoadResourcePresenter(
-            resourceView: feedViewSpy,
-            loadingView: feedViewSpy,
-            errorView: feedViewSpy,
+            resourceView: spy,
+            loadingView: spy,
+            errorView: spy,
             mapper: mapper
         )
 
-        trackForMemoryLeaks(feedViewSpy, file: file, line: line)
+        trackForMemoryLeaks(spy, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
 
-        return (sut, feedViewSpy)
+        return (sut, spy)
     }
 
-    final class FeedViewSpy: ResourceView, FeedLoadingView, FeedErrorView {
+    private final class ViewSpy: ResourceView, FeedLoadingView, FeedErrorView {
         typealias ResourceViewModel = String
 
         enum Message: Hashable {
