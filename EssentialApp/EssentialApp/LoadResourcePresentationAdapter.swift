@@ -10,8 +10,8 @@ class LoadResourcePresentationAdapter<Resource, View: ResourceView> {
     private let loader: () -> AnyPublisher<Resource, Error>
     private var cancellable: AnyCancellable?
 
-    init(feedLoader: @escaping () -> AnyPublisher<Resource, Error>) {
-        self.loader = feedLoader
+    init(loader: @escaping () -> AnyPublisher<Resource, Error>) {
+        self.loader = loader
     }
 
     func loadResource() {
@@ -34,6 +34,20 @@ class LoadResourcePresentationAdapter<Resource, View: ResourceView> {
 
 extension LoadResourcePresentationAdapter: FeedViewControllerDelegate {
     func didTriggerRefresh() {
+        loadResource()
+    }
+}
+
+extension LoadResourcePresentationAdapter: FeedImageCellControllerDelegate {
+    func didTriggerPreload() {
+        loadResource()
+    }
+
+    func didCancelLoad() {
+        cancellable?.cancel()
+    }
+
+    func didRequestImage() {
         loadResource()
     }
 }

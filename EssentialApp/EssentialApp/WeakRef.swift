@@ -23,8 +23,8 @@ extension WeakRef: ResourceErrorView where T: ResourceErrorView {
     }
 }
 
-extension WeakRef: FeedImageView where T: FeedImageView, T.Image == UIImage {
-    func display(_ model: FeedImageViewModel<UIImage>) {
+extension WeakRef: ResourceView where T: ResourceView, T.ResourceViewModel == UIImage {
+    func display(_ model: UIImage) {
         object?.display(model)
     }
 }
