@@ -3,54 +3,6 @@
 import EssentialFeed
 import XCTest
 
-final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == Image {
-    private let view: View
-    private let imageTransformer: (Data) -> Image?
-
-    init(view: View, imageTransformer: @escaping (Data) -> Image?) {
-        self.view = view
-        self.imageTransformer = imageTransformer
-    }
-
-    func didStartLoadingImageData(for model: FeedImage) {
-        view.display(
-            FeedImageViewModel<Image>(
-                description: model.description,
-                location: model.location,
-                image: nil,
-                isLoading: true,
-                shouldRetry: false
-            )
-        )
-    }
-
-    func didFinishLoadingImageData(with data: Data, for model: FeedImage) {
-        let image: Image? = imageTransformer(data)
-
-        view.display(
-            FeedImageViewModel<Image>(
-                description: model.description,
-                location: model.location,
-                image: image,
-                isLoading: false,
-                shouldRetry: image == nil
-            )
-        )
-    }
-
-    func didFinishLoadingImageData(with error: NSError, for model: FeedImage) {
-        view.display(
-            FeedImageViewModel<Image>(
-                description: model.description,
-                location: model.location,
-                image: nil,
-                isLoading: false,
-                shouldRetry: true
-            )
-        )
-    }
-}
-
 final class FeedImagePresenterTests: XCTestCase {
     func test_init_doesNotSendMessageToView() {
         let (view, _) = makeSUT()
@@ -93,7 +45,7 @@ final class FeedImagePresenterTests: XCTestCase {
     func test_didFinishLoadingImageData_displaysRetryOnFailedTransformation() {
         let image = anyFeedImage()
         let data = anyData()
-        let (view, presenter) = makeSUT(imageTransformer: failingImageTransformer)
+        let (view, presenter) = makeSUT(imageDataTransformer: failingImageTransformer)
 
         presenter.didFinishLoadingImageData(with: data, for: image)
 
@@ -109,7 +61,7 @@ final class FeedImagePresenterTests: XCTestCase {
     func test_didFinishLoadingImageData_displaysRetryOnError() {
         let image = anyFeedImage()
         let error = anyNSError()
-        let (view, presenter) = makeSUT(imageTransformer: failingImageTransformer)
+        let (view, presenter) = makeSUT(imageDataTransformer: failingImageTransformer)
 
         presenter.didFinishLoadingImageData(with: error, for: image)
 
@@ -133,12 +85,12 @@ final class FeedImagePresenterTests: XCTestCase {
     private var failingImageTransformer: (Data) -> AnyImage? = { _ in nil }
 
     private func makeSUT(
-        imageTransformer: @escaping (Data) -> AnyImage? = { data in AnyImage() },
+        imageDataTransformer: @escaping (Data) -> AnyImage? = { data in AnyImage() },
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> (ViewSpy, FeedImagePresenter<ViewSpy, AnyImage>) {
         let view = ViewSpy()
-        let sut = FeedImagePresenter(view: view, imageTransformer: imageTransformer)
+        let sut = FeedImagePresenter(view: view, imageDataTransformer: imageDataTransformer)
         trackForMemoryLeaks(view, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (view, sut)
