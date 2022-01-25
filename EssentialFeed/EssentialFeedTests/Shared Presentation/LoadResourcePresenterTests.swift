@@ -21,23 +21,23 @@ final class LoadResourcePresenterTests: XCTestCase {
         ])
     }
 
-    func test_didStopLoadingFeed_displaysFeedAndStopsLoading() {
-        let (sut, feedViewSpy) = makeSUT()
-        let feed = uniqueImageFeed().models
+    func test_didStopLoadingResource_displaysResourceAndStopsLoading() {
+        let (sut, feedViewSpy) = makeSUT(mapper: { resource in "\(resource) view model" })
+        let resource = "resource"
 
-        sut.didStopLoadingFeed(with: feed)
+        sut.didStopLoading(with: resource)
 
         XCTAssertEqual(feedViewSpy.receivedMessages, [
-            .display(feed: feed),
+            .display(resourceViewModel: "resource view model"),
             .display(isLoading: false)
         ])
     }
 
-    func test_didStopLoadingWithError_displaysLocalizedErrorMessageAndStopsLoading() {
+    func test_didStopLoadingResourceWithError_displaysLocalizedErrorMessageAndStopsLoading() {
         let (sut, feedViewSpy) = makeSUT()
         let error = anyNSError()
 
-        sut.didStopLoadingFeed(with: error)
+        sut.didStopLoading(with: error)
 
         XCTAssertEqual(feedViewSpy.receivedMessages, [
             .display(errorMessage: localized("FEED_VIEW_CONNECTION_ERROR")),
@@ -47,13 +47,18 @@ final class LoadResourcePresenterTests: XCTestCase {
 }
 
 extension LoadResourcePresenterTests {
-    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (LoadResourcePresenter, FeedViewSpy) {
+    private func makeSUT(
+        mapper: @escaping LoadResourcePresenter.Mapper = { _ in "any" },
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> (LoadResourcePresenter, FeedViewSpy) {
         let feedViewSpy = FeedViewSpy()
 
         let sut = LoadResourcePresenter(
-            feedView: feedViewSpy,
+            resourceView: feedViewSpy,
             loadingView: feedViewSpy,
-            errorView: feedViewSpy
+            errorView: feedViewSpy,
+            mapper: mapper
         )
 
         trackForMemoryLeaks(feedViewSpy, file: file, line: line)
@@ -62,17 +67,17 @@ extension LoadResourcePresenterTests {
         return (sut, feedViewSpy)
     }
 
-    final class FeedViewSpy: FeedView, FeedLoadingView, FeedErrorView {
+    final class FeedViewSpy: ResourceView, FeedLoadingView, FeedErrorView {
         enum Message: Hashable {
-            case display(feed: [FeedImage])
+            case display(resourceViewModel: String)
             case display(isLoading: Bool)
             case display(errorMessage: String?)
         }
 
         private (set) var receivedMessages: Set<Message> = []
 
-        func display(_ viewModel: FeedViewModel) {
-            receivedMessages.insert(.display(feed: viewModel.feed))
+        func display(_ viewModel: String) {
+            receivedMessages.insert(.display(resourceViewModel: viewModel))
         }
 
         func display(_ viewModel: FeedLoadingViewModel) {
