@@ -6,7 +6,7 @@ public protocol HTTPClientTask {
     func cancel()
 }
 
-public protocol HTTPClient {
+public protocol HTTPClient: AnyObject {
     typealias Result = Swift.Result<(Data, HTTPURLResponse), Error>
 
     // The comletion can be called in any Thread. Clients are responsible to dispatch in appropriate threads if needed.

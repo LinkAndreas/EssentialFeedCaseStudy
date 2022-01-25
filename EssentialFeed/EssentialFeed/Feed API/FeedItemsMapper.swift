@@ -1,19 +1,36 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
-internal enum FeedItemsMapper {
+public enum FeedItemsMapper {
     private struct Root: Decodable {
-        var items: [RemoteFeedItem]
-    }
+        private var items: [Item]
 
-    internal static func map(
-        data: Data,
-        response: HTTPURLResponse
-    ) throws -> [RemoteFeedItem] {
-        guard response.isOK, let root = try? JSONDecoder().decode(Root.self, from: data) else {
-            throw RemoteFeedLoader.Error.invalidData
+        private struct Item: Decodable {
+            let id: UUID
+            let description: String?
+            let location: String?
+            let image: URL
         }
 
-        return root.items
+        var models: [FeedImage] {
+            items.map {
+                FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.image)
+            }
+        }
+    }
+
+    public enum Error: Swift.Error {
+        case invalidData
+    }
+
+    public static func map(
+        data: Data,
+        response: HTTPURLResponse
+    ) throws -> [FeedImage] {
+        guard response.isOK, let root = try? JSONDecoder().decode(Root.self, from: data) else {
+            throw Error.invalidData
+        }
+
+        return root.models
     }
 }
 

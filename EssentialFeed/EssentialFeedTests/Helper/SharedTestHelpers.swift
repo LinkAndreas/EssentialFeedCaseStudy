@@ -13,3 +13,14 @@ func anyURL() -> URL {
 func anyNSError() -> NSError {
     return .init(domain: "any domain", code: 42, userInfo: nil)
 }
+
+func makeJSONData(items: [[String: Any]]) -> Data {
+    let json: [String: Any] = ["items": items]
+    return try! JSONSerialization.data(withJSONObject: json)
+}
+
+extension HTTPURLResponse {
+    convenience init(statusCode: Int) {
+        self.init(url: anyURL(), statusCode: statusCode, httpVersion: nil, headerFields: nil)!
+    }
+}

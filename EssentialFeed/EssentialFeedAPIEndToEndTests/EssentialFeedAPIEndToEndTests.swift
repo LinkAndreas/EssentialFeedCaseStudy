@@ -1,5 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import Combine
 import EssentialFeed
 import XCTest
 
@@ -29,11 +30,8 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         case let .success(imageData):
             XCTAssertFalse(imageData.isEmpty, "Expected non empty image data.")
 
-        case .failure(RemoteFeedImageDataLoader.Error.connectivity):
-            XCTFail("Excpected fetch image data to succeed, but received connectivity error instead.")
-
-        case .failure(RemoteFeedImageDataLoader.Error.invalidData):
-            XCTFail("Excpected fetch image data to succeed, but received invalid data error instead.")
+        case let .failure(error):
+            XCTFail("Excpected successful image data result, but received error \(error) instead.")
 
         default:
             XCTFail("Expected to receive successful response.")
@@ -43,14 +41,21 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
     // MARK: - Helpers
     private func loadImageData(file: StaticString = #file, line: UInt = #line) -> FeedImageDataLoader.LoadResult? {
         let testServerURL: URL = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
-        let loader = RemoteFeedImageDataLoader(client: ephemeralClient())
+        let client = ephemeralClient()
 
-        trackForMemoryLeaks(loader, file: file, line: line)
+        trackForMemoryLeaks(client, file: file, line: line)
 
         let expectation = expectation(description: "Wait for response.")
-        var receivedResult: FeedImageDataLoader.LoadResult?
-        _ = loader.loadImageData(from: testServerURL) { result in
-            receivedResult = result
+        var receivedResult: Swift.Result<Data, Error>?
+        _ = client.load(from: testServerURL) { result in
+            receivedResult = result.flatMap { data, response in
+                do {
+                    let imageData = try FeedImageDataMapper.map(data: data, response: response)
+                    return .success(imageData)
+                } catch {
+                    return .failure(error)
+                }
+            }
             expectation.fulfill()
         }
 
@@ -59,16 +64,23 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
         return receivedResult
     }
 
-    private func loadFeedResult(file: StaticString = #file, line: UInt = #line) -> FeedLoader.Result? {
-        let loader: RemoteFeedLoader = .init(url: feedTestServerURL, client: ephemeralClient())
+    private func loadFeedResult(file: StaticString = #file, line: UInt = #line) -> Result<[FeedImage], Error>? {
+        let client = ephemeralClient()
 
-        trackForMemoryLeaks(loader, file: file, line: line)
+        trackForMemoryLeaks(client, file: file, line: line)
 
         let expectation: XCTestExpectation = .init(description: "Wait for response.")
-        var capturedResult: FeedLoader.Result?
+        var capturedResult: Result<[FeedImage], Error>?
 
-        loader.load { result in
-            capturedResult = result
+        client.load(from: feedTestServerURL) { result in
+            capturedResult = result.flatMap { data, response in
+                do {
+                    let items = try FeedItemsMapper.map(data: data, response: response)
+                    return .success(items)
+                } catch {
+                    return .failure(error)
+                }
+            }
             expectation.fulfill()
         }
 
@@ -85,7 +97,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
             url: imageURL(at: index))
     }
 
-    private func ephemeralClient(file: StaticString = #filePath, line: UInt = #line) -> URLSessionHTTPClient {
+    private func ephemeralClient(file: StaticString = #filePath, line: UInt = #line) -> HTTPClient {
         let configuration = URLSessionConfiguration.ephemeral
         let session = URLSession(configuration: configuration)
         let client: URLSessionHTTPClient = .init(session: session)

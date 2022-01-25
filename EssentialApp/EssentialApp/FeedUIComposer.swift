@@ -1,12 +1,13 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import Combine
 import EssentialFeed
 import EssentialFeediOS
 import UIKit
 
 public enum FeedUIComposer {
     public static func feedComposedWith(
-        feedLoader: @escaping () -> FeedLoader.Publisher,
+        feedLoader: @escaping () -> AnyPublisher<[FeedImage], Error>,
         imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher
     ) -> FeedViewController {
         let presentationAdapter = FeedLoaderPresentationAdapter(

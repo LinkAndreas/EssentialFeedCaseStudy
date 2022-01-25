@@ -1,11 +1,12 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import Combine
 import EssentialFeed
 import EssentialFeediOS
 
 extension FeedUIIntegrationTests {
-    final class LoaderSpy: FeedLoader, FeedImageDataLoader {
-        var feedRequests: [(FeedLoader.Result) -> Void] = []
+    final class LoaderSpy: FeedImageDataLoader {
+        var feedRequests: [PassthroughSubject<[FeedImage], Error>] = []
         var imageRequests: [(url: URL, completion: (FeedImageDataLoader.LoadResult) -> Void)] = []
         var loadFeedCallCount: Int { feedRequests.count }
         var loadedImageURLs: [URL] { imageRequests.map(\.url) }
@@ -20,17 +21,25 @@ extension FeedUIIntegrationTests {
         }
 
         // MARK: - FeedLoader
-        func load(completion: @escaping (FeedLoader.Result) -> Void) {
-            feedRequests.append(completion)
+        func loadPublisher() -> AnyPublisher<[FeedImage], Error> {
+            let publisher = PassthroughSubject<[FeedImage], Error>()
+            feedRequests.append(publisher)
+            return publisher.eraseToAnyPublisher()
         }
 
-        func completeFeedLoading(with result: FeedLoader.Result, atIndex index: Int = 0) {
-            feedRequests[index](result)
+        func completeFeedLoading(with result: Result<[FeedImage], Error>, atIndex index: Int = 0) {
+            switch result {
+            case let .success(feed):
+                feedRequests[index].send(feed)
+
+            case let .failure(error):
+                feedRequests[index].send(completion: .failure(error))
+            }
         }
 
         func completeFeedLoadingWithError(atIndex index: Int = 0) {
             let error = NSError(domain: "an error", code: 0)
-            feedRequests[index](.failure(error))
+            feedRequests[index].send(completion: .failure(error))
         }
 
         // MARK: - FeedImageDataLoader
