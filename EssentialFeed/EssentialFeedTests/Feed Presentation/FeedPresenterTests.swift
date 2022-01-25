@@ -66,7 +66,7 @@ extension FeedPresenterTests {
         return (sut, feedViewSpy)
     }
 
-    final class FeedViewSpy: FeedView, FeedLoadingView, FeedErrorView {
+    final class FeedViewSpy: FeedView, ResourceLoadingView, ResourceErrorView {
         enum Message: Hashable {
             case display(feed: [FeedImage])
             case display(isLoading: Bool)
@@ -79,11 +79,11 @@ extension FeedPresenterTests {
             receivedMessages.insert(.display(feed: viewModel.feed))
         }
 
-        func display(_ viewModel: FeedLoadingViewModel) {
+        func display(_ viewModel: ResourceLoadingViewModel) {
             receivedMessages.insert(.display(isLoading: viewModel.isLoading))
         }
 
-        func display(_ viewModel: FeedErrorViewModel) {
+        func display(_ viewModel: ResourceErrorViewModel) {
             receivedMessages.insert(.display(errorMessage: viewModel.message))
         }
     }

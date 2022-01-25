@@ -7,7 +7,7 @@ public protocol FeedViewControllerDelegate: AnyObject {
     func didTriggerRefresh()
 }
 
-public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedLoadingView, FeedErrorView {
+public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, ResourceLoadingView, ResourceErrorView {
     public var delegate: FeedViewControllerDelegate?
     private var loadingControllers: [IndexPath: FeedImageCellController] = [:]
     private var tableModel: [FeedImageCellController] = [] {
@@ -33,11 +33,11 @@ public final class FeedViewController: UITableViewController, UITableViewDataSou
         self.tableModel = cellControllers
     }
 
-    public func display(_ viewModel: FeedLoadingViewModel) {
+    public func display(_ viewModel: ResourceLoadingViewModel) {
         refreshControl?.update(isRefreshing: viewModel.isLoading)
     }
 
-    public func display(_ viewModel: FeedErrorViewModel) {
+    public func display(_ viewModel: ResourceErrorViewModel) {
         if let errorMessage = viewModel.message {
             errorView?.show(message: errorMessage)
         } else {
