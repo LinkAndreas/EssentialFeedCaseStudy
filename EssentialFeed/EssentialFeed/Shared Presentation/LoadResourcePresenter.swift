@@ -16,12 +16,12 @@ public final class LoadResourcePresenter<Resource, View: ResourceView> {
     private let errorView: FeedErrorView
     private let mapper: Mapper
 
-    private var feedLoadError: String {
+    public static var loadError: String {
         return NSLocalizedString(
             "GENERIC_CONNECTION_ERROR",
-            tableName: "Feed",
-            bundle: Bundle(for: FeedPresenter.self),
-            comment: "Error message displayed when we can't fetch the feed due to a connection error."
+            tableName: "Shared",
+            bundle: Bundle(for: Self.self),
+            comment: "Error message displayed when we can't fetch the resource due to a connection error."
         )
     }
 
@@ -43,7 +43,7 @@ public final class LoadResourcePresenter<Resource, View: ResourceView> {
     }
 
     public func didStopLoading(with error: Error) {
-        errorView.display(.error(message: feedLoadError))
+        errorView.display(.error(message: Self.loadError))
         loadingView.display(FeedLoadingViewModel(isLoading: false))
     }
 }

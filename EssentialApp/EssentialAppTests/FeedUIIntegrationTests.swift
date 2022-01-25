@@ -11,7 +11,7 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         sut.loadViewIfNeeded()
 
-        XCTAssertEqual(sut.title, localized("FEED_VIEW_TITLE"))
+        XCTAssertEqual(sut.title, feedTitle)
     }
 
     func test_loadFeedActions_requestsFeedFromLoader() {
@@ -321,7 +321,7 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         sut.loadViewIfNeeded()
         loaderSpy.completeFeedLoadingWithError(atIndex: 0)
-        XCTAssertEqual(sut.errorMessage, localized("GENERIC_CONNECTION_ERROR"))
+        XCTAssertEqual(sut.errorMessage, loadError)
 
         sut.simulateUserInitiatedFeedReload()
         loaderSpy.completeFeedLoading(with: .success([makeImage()]), atIndex: 1)
@@ -335,7 +335,7 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         sut.loadViewIfNeeded()
         loaderSpy.completeFeedLoadingWithError(atIndex: 0)
-        XCTAssertEqual(sut.errorMessage, localized("GENERIC_CONNECTION_ERROR"))
+        XCTAssertEqual(sut.errorMessage, loadError)
 
         sut.simulateErrorMessageButtonTap()
         XCTAssertEqual(sut.errorMessage, .none)
@@ -366,5 +366,17 @@ final class FeedUIIntegrationTests: XCTestCase {
 
     private func anyImageData() -> Data {
         return UIImage.make(with: .red).pngData()!
+    }
+
+    private var feedTitle: String {
+        FeedPresenter.title
+    }
+
+    private var loadError: String {
+        LoadResourcePresenter<Any, DummyView>.loadError
+    }
+
+    private class DummyView: ResourceView {
+        func display(_ viewModel: Any) {}
     }
 }
