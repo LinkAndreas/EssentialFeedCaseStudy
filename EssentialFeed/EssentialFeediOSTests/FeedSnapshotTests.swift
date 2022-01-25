@@ -46,7 +46,7 @@ final class FeedSnapshotTests: XCTestCase {
 private extension FeedViewController {
     func display(_ stubs: [ImageStub]) {
         let cells: [FeedImageCellController] = stubs.map { stub in
-            let controller = FeedImageCellController(delegate: stub)
+            let controller = FeedImageCellController(viewModel: stub.viewModel, delegate: stub)
             stub.controller = controller
             return controller
         }
@@ -126,13 +126,17 @@ private extension FeedSnapshotTests {
     func feedWithContent() -> [ImageStub] {
         return [
             ImageStub(
-                description: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-                location: "Paris, France",
+                viewModel: FeedImageViewModel(
+                    description: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+                    location: "Paris, France"
+                ),
                 image: UIImage.make(with: .red)
             ),
             ImageStub(
-                description: "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.",
-                location: "Berlin, Germany",
+                viewModel: FeedImageViewModel(
+                    description: "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.",
+                    location: "Berlin, Germany"
+                ),
                 image: UIImage.make(with: .green)
             )
         ]
@@ -141,14 +145,16 @@ private extension FeedSnapshotTests {
     func feedWithFailedImageLoading() -> [ImageStub] {
         return [
             ImageStub(
-                description: "Brandenburg Gare",
-                location: "Berlin, Germany",
-                image: nil
+                viewModel: FeedImageViewModel(
+                    description: "Brandenburg Gare",
+                    location: "Berlin, Germany"
+                )
             ),
             ImageStub(
-                description: "Eifel Tower",
-                location: "Paris, France",
-                image: nil
+                viewModel: FeedImageViewModel(
+                    description: "Eifel Tower",
+                    location: "Paris, France"
+                )
             )
         ]
     }
@@ -156,20 +162,22 @@ private extension FeedSnapshotTests {
 
 private class ImageStub: FeedImageCellControllerDelegate {
     weak var controller: FeedImageCellController?
-    private let model: FeedImageViewModel<UIImage>
+    let viewModel: FeedImageViewModel
+    let image: UIImage?
 
-    init(description: String?, location: String?, image: UIImage?) {
-        model = FeedImageViewModel(
-            description: description,
-            location: location,
-            image: image,
-            isLoading: false,
-            shouldRetry: image == nil
-        )
+    init(viewModel: FeedImageViewModel, image: UIImage? = nil) {
+        self.viewModel = viewModel
+        self.image = image
     }
 
     func didRequestImage() {
-        controller?.display(model)
+        controller?.display(ResourceLoadingViewModel(isLoading: false))
+        if let image = image {
+            controller?.display(image)
+            controller?.display(.noError)
+        } else {
+            controller?.display(.error(message: "any"))
+        }
     }
 
     func didTriggerPreload() {}

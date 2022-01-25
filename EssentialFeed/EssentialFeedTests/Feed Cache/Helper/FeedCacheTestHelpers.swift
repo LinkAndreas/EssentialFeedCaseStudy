@@ -23,16 +23,4 @@ extension Date {
     private var feedCacheMaxAgeInDays: Int {
         return 7
     }
-
-    private func adding(days: Int) -> Self {
-        let calendar: Calendar = .init(identifier: .gregorian)
-        return calendar.date(byAdding: .day, value: days, to: self)!
-    }
-}
-
-extension Date {
-    func adding(seconds: Int) -> Self {
-        let calendar: Calendar = .init(identifier: .gregorian)
-        return calendar.date(byAdding: .second, value: seconds, to: self)!
-    }
 }
