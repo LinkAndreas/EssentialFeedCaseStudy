@@ -14,26 +14,26 @@ public enum FeedUIComposer {
             loader: { feedLoader().dispatchOnMainQueue() }
         )
 
-        let feedController = ListViewController.makeWith(delegate: presentationAdapter, title: FeedPresenter.title)
+        let controller = ListViewController.makeWith(title: FeedPresenter.title)
+        controller.onRefresh = presentationAdapter.loadResource
         presentationAdapter.presenter = LoadResourcePresenter(
             resourceView: FeedViewAdapter(
-                controller: feedController,
+                controller: controller,
                 imageLoader: { url in imageLoader(url).dispatchOnMainQueue() }
             ),
-            loadingView: WeakRef(feedController),
-            errorView: WeakRef(feedController),
+            loadingView: WeakRef(controller),
+            errorView: WeakRef(controller),
             mapper: FeedPresenter.map
         )
-        return feedController
+        return controller
     }
 }
 
 private extension ListViewController {
-    static func makeWith(delegate: FeedViewControllerDelegate, title: String) -> ListViewController {
+    static func makeWith(title: String) -> ListViewController {
         let bundle = Bundle(for: ListViewController.self)
         let storyboard = UIStoryboard(name: "Feed", bundle: bundle)
         let controller = storyboard.instantiateInitialViewController() as! ListViewController
-        controller.delegate = delegate
         controller.title = title
         return controller
     }
