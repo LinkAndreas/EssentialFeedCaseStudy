@@ -21,6 +21,11 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
 
     private func setupErrorView() {
         tableView.tableHeaderView = errorView
+        errorView.onHide = { [weak self] in
+            self?.tableView.beginUpdates()
+            self?.tableView.sizeTableHeaderToFit()
+            self?.tableView.endUpdates()
+        }
     }
 
     public override func viewDidLayoutSubviews() {
@@ -39,11 +44,7 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
     }
 
     public func display(_ viewModel: ResourceErrorViewModel) {
-        if let errorMessage = viewModel.message {
-            errorView.show(message: errorMessage)
-        } else {
-            errorView.hideMessage()
-        }
+        errorView.message = viewModel.message
     }
 
     @IBAction func refresh() {

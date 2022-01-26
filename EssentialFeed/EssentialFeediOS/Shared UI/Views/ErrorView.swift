@@ -2,19 +2,12 @@
 
 import UIKit
 
-public final class ErrorView: UIView {
-    private (set) public lazy var button: UIButton = {
-        let button = UIButton()
-        button.titleLabel?.textColor = .white
-        button.titleLabel?.textAlignment = .center
-        button.titleLabel?.numberOfLines = 0
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
-        button.addTarget(self, action: #selector(handleButtonAction), for: .touchUpInside)
-        return button
-    }()
+public final class ErrorView: UIButton {
+    var onHide: (() -> Void)?
 
     public var message: String? {
-        get { return isVisible ? button.title(for: .normal) : nil }
+        get { isVisible ? title(for: .normal) : nil }
+        set { newValue == nil ? hideMessage() : show(message: newValue) }
     }
 
     private var isVisible: Bool {
@@ -36,53 +29,43 @@ public final class ErrorView: UIView {
     private func commonInit() {
         backgroundColor = .errorBackgroundColor
         
-        setupButton()
+        setupLabel()
         hideMessage()
+        addTarget(self, action: #selector(hideMessageAnimated), for: .touchUpInside)
     }
 
-    private func setupButton() {
-        addSubview(button)
-
-        button.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            button.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: 8),
-            button.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            bottomAnchor.constraint(equalTo: button.bottomAnchor, constant: 8)
-        ])
-    }
-
-    public override func awakeFromNib() {
-        super.awakeFromNib()
-
-        button.setTitle(nil, for: .normal)
-        button.titleLabel?.numberOfLines = 0
-        button.titleLabel?.textAlignment = .center
-        alpha = 0
+    private func setupLabel() {
+        titleLabel?.textColor = .white
+        titleLabel?.textAlignment = .center
+        titleLabel?.numberOfLines = 0
+        titleLabel?.font = .systemFont(ofSize: 17)
     }
 
     func show(message: String?) {
-        button.setTitle(message, for: .normal)
+        setTitle(message, for: .normal)
+        contentEdgeInsets = .init(top: 8, left: 8, bottom: 8, right: 8)
 
         UIView.animate(withDuration: 0.25) {
             self.alpha = 1
         }
     }
 
-    func hideMessage() {
+    @objc
+    private func hideMessageAnimated() {
         UIView.animate(
             withDuration: 0.25,
             animations: { self.alpha = 0 },
             completion: { completed in
-                if completed {
-                    self.button.setTitle(nil, for: .normal)
-                }
-            })
+                if completed { self.hideMessage() }
+            }
+        )
     }
 
-    @objc
-    private func handleButtonAction() {
-        hideMessage()
+    private func hideMessage() {
+        alpha = 0
+        contentEdgeInsets = .init(top: -10.5, left: 8, bottom: -10.5, right: 8)
+        setTitle(nil, for: .normal)
+        onHide?()
     }
 }
 
