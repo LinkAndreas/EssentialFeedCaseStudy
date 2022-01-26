@@ -13,6 +13,7 @@ extension XCTestCase {
                 withIntermediateDirectories: true
              )
             try snapshotData?.write(to: snapshotURL)
+            return XCTFail("Record succeeded - use `assert` to compare the snapshot.", file: file, line: line)
         } catch {
             return XCTFail("Failed to record snapshot with error: \(error)", file: file, line: line)
         }

@@ -37,7 +37,6 @@ private extension ListViewController {
     }
 }
 
-
 private extension FeedSnapshotTests {
     func makeSUT() -> ListViewController {
         let bundle = Bundle(for: ListViewController.self)
@@ -47,10 +46,6 @@ private extension FeedSnapshotTests {
         controller.tableView.showsVerticalScrollIndicator = false
         controller.tableView.showsHorizontalScrollIndicator = false
         return controller
-    }
-
-    func emptyFeed() -> [FeedImageCellController] {
-        return []
     }
 
     func feedWithContent() -> [ImageStub] {
