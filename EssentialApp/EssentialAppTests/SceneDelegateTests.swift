@@ -32,8 +32,8 @@ final class SceneDelegateTests: XCTestCase {
         )
 
         XCTAssertTrue(
-            topViewController is FeedViewController,
-            "Expected \(String(describing: FeedViewController.self)) as topViewController, got \(String(describing: topViewController)) instead."
+            topViewController is ListViewController,
+            "Expected \(String(describing: ListViewController.self)) as topViewController, got \(String(describing: topViewController)) instead."
         )
     }
 }
