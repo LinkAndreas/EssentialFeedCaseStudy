@@ -10,12 +10,17 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
         didSet { tableView.reloadData() }
     }
 
-    @IBOutlet private(set) public var errorView: ErrorView?
+    private(set) public var errorView: ErrorView = ErrorView()
 
     public override func viewDidLoad() {
         super.viewDidLoad()
 
+        setupErrorView()
         refresh()
+    }
+
+    private func setupErrorView() {
+        tableView.tableHeaderView = errorView
     }
 
     public override func viewDidLayoutSubviews() {
@@ -35,9 +40,9 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
 
     public func display(_ viewModel: ResourceErrorViewModel) {
         if let errorMessage = viewModel.message {
-            errorView?.show(message: errorMessage)
+            errorView.show(message: errorMessage)
         } else {
-            errorView?.hideMessage()
+            errorView.hideMessage()
         }
     }
 

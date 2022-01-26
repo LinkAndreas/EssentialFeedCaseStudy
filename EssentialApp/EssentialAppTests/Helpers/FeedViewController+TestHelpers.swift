@@ -10,7 +10,7 @@ extension ListViewController {
 
     @discardableResult
     func simulateFeedImageViewVisible(atIndex index: Int = 0) -> FeedImageCell? {
-        return feedImageView(atIndex: index) as? FeedImageCell
+        feedImageView(atIndex: index) as? FeedImageCell
     }
 
     @discardableResult
@@ -41,11 +41,11 @@ extension ListViewController {
     }
 
     var isShowingLoadingIndicator: Bool {
-        return refreshControl?.isRefreshing == true
+        refreshControl?.isRefreshing == true
     }
 
     func numberOfRenderedFeedImageViews() -> Int {
-        return tableView.numberOfRows(inSection: feedImageSection)
+       tableView.numberOfRows(inSection: feedImageSection)
     }
 
     var feedImageSection: Int {
@@ -61,10 +61,10 @@ extension ListViewController {
     }
 
     var errorMessage: String? {
-        return errorView?.message
+        errorView.message
     }
 
     func simulateErrorMessageButtonTap() {
-        errorView?.button.simulateTap()
+        errorView.button.simulateTap()
     }
 }
