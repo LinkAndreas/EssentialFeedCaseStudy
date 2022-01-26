@@ -31,7 +31,8 @@ public final class FeedViewAdapter: ResourceView {
                 errorView: WeakRef(view),
                 mapper: mapper
             )
-            return view
+
+            return CellController(dataSource: view, dataSourcePrefetching: view)
         })
     }
 
