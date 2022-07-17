@@ -13,6 +13,14 @@ final class FeedSnapshotTests: XCTestCase {
 
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_CONTENT_light")
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_CONTENT_dark")
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .light, category: .extraExtraExtraLarge)),
+            named: "FEED_WITH_CONTENT_extraExtraExtraLarge_light"
+        )
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .dark, category: .extraExtraExtraLarge)),
+            named: "FEED_WITH_CONTENT_extraExtraExtraLarge_dark"
+        )
     }
 
     func test_feedWithFailedImageLoading() {
@@ -22,6 +30,15 @@ final class FeedSnapshotTests: XCTestCase {
 
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_FAILED_IMAGE_LOADING_light")
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_FAILED_IMAGE_LOADING_dark")
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .light, category: .extraExtraExtraLarge)),
+            named: "FEED_WITH_FAILED_IMAGE_LOADING_extraExtraExtraLarge_light"
+        )
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .dark, category: .extraExtraExtraLarge)),
+            named: "FEED_WITH_FAILED_IMAGE_LOADING_extraExtraExtraLarge_dark"
+        )
+
     }
 }
 
