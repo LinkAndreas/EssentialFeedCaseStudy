@@ -21,8 +21,14 @@ final class ListSnapshotTests: XCTestCase {
 
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "LIST_WITH_ERROR_MESSAGE_light")
         assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "LIST_WITH_ERROR_MESSAGE_dark")
-        assert(snapshot: sut.snapshot(for: .iPhone8(style: .light, category: .extraExtraExtraLarge)), named: "LIST_WITH_ERROR_MESSAGE_extraExtraExtraLarge_light")
-        assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark, category: .extraExtraExtraLarge)), named: "LIST_WITH_ERROR_MESSAGE_extraExtraExtraLarge_dark")
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .light, category: .extraExtraExtraLarge)), 
+            named: "LIST_WITH_ERROR_MESSAGE_extraExtraExtraLarge_light"
+        )
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .dark, category: .extraExtraExtraLarge)), 
+            named: "LIST_WITH_ERROR_MESSAGE_extraExtraExtraLarge_dark"
+        )
     }
 }
 

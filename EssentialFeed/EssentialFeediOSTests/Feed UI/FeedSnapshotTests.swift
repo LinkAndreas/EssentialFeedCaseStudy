@@ -71,7 +71,7 @@ private extension FeedSnapshotTests {
         return [
             ImageStub(
                 viewModel: FeedImageViewModel(
-                    description: "Brandenburg Gare",
+                    description: "Brandenburg Gate",
                     location: "Berlin, Germany"
                 )
             ),

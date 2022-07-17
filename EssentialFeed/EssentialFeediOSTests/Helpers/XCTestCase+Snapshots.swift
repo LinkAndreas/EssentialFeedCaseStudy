@@ -4,40 +4,109 @@ import XCTest
 
 extension XCTestCase {
     func record(snapshot: UIImage, named name: String, file: StaticString = #filePath, line: UInt = #line) {
-        let snapshotURL = makeSnapshotURL(name: name, file: file, line: line)
-        let snapshotData = makeSnapshotData(for: snapshot, file: file, line: line)
+        let snapshotDirectoryURL = makeSnapshotDirectoryURL(name: name, file: file)
+        let referenceData = makeSnapshotData(for: snapshot, file: file)
+        let referenceURL = makeReferenceURL(name: name, file: file)
+
+        createDirectoryIfNeeded(at: snapshotDirectoryURL)
 
         do {
-            try FileManager.default.createDirectory(
-                at: snapshotURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-             )
-            try snapshotData?.write(to: snapshotURL)
-            return XCTFail("Record succeeded - use `assert` to compare the snapshot.", file: file, line: line)
+            try referenceData?.write(to: referenceURL)
+            return XCTFail(
+                """
+                Record succeeded: Use `assert` to compare the snapshot.
+
+                • Snapshot: \(referenceURL)
+                """,
+                file: file,
+                line: line
+            )
         } catch {
             return XCTFail("Failed to record snapshot with error: \(error)", file: file, line: line)
         }
     }
 
-    func assert(snapshot: UIImage, named name: String, file: StaticString = #filePath, line: UInt = #line) {
-        let snapshotURL = makeSnapshotURL(name: name, file: file, line: line)
-        let snapshotData = makeSnapshotData(for: snapshot, file: file, line: line)
+    func assert(
+        snapshot: UIImage,
+        named name: String,
+        perPixelTolerance: CGFloat = 0.0,
+        tolerance: CGFloat = 0.0,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let referenceURL = makeReferenceURL(name: name, file: file)
+        let failedURL = makeFailedURL(name: name, file: file)
+        let differenceURL = makeDifferenceURL(name: name, file: file)
 
-        guard let storedSnapshotData = try? Data(contentsOf: snapshotURL) else {
-            return XCTFail("Failed to load snapshot at: \(snapshotURL). Use the record methos to store a snapshot before asserting.", file: file, line: line)
-        }
-
-        if snapshotData != storedSnapshotData {
-            let temporarySnapshotURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent(snapshotURL.lastPathComponent)
-
-            try? snapshotData?.write(to: temporarySnapshotURL)
-
-            XCTFail(
-                "New snapshot does not match stored snapshot. New snapshot URL: \(temporarySnapshotURL), Stored snapshot URL \(snapshotURL)",
+        guard
+            let snapshotData = snapshot.pngData(),
+            let snapshot = UIImage(data: snapshotData)
+        else {
+            return XCTFail(
+                "Failed to generate PNG representation from snapshot",
                 file: file,
                 line: line
             )
         }
+
+        guard
+            let referenceData = try? Data(contentsOf: referenceURL),
+            let reference = UIImage(data: referenceData)
+        else {
+            return XCTFail(
+                "Failed loading reference at: \(referenceURL). Use `record` before asserting.",
+                file: file,
+                line: line
+            )
+        }
+
+        if !snapshot.matches(
+            reference: reference,
+            perPixelTolerance: perPixelTolerance,
+            tolerance: tolerance
+        ) {
+            removeItemIfNeeded(at: failedURL)
+            removeItemIfNeeded(at: differenceURL)
+
+            let difference = snapshot.diff(with: reference)
+            let differenceData = difference.pngData()
+
+            do {
+                try snapshotData.write(to: failedURL)
+            } catch {
+                XCTFail("Failed storing failed snapshots: \(error)", file: file, line: line)
+            }
+
+            do {
+                try differenceData?.write(to: differenceURL)
+            } catch {
+                XCTFail("Failed storing snapshot difference: \(error)", file: file, line: line)
+            }
+
+            XCTFail(
+                """
+                Snapshot does not match Reference:
+
+                • Snapshot: \(failedURL)
+
+                • Reference: \(referenceURL)
+
+                • Difference: \(differenceURL)
+                """,
+                file: file,
+                line: line
+            )
+        }
+    }
+}
+
+private extension XCTestCase {
+    private func removeItemIfNeeded(at url: URL) {
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    private func createDirectoryIfNeeded(at url: URL) {
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
     }
 
     func makeSnapshotData(for snapshot: UIImage, file: StaticString = #filePath, line: UInt = #line) -> Data? {
@@ -49,71 +118,27 @@ extension XCTestCase {
         return snapshotData
     }
 
-    func makeSnapshotURL(name: String, file: StaticString = #filePath, line: UInt = #line) -> URL {
-        return URL(fileURLWithPath: String(describing: file))
+    func makeSnapshotDirectoryURL(name: String, file: StaticString = #filePath) -> URL {
+        let fileURL = URL(fileURLWithPath: String(describing: file))
+        let fileName = (fileURL.lastPathComponent as NSString).deletingPathExtension
+
+        return fileURL
             .deletingLastPathComponent()
-            .appendingPathComponent("snapshots")
-            .appendingPathComponent("\(name).png")
+            .appendingPathComponent("snapshots/\(fileName)/", isDirectory: true)
+    }
+
+    func makeReferenceURL(name: String, file: StaticString = #filePath) -> URL {
+        makeSnapshotDirectoryURL(name: name, file: file)
+            .appendingPathComponent("\(name).png", isDirectory: false)
+    }
+
+    func makeFailedURL(name: String, file: StaticString = #filePath) -> URL {
+        makeSnapshotDirectoryURL(name: name, file: file)
+            .appendingPathComponent("\(name)_failed.png", isDirectory: false)
+    }
+
+    func makeDifferenceURL(name: String, file: StaticString = #filePath) -> URL {
+        makeSnapshotDirectoryURL(name: name, file: file)
+            .appendingPathComponent("\(name)_diff.png", isDirectory: false)
     }
 }
-
-extension UIViewController {
-    func snapshot(for configuration: SnapshotConfiguration) -> UIImage {
-        return SnapshotWindow(configuration: configuration, root: self).snapshot()
-    }
-}
-
-struct SnapshotConfiguration {
-    let size: CGSize
-    let safeAreaInsets: UIEdgeInsets
-    let layoutMargins: UIEdgeInsets
-    let traitCollection: UITraitCollection
-
-    static func iPhone8(style: UIUserInterfaceStyle, category: UIContentSizeCategory = .medium) -> SnapshotConfiguration {
-        return SnapshotConfiguration(
-            size: CGSize(width: 375, height: 667),
-            safeAreaInsets: UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0),
-            layoutMargins: UIEdgeInsets(top: 20, left: 16, bottom: 0, right: 16),
-            traitCollection: UITraitCollection(traitsFrom: [
-                .init(forceTouchCapability: .available),
-                .init(layoutDirection: .leftToRight),
-                .init(preferredContentSizeCategory: category),
-                .init(userInterfaceIdiom: .phone),
-                .init(horizontalSizeClass: .compact),
-                .init(verticalSizeClass: .regular),
-                .init(displayScale: 2),
-                .init(displayGamut: .P3),
-                .init(userInterfaceStyle: style)
-            ])
-        )
-    }
-}
-
-final class SnapshotWindow: UIWindow {
-    private var configuration: SnapshotConfiguration = .iPhone8(style: .light)
-
-    convenience init(configuration: SnapshotConfiguration, root: UIViewController) {
-        self.init(frame: CGRect(origin: .zero, size: configuration.size))
-        self.configuration = configuration
-        self.layoutMargins = configuration.layoutMargins
-        self.rootViewController = root
-        self.isHidden = false
-        root.view.layoutMargins = configuration.layoutMargins
-    }
-
-    override var safeAreaInsets: UIEdgeInsets {
-        return configuration.safeAreaInsets
-    }
-
-    override var traitCollection: UITraitCollection {
-        return configuration.traitCollection
-    }
-
-    func snapshot() -> UIImage {
-        let renderer = UIGraphicsImageRenderer(bounds: bounds, format: .init(for: configuration.traitCollection))
-        return renderer.image { actions in
-            layer.render(in: actions.cgContext)
-        }
-    }
-}
-
