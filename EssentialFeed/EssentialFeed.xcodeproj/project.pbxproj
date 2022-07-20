@@ -60,6 +60,8 @@
 		3866CE2D2884737300BC694C /* FEED_WITH_CONTENT_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3866CE292884737300BC694C /* FEED_WITH_CONTENT_dark.png */; };
 		3866CE2E2884737300BC694C /* FEED_WITH_CONTENT_light.png in Resources */ = {isa = PBXBuildFile; fileRef = 3866CE2A2884737300BC694C /* FEED_WITH_CONTENT_light.png */; };
 		3866CE2F2884737300BC694C /* FEED_WITH_FAILED_IMAGE_LOADING_light.png in Resources */ = {isa = PBXBuildFile; fileRef = 3866CE2B2884737300BC694C /* FEED_WITH_FAILED_IMAGE_LOADING_light.png */; };
+		3866CE332888777100BC694C /* Dimension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3866CE322888777100BC694C /* Dimension.swift */; };
+		3866CE352888780E00BC694C /* View+TargetSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3866CE342888780E00BC694C /* View+TargetSize.swift */; };
 		386712ED26FA5F1700C96AAC /* FeedPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386712EC26FA5F1700C96AAC /* FeedPresenter.swift */; };
 		386712EE26FA5FE600C96AAC /* Feed.strings in Resources */ = {isa = PBXBuildFile; fileRef = 386712E926FA5BF700C96AAC /* Feed.strings */; };
 		386712F026FA603B00C96AAC /* FeedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386712EF26FA603B00C96AAC /* FeedViewModel.swift */; };
@@ -233,6 +235,8 @@
 		3866CE292884737300BC694C /* FEED_WITH_CONTENT_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_CONTENT_dark.png; sourceTree = "<group>"; };
 		3866CE2A2884737300BC694C /* FEED_WITH_CONTENT_light.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_CONTENT_light.png; sourceTree = "<group>"; };
 		3866CE2B2884737300BC694C /* FEED_WITH_FAILED_IMAGE_LOADING_light.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_FAILED_IMAGE_LOADING_light.png; sourceTree = "<group>"; };
+		3866CE322888777100BC694C /* Dimension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dimension.swift; sourceTree = "<group>"; };
+		3866CE342888780E00BC694C /* View+TargetSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+TargetSize.swift"; sourceTree = "<group>"; };
 		386712E826FA5BF700C96AAC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Feed.strings; sourceTree = "<group>"; };
 		386712EA26FA5BFC00C96AAC /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Feed.strings; sourceTree = "<group>"; };
 		386712EC26FA5F1700C96AAC /* FeedPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedPresenter.swift; sourceTree = "<group>"; };
@@ -671,11 +675,13 @@
 		387F9E5027A14FD60088CDF7 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				3866CE322888777100BC694C /* Dimension.swift */,
 				387F9E5127A14FFE0088CDF7 /* XCTestCase+Snapshots.swift */,
 				38E3FE6D27A336EB00EDEB68 /* UIImage+Difference.swift */,
 				38E3FE6F27A3370900EDEB68 /* UIImage+Match.swift */,
 				38623A1D2815815B007A67D3 /* Extensions.swift */,
 				3864CDA827B7D2F000E65F6C /* View+Snapshot.swift */,
+				3866CE342888780E00BC694C /* View+TargetSize.swift */,
 				38097D8D2811DF3B00A77F03 /* UIView+Snapshot.swift */,
 				38EAFBB52821906A007B64B8 /* UIView+TargetSize.swift */,
 				38E3FE7527A340B700EDEB68 /* UIViewController+Snapshot.swift */,
@@ -1233,6 +1239,7 @@
 				3864CDAB27B7D87700E65F6C /* SnapshotConfiguration+iPhone8.swift in Sources */,
 				387F9E5627A154420088CDF7 /* ImageCommentsSnapshotTests.swift in Sources */,
 				38E3FE7027A3370900EDEB68 /* UIImage+Match.swift in Sources */,
+				3866CE352888780E00BC694C /* View+TargetSize.swift in Sources */,
 				387F9E5227A14FFE0088CDF7 /* XCTestCase+Snapshots.swift in Sources */,
 				38097D8E2811DF3B00A77F03 /* UIView+Snapshot.swift in Sources */,
 				38EAFBB62821906A007B64B8 /* UIView+TargetSize.swift in Sources */,
@@ -1240,6 +1247,7 @@
 				38E3FE6E27A336EB00EDEB68 /* UIImage+Difference.swift in Sources */,
 				389D90DA26A49A1000216D63 /* XCTTestCase+MemoryLeakTracking.swift in Sources */,
 				3872D6EF275CB45500774E3B /* FeedSnapshotTests.swift in Sources */,
+				3866CE332888777100BC694C /* Dimension.swift in Sources */,
 				387F9E4F27A14F780088CDF7 /* ListSnapshotTests.swift in Sources */,
 				3864CDA927B7D2F000E65F6C /* View+Snapshot.swift in Sources */,
 				382E5E14282AC70400135497 /* SnapshotConfiguration+Compressed.swift in Sources */,

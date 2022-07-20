@@ -8,7 +8,8 @@ extension SnapshotConfiguration {
         category: UIContentSizeCategory = .medium
     ) -> SnapshotConfiguration {
         SnapshotConfiguration(
-            size: CGSize(width: 375, height: 667),
+            width: .value(375),
+            height: .value(667),
             padding: .zero,
             safeAreaInsets: UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0),
             layoutMargins: UIEdgeInsets(top: 20, left: 16, bottom: 0, right: 16),

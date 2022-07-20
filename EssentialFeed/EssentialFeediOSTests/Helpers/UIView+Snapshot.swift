@@ -23,7 +23,7 @@ extension UIView {
 
         let offscreen: CGFloat = 10_000
         if configuration.safeAreaInsets == .zero {
-            frame.origin = .init(x: offscreen, y: offscreen)
+            frame.origin = CGPoint(x: offscreen, y: offscreen)
         }
 
         let image = UIGraphicsImageRenderer(

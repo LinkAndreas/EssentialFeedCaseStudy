@@ -10,7 +10,8 @@ extension SnapshotConfiguration {
         backgroundColor: UIColor = .systemBackground
     ) -> SnapshotConfiguration {
         fixed(
-            size: UIView.layoutFittingCompressedSize,
+            width: .compressed,
+            height: .compressed,
             style: style,
             category: category,
             padding: padding,

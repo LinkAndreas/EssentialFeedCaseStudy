@@ -25,7 +25,9 @@ extension XCTestCase {
             return XCTFail("Failed to record snapshot with error: \(error)", file: file, line: line)
         }
     }
+}
 
+extension XCTestCase {
     func assert(
         snapshot: UIImage,
         named name: String,

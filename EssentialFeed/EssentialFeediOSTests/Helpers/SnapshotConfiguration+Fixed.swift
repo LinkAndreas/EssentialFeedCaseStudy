@@ -4,31 +4,16 @@ import UIKit
 
 extension SnapshotConfiguration {
     static func fixed(
-        width: CGFloat,
-        height: CGFloat,
-        style: UIUserInterfaceStyle,
-        category: UIContentSizeCategory = .medium,
-        padding: UIEdgeInsets = .zero,
-        backgroundColor: UIColor = .systemBackground
-    ) -> SnapshotConfiguration {
-        fixed(
-            size: CGSize(width: width, height: height),
-            style: style,
-            category: category,
-            padding: padding,
-            backgroundColor: backgroundColor
-        )
-    }
-
-    static func fixed(
-        size: CGSize,
+        width: Dimension,
+        height: Dimension,
         style: UIUserInterfaceStyle,
         category: UIContentSizeCategory = .medium,
         padding: UIEdgeInsets = .zero,
         backgroundColor: UIColor = .systemBackground
     ) -> SnapshotConfiguration {
         SnapshotConfiguration(
-            size: size,
+            width: width,
+            height: height,
             padding: padding,
             safeAreaInsets: .zero,
             layoutMargins: .zero,

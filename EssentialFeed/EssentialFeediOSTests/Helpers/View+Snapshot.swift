@@ -30,38 +30,3 @@ extension View {
         }
     }
 }
-
-extension View {
-    private func resolvedSize(for configuration: SnapshotConfiguration) -> CGSize {
-        resolve(size: configuration.size)
-            .adding(configuration.padding)
-    }
-
-    private func resolve(size: CGSize) -> CGSize {
-        switch (size.width, size.height) {
-        case (UIView.layoutFittingCompressedSize.width, UIView.layoutFittingCompressedSize.height):
-            let rootView = fixedSize()
-            let controller = UIHostingController(rootView: rootView)
-
-            return controller.sizeThatFits(in: UIView.layoutFittingCompressedSize)
-
-        case let (UIView.layoutFittingCompressedSize.width, height):
-            let rootView = frame(height: height).fixedSize()
-            let controller = UIHostingController(rootView: rootView)
-
-            return controller.sizeThatFits(in: UIView.layoutFittingCompressedSize)
-
-        case let (width, UIView.layoutFittingCompressedSize.height):
-            let rootView = frame(width: width).fixedSize()
-            let controller = UIHostingController(rootView: rootView)
-
-            return controller.sizeThatFits(in: UIView.layoutFittingCompressedSize)
-
-        case let (width, height):
-            let rootView = frame(width: width, height: height).fixedSize()
-            let controller = UIHostingController(rootView: rootView)
-
-            return controller.sizeThatFits(in: UIView.layoutFittingCompressedSize)
-        }
-    }
-}

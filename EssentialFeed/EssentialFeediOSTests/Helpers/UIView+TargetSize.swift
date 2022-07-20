@@ -4,32 +4,32 @@ import UIKit
 
 extension UIView {
     func resolvedSize(for configuration: SnapshotConfiguration) -> CGSize {
-        resolve(size: configuration.size)
+        resolve(width: configuration.width, height: configuration.height)
             .adding(configuration.padding)
     }
 }
 
 extension UIView {
-    private func resolve(size: CGSize) -> CGSize {
-        switch (size.width, size.height) {
-        case (UIView.layoutFittingCompressedSize.width, UIView.layoutFittingCompressedSize.height):
+    private func resolve(width: Dimension, height: Dimension) -> CGSize {
+        switch (width, height) {
+        case (.compressed, .compressed):
             return sizeThatFits(UIView.layoutFittingCompressedSize)
 
-        case let (UIView.layoutFittingCompressedSize.width, height):
+        case let (.compressed, .value(height)):
             return systemLayoutSizeFitting(
                 CGSize(width: UIView.layoutFittingCompressedSize.width, height: height),
                 withHorizontalFittingPriority: .defaultLow,
                 verticalFittingPriority: .required
             )
 
-        case let (width, UIView.layoutFittingCompressedSize.height):
+        case let (.value(width), .compressed):
             return systemLayoutSizeFitting(
                 CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
                 withHorizontalFittingPriority: .required,
                 verticalFittingPriority: .defaultLow
             )
 
-        case let (width, height):
+        case let (.value(width), .value(height)):
             return CGSize(width: width, height: height)
         }
     }

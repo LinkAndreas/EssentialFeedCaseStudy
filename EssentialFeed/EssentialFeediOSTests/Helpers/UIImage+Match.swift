@@ -33,7 +33,9 @@ extension UIImage {
             )
         }
     }
+}
 
+extension UIImage {
     private func makeRawPixels(from image: CGImage?) -> [UInt32]? {
         guard let image = image else { return nil }
 

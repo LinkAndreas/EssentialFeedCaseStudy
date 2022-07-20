@@ -3,7 +3,8 @@
 import UIKit
 
 struct SnapshotConfiguration {
-    let size: CGSize
+    let width: Dimension
+    let height: Dimension
     let padding: UIEdgeInsets
     let safeAreaInsets: UIEdgeInsets
     let layoutMargins: UIEdgeInsets
@@ -11,14 +12,16 @@ struct SnapshotConfiguration {
     let backgroundColor: UIColor
 
     init(
-        size: CGSize,
+        width: Dimension,
+        height: Dimension,
         padding: UIEdgeInsets = .zero,
         safeAreaInsets: UIEdgeInsets = .zero,
         layoutMargins: UIEdgeInsets = .zero,
         traitCollection: UITraitCollection,
         backgroundColor: UIColor = .systemBackground
     ) {
-        self.size = size
+        self.width = width
+        self.height = height
         self.padding = padding
         self.safeAreaInsets = safeAreaInsets
         self.layoutMargins = layoutMargins
