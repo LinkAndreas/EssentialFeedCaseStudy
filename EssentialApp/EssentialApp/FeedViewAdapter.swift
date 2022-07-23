@@ -32,7 +32,12 @@ public final class FeedViewAdapter: ResourceView {
                 mapper: mapper
             )
 
-            return CellController(dataSource: view, dataSourcePrefetching: view)
+            return CellController(
+                id: model,
+                dataSource: view,
+                delegate: view,
+                dataSourcePrefetching: view
+            )
         })
     }
 
