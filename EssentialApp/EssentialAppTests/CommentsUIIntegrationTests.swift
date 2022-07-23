@@ -1,5 +1,6 @@
 //  Copyright © 2021 Andreas Link. All rights reserved.
 
+import Combine
 import EssentialApp
 import EssentialFeed
 import EssentialFeediOS
@@ -133,6 +134,29 @@ final class CommentsUIIntegrationTests: XCTestCase {
 
         sut.simulateErrorMessageButtonTap()
         XCTAssertEqual(sut.errorMessage, .none)
+    }
+
+    func test_deinit_cancelsRunningRequest() {
+        var cancelCallCount: Int = 0
+
+        var sut: ListViewController?
+        autoreleasepool {
+            sut = CommentsUIComposer.commentsComposedWith(
+                commentsLoader: {
+                    PassthroughSubject<[ImageComment], Error>()
+                        .handleEvents(receiveCancel: { cancelCallCount += 1 })
+                        .eraseToAnyPublisher()
+                }
+            )
+
+            sut?.loadViewIfNeeded()
+        }
+
+        XCTAssertEqual(cancelCallCount, 0)
+
+        sut = nil
+
+        XCTAssertEqual(cancelCallCount, 1)
     }
 }
 
