@@ -6,20 +6,20 @@ import EssentialFeediOS
 
 extension CommentsUIIntegrationTests {
     final class LoaderSpy {
-        var requests: [PassthroughSubject<[FeedImage], Error>] = []
+        var requests: [PassthroughSubject<[ImageComment], Error>] = []
         var loadCommentsCallCount: Int { requests.count }
 
         // MARK: - CommentsLoader
-        func loadPublisher() -> AnyPublisher<[FeedImage], Error> {
-            let publisher = PassthroughSubject<[FeedImage], Error>()
+        func loadPublisher() -> AnyPublisher<[ImageComment], Error> {
+            let publisher = PassthroughSubject<[ImageComment], Error>()
             requests.append(publisher)
             return publisher.eraseToAnyPublisher()
         }
 
-        func completeCommentsLoading(with result: Result<[FeedImage], Error>, atIndex index: Int = 0) {
+        func completeCommentsLoading(with result: Result<[ImageComment], Error>, atIndex index: Int = 0) {
             switch result {
-            case let .success(feed):
-                requests[index].send(feed)
+            case let .success(comments):
+                requests[index].send(comments)
 
             case let .failure(error):
                 requests[index].send(completion: .failure(error))

@@ -1,6 +1,6 @@
 //  Copyright © 2022 Andreas Link. All rights reserved.
 
-public struct ImageCommentsViewModel: Equatable {
+public struct ImageCommentsViewModel: Hashable {
     public let comments: [ImageCommentViewModel]
 
     public init(comments: [ImageCommentViewModel]) {
@@ -8,7 +8,7 @@ public struct ImageCommentsViewModel: Equatable {
     }
 }
 
-public struct ImageCommentViewModel: Equatable {
+public struct ImageCommentViewModel: Hashable {
     public let message: String
     public let date: String
     public let username: String

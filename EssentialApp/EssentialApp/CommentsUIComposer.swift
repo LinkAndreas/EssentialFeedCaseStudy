@@ -7,22 +7,19 @@ import UIKit
 
 public enum CommentsUIComposer {
     public static func commentsComposedWith(
-        commentsLoader: @escaping () -> AnyPublisher<[FeedImage], Error>
+        commentsLoader: @escaping () -> AnyPublisher<[ImageComment], Error>
     ) -> ListViewController {
-        let presentationAdapter = LoadResourcePresentationAdapter<[FeedImage], FeedViewAdapter>(
+        let presentationAdapter = LoadResourcePresentationAdapter<[ImageComment], CommentsViewAdapter>(
             loader: { commentsLoader().dispatchOnMainQueue() }
         )
 
         let controller = ListViewController.makeWith(title: ImageCommentsPresenter.title)
         controller.onRefresh = presentationAdapter.loadResource
         presentationAdapter.presenter = LoadResourcePresenter(
-            resourceView: FeedViewAdapter(
-                controller: controller,
-                imageLoader: { _ in Empty<Data, Error>().eraseToAnyPublisher() }
-            ),
+            resourceView: CommentsViewAdapter(controller: controller),
             loadingView: WeakRef(controller),
             errorView: WeakRef(controller),
-            mapper: FeedPresenter.map
+            mapper: { ImageCommentsPresenter.map($0) }
         )
         return controller
     }
@@ -31,7 +28,7 @@ public enum CommentsUIComposer {
 private extension ListViewController {
     static func makeWith(title: String) -> ListViewController {
         let bundle = Bundle(for: ListViewController.self)
-        let storyboard = UIStoryboard(name: "Feed", bundle: bundle)
+        let storyboard = UIStoryboard(name: "ImageComments", bundle: bundle)
         let controller = storyboard.instantiateInitialViewController() as! ListViewController
         controller.title = title
         return controller
