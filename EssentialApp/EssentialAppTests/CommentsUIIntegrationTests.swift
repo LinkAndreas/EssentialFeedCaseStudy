@@ -156,16 +156,4 @@ extension CommentsUIIntegrationTests {
     ) -> ImageComment {
         return ImageComment(id: UUID(), message: message, createdAt: Date(), username: username)
     }
-
-    private var commentsTitle: String {
-        ImageCommentsPresenter.title
-    }
-
-    private var loadError: String {
-        LoadResourcePresenter<Any, DummyView>.loadError
-    }
-
-    private class DummyView: ResourceView {
-        func display(_ viewModel: Any) {}
-    }
 }

@@ -340,8 +340,9 @@ final class FeedUIIntegrationTests: XCTestCase {
         sut.simulateErrorMessageButtonTap()
         XCTAssertEqual(sut.errorMessage, .none)
     }
+}
 
-    // MARK: - Helpers
+extension FeedUIIntegrationTests {
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
@@ -366,17 +367,5 @@ final class FeedUIIntegrationTests: XCTestCase {
 
     private func anyImageData() -> Data {
         return UIImage.make(with: .red).pngData()!
-    }
-
-    private var feedTitle: String {
-        FeedPresenter.title
-    }
-
-    private var loadError: String {
-        LoadResourcePresenter<Any, DummyView>.loadError
-    }
-
-    private class DummyView: ResourceView {
-        func display(_ viewModel: Any) {}
     }
 }
