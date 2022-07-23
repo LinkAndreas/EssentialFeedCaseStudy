@@ -16,7 +16,7 @@ extension CommentsUIIntegrationTests {
             return publisher.eraseToAnyPublisher()
         }
 
-        func completeFeedLoading(with result: Result<[FeedImage], Error>, atIndex index: Int = 0) {
+        func completeCommentsLoading(with result: Result<[FeedImage], Error>, atIndex index: Int = 0) {
             switch result {
             case let .success(feed):
                 requests[index].send(feed)
