@@ -5,10 +5,10 @@ import EssentialFeediOS
 import UIKit
 
 public final class FeedViewAdapter: ResourceView {
-    private weak var controller: FeedViewController?
+    private weak var controller: ListViewController?
     private let imageLoader: (URL) -> FeedImageDataLoader.Publisher
 
-    init(controller: FeedViewController, imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher) {
+    init(controller: ListViewController, imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher) {
         self.controller = controller
         self.imageLoader = imageLoader
     }
@@ -31,7 +31,13 @@ public final class FeedViewAdapter: ResourceView {
                 errorView: WeakRef(view),
                 mapper: mapper
             )
-            return view
+
+            return CellController(
+                id: model,
+                dataSource: view,
+                delegate: view,
+                dataSourcePrefetching: view
+            )
         })
     }
 

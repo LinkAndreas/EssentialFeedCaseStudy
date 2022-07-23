@@ -9,31 +9,31 @@ public enum FeedUIComposer {
     public static func feedComposedWith(
         feedLoader: @escaping () -> AnyPublisher<[FeedImage], Error>,
         imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher
-    ) -> FeedViewController {
+    ) -> ListViewController {
         let presentationAdapter = LoadResourcePresentationAdapter<[FeedImage], FeedViewAdapter>(
             loader: { feedLoader().dispatchOnMainQueue() }
         )
 
-        let feedController = FeedViewController.makeWith(delegate: presentationAdapter, title: FeedPresenter.title)
+        let controller = ListViewController.makeWith(title: FeedPresenter.title)
+        controller.onRefresh = presentationAdapter.loadResource
         presentationAdapter.presenter = LoadResourcePresenter(
             resourceView: FeedViewAdapter(
-                controller: feedController,
+                controller: controller,
                 imageLoader: { url in imageLoader(url).dispatchOnMainQueue() }
             ),
-            loadingView: WeakRef(feedController),
-            errorView: WeakRef(feedController),
+            loadingView: WeakRef(controller),
+            errorView: WeakRef(controller),
             mapper: FeedPresenter.map
         )
-        return feedController
+        return controller
     }
 }
 
-private extension FeedViewController {
-    static func makeWith(delegate: FeedViewControllerDelegate, title: String) -> FeedViewController {
-        let bundle = Bundle(for: FeedViewController.self)
+private extension ListViewController {
+    static func makeWith(title: String) -> ListViewController {
+        let bundle = Bundle(for: ListViewController.self)
         let storyboard = UIStoryboard(name: "Feed", bundle: bundle)
-        let controller = storyboard.instantiateInitialViewController() as! FeedViewController
-        controller.delegate = delegate
+        let controller = storyboard.instantiateInitialViewController() as! ListViewController
         controller.title = title
         return controller
     }

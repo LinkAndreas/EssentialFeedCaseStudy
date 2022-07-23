@@ -7,10 +7,6 @@ public protocol FeedView {
 }
 
 public final class FeedPresenter {
-    private let feedView: FeedView
-    private let loadingView: ResourceLoadingView
-    private let errorView: ResourceErrorView
-
     public static var title: String {
         return NSLocalizedString(
             "FEED_VIEW_TITLE",
@@ -27,27 +23,6 @@ public final class FeedPresenter {
             bundle: Bundle(for: FeedPresenter.self),
             comment: "Error message displayed when we can't fetch the feed due to a connection error."
         )
-    }
-
-    public init(feedView: FeedView, loadingView: ResourceLoadingView, errorView: ResourceErrorView) {
-        self.feedView = feedView
-        self.loadingView = loadingView
-        self.errorView = errorView
-    }
-
-    public func didStartLoadingFeed() {
-        errorView.display(.noError)
-        loadingView.display(ResourceLoadingViewModel(isLoading: true))
-    }
-
-    public func didStopLoadingFeed(with feed: [FeedImage]) {
-        feedView.display(FeedViewModel(feed: feed))
-        loadingView.display(ResourceLoadingViewModel(isLoading: false))
-    }
-
-    public func didStopLoadingFeed(with error: Error) {
-        errorView.display(.error(message: feedLoadError))
-        loadingView.display(ResourceLoadingViewModel(isLoading: false))
     }
 
     public static func map(_ feed: [FeedImage]) -> FeedViewModel {

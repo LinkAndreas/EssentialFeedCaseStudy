@@ -52,13 +52,13 @@ class EssentialAppUIAcceptanceTests: XCTestCase {
 }
 
 extension EssentialAppUIAcceptanceTests {
-    private func launch(httpClient: HTTPClientStub = .offline, store: InMemoryFeedStore = .empty) -> FeedViewController {
+    private func launch(httpClient: HTTPClientStub = .offline, store: InMemoryFeedStore = .empty) -> ListViewController {
         let sut = SceneDelegate(httpClient: httpClient, store: store)
         sut.window = UIWindow()
         sut.configureWindow()
 
         let root = sut.window?.rootViewController as? UINavigationController
-        let feed = root?.topViewController as! FeedViewController
+        let feed = root?.topViewController as! ListViewController
         return feed
     }
 
