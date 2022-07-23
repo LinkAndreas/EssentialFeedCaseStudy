@@ -6,12 +6,12 @@ import EssentialFeediOS
 import XCTest
 
 final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
-    override func test_feedView_hasTitle() {
+    func test_commentView_hasTitle() {
         let (_, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
 
-        XCTAssertEqual(sut.title, feedTitle)
+        XCTAssertEqual(sut.title, commentsTitle)
     }
 
     override func test_loadFeedActions_requestsFeedFromLoader() {
@@ -161,6 +161,10 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
 
     private var feedTitle: String {
         FeedPresenter.title
+    }
+
+    private var commentsTitle: String {
+        ImageCommentsPresenter.title
     }
 
     private var loadError: String {
