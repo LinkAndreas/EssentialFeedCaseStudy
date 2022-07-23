@@ -14,19 +14,19 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
         XCTAssertEqual(sut.title, commentsTitle)
     }
 
-    override func test_loadFeedActions_requestsFeedFromLoader() {
+    func test_loadCommentsActions_requestsCommentsFromLoader() {
         let (loaderSpy, sut) = makeSUT()
 
-        XCTAssertEqual(loaderSpy.loadFeedCallCount, 0, "Expected no loading requests before view is loaded")
+        XCTAssertEqual(loaderSpy.loadCommentsCallCount, 0, "Expected no loading requests before view is loaded")
 
         sut.loadViewIfNeeded()
-        XCTAssertEqual(loaderSpy.loadFeedCallCount, 1, "Expected a loading request once the view is loaded")
+        XCTAssertEqual(loaderSpy.loadCommentsCallCount, 1, "Expected a loading request once the view is loaded")
 
-        sut.simulateUserInitiatedFeedReload()
-        XCTAssertEqual(loaderSpy.loadFeedCallCount, 2, "Expected another load request once user initiated the load")
+        sut.simulateUserInitiatedReload()
+        XCTAssertEqual(loaderSpy.loadCommentsCallCount, 2, "Expected another load request once user initiated the load")
 
-        sut.simulateUserInitiatedFeedReload()
-        XCTAssertEqual(loaderSpy.loadFeedCallCount, 3, "Expected a third load request once user initiated another load")
+        sut.simulateUserInitiatedReload()
+        XCTAssertEqual(loaderSpy.loadCommentsCallCount, 3, "Expected a third load request once user initiated another load")
     }
 
     override func test_loadingFeedIndicator_isVisibleWhileLoadingFeed() {
@@ -38,7 +38,7 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
         loaderSpy.completeFeedLoading(with: .success([]), atIndex: 0)
         XCTAssertFalse(sut.isShowingLoadingIndicator, "Expected no loading indicator once loading is completed")
 
-        sut.simulateUserInitiatedFeedReload()
+        sut.simulateUserInitiatedReload()
         XCTAssertTrue(sut.isShowingLoadingIndicator, "Expected loading indicator once user initiated load")
 
         loaderSpy.completeFeedLoading(with: .failure(anyNSError()), atIndex: 1)
@@ -59,7 +59,7 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
         loaderSpy.completeFeedLoading(with: .success([image0]))
         assertThat(sut, renders: [image0])
 
-        sut.simulateUserInitiatedFeedReload()
+        sut.simulateUserInitiatedReload()
         loaderSpy.completeFeedLoading(with: .success([image0, image1, image2, image3]), atIndex: 1)
         assertThat(sut, renders: [image0, image1, image2, image3])
     }
@@ -74,7 +74,7 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
         loaderSpy.completeFeedLoading(with: .success([image0, image1]))
         assertThat(sut, renders: [image0, image1])
 
-        sut.simulateUserInitiatedFeedReload()
+        sut.simulateUserInitiatedReload()
         loaderSpy.completeFeedLoading(with: .success([]), atIndex: 1)
         assertThat(sut, renders: [])
     }
@@ -89,7 +89,7 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
 
         assertThat(sut, renders: [image0])
 
-        sut.simulateUserInitiatedFeedReload()
+        sut.simulateUserInitiatedReload()
 
         loaderSpy.completeFeedLoading(with: .failure(anyNSError()), atIndex: 1)
 
@@ -120,7 +120,7 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
         loaderSpy.completeFeedLoadingWithError(atIndex: 0)
         XCTAssertEqual(sut.errorMessage, loadError)
 
-        sut.simulateUserInitiatedFeedReload()
+        sut.simulateUserInitiatedReload()
         loaderSpy.completeFeedLoading(with: .success([makeImage()]), atIndex: 1)
         XCTAssertEqual(sut.errorMessage, .none)
     }
@@ -137,7 +137,9 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
         sut.simulateErrorMessageButtonTap()
         XCTAssertEqual(sut.errorMessage, .none)
     }
+}
 
+extension CommentsUIIntegrationTests {
     private func makeSUT(
         file: StaticString = #filePath,
         line: UInt = #line
@@ -157,10 +159,6 @@ final class CommentsUIIntegrationTests: FeedUIIntegrationTests {
         url: URL = .init(string: "http://any-url.com")!
     ) -> FeedImage {
         return .init(id: UUID(), description: description, location: location, url: url)
-    }
-
-    private var feedTitle: String {
-        FeedPresenter.title
     }
 
     private var commentsTitle: String {
