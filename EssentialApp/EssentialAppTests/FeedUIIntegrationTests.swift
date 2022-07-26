@@ -14,6 +14,25 @@ final class FeedUIIntegrationTests: XCTestCase {
         XCTAssertEqual(sut.title, feedTitle)
     }
 
+    func test_imageSelection_notifiesHandler() {
+        let image0 = makeImage()
+        let image1 = makeImage()
+        var imageSelection: [FeedImage] = []
+
+        let (loaderSpy, sut) = makeSUT(selection: { image in
+            imageSelection.append(image)
+        })
+
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+
+        sut.simulateTapOnFeedImage(at: 0)
+        XCTAssertEqual(imageSelection, [image0])
+
+        sut.simulateTapOnFeedImage(at: 1)
+        XCTAssertEqual(imageSelection, [image0, image1])
+    }
+
     func test_loadFeedActions_requestsFeedFromLoader() {
         let (loaderSpy, sut) = makeSUT()
 
@@ -344,13 +363,15 @@ final class FeedUIIntegrationTests: XCTestCase {
 
 extension FeedUIIntegrationTests {
     private func makeSUT(
+        selection: @escaping (FeedImage) -> Void = { _ in },
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> (loaderSpy: LoaderSpy, sut: ListViewController) {
         let loaderSpy = LoaderSpy()
         let sut = FeedUIComposer.feedComposedWith(
             feedLoader: loaderSpy.loadPublisher,
-            imageLoader: loaderSpy.loadPublisher(from:)
+            imageLoader: loaderSpy.loadPublisher(from:),
+            selection: selection
         )
         trackForMemoryLeaks(loaderSpy, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
@@ -362,7 +383,7 @@ extension FeedUIIntegrationTests {
         location: String? = nil,
         url: URL = .init(string: "http://any-url.com")!
     ) -> FeedImage {
-        return .init(id: UUID(), description: description, location: location, url: url)
+        return FeedImage(id: UUID(), description: description, location: location, url: url)
     }
 
     private func anyImageData() -> Data {

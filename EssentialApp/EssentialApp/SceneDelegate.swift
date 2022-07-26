@@ -48,7 +48,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let feedViewController = UINavigationController(
             rootViewController: FeedUIComposer.feedComposedWith(
                 feedLoader: makeRemoteFeedLoaderWithLocalFallback,
-                imageLoader: makeLocalImageLoaderWithRemoteFallback(url:)
+                imageLoader: makeLocalImageLoaderWithRemoteFallback(url:),
+                selection: { image in
+
+                }
             )
         )
 

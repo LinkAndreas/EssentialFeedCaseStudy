@@ -8,7 +8,8 @@ import UIKit
 public enum FeedUIComposer {
     public static func feedComposedWith(
         feedLoader: @escaping () -> AnyPublisher<[FeedImage], Error>,
-        imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher
+        imageLoader: @escaping (URL) -> FeedImageDataLoader.Publisher,
+        selection: @escaping (FeedImage) -> Void
     ) -> ListViewController {
         let presentationAdapter = LoadResourcePresentationAdapter<[FeedImage], FeedViewAdapter>(
             loader: { feedLoader().dispatchOnMainQueue() }
@@ -19,7 +20,8 @@ public enum FeedUIComposer {
         presentationAdapter.presenter = LoadResourcePresenter(
             resourceView: FeedViewAdapter(
                 controller: controller,
-                imageLoader: { url in imageLoader(url).dispatchOnMainQueue() }
+                imageLoader: { url in imageLoader(url).dispatchOnMainQueue() },
+                selection: selection
             ),
             loadingView: WeakRef(controller),
             errorView: WeakRef(controller),

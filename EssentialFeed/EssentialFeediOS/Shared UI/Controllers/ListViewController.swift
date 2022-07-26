@@ -105,6 +105,11 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
         }
     }
 
+    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let controller = cellController(at: indexPath)
+        controller?.delegate?.tableView?(tableView, didSelectRowAt: indexPath)
+    }
+
     private func preload(forRowAt indexPath: IndexPath) {
         let controller = cellController(at: indexPath)
         controller?.dataSourcePrefetching?.tableView(tableView, prefetchRowsAt: [indexPath])
