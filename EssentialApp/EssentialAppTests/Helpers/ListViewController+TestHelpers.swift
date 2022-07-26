@@ -10,10 +10,24 @@ extension ListViewController {
         tableView.frame = CGRect(x: 0, y: 0, width: 1, height: 1)
     }
 
-    func simulateUserInitiatedFeedReload() {
+    func simulateUserInitiatedReload() {
         refreshControl?.simulatePullToRefresh()
     }
 
+    var isShowingLoadingIndicator: Bool {
+        refreshControl?.isRefreshing == true
+    }
+
+    var errorMessage: String? {
+        errorView.message
+    }
+
+    func simulateErrorMessageButtonTap() {
+        errorView.simulateTap()
+    }
+}
+
+extension ListViewController {
     @discardableResult
     func simulateFeedImageViewVisible(atIndex index: Int = 0) -> FeedImageCell? {
         feedImageView(atIndex: index) as? FeedImageCell
@@ -46,10 +60,6 @@ extension ListViewController {
         simulateFeedImageViewVisible(atIndex: index)?.renderedImage
     }
 
-    var isShowingLoadingIndicator: Bool {
-        refreshControl?.isRefreshing == true
-    }
-
     func numberOfRenderedFeedImageViews() -> Int {
         tableView.numberOfSections == 0 ? 0 : tableView.numberOfRows(inSection: feedImageSection)
     }
@@ -60,15 +70,35 @@ extension ListViewController {
         guard numberOfRenderedFeedImageViews() > index else { return nil }
 
         let dataSource = tableView.dataSource
-        let indexPath: IndexPath = .init(row: index, section: 0)
+        let indexPath: IndexPath = .init(row: index, section: feedImageSection)
         return dataSource?.tableView(tableView, cellForRowAt: indexPath)
     }
+}
 
-    var errorMessage: String? {
-        errorView.message
+extension ListViewController {
+    func numberOfRenderedComments() -> Int {
+        tableView.numberOfSections == 0 ? 0 : tableView.numberOfRows(inSection: commentsSection)
     }
 
-    func simulateErrorMessageButtonTap() {
-        errorView.simulateTap()
+    var commentsSection: Int { 0 }
+
+    func commentMessage(at index: Int) -> String? {
+        return comment(at: index)?.messageLabel.text
+    }
+
+    func commentDate(at index: Int) -> String? {
+        return comment(at: index)?.dateLabel.text
+    }
+
+    func commentUsername(at index: Int) -> String? {
+        return comment(at: index)?.usernameLabel.text
+    }
+
+    private func comment(at index: Int) -> ImageCommentCell? {
+        guard numberOfRenderedComments() > index else { return nil }
+
+        let dataSource = tableView.dataSource
+        let indexPath: IndexPath = .init(row: index, section: commentsSection)
+        return dataSource?.tableView(tableView, cellForRowAt: indexPath) as? ImageCommentCell
     }
 }
