@@ -31,7 +31,7 @@ extension XCTestCase {
     func assert(
         snapshot: UIImage,
         named name: String,
-        perPixelTolerance: CGFloat = 0.0,
+        perPixelTolerance: CGFloat = 0.001,
         tolerance: CGFloat = 0.0,
         file: StaticString = #filePath,
         line: UInt = #line
