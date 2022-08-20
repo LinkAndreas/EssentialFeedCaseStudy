@@ -13,6 +13,10 @@
 		3805697A28B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3805697828B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_dark.png */; };
 		3805697B28B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_light.png in Resources */ = {isa = PBXBuildFile; fileRef = 3805697928B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_light.png */; };
 		3805697D28B10B9B00594893 /* LoadMoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3805697C28B10B9B00594893 /* LoadMoreCell.swift */; };
+		3805698228B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3805697E28B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_dark.png */; };
+		3805698328B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_light.png in Resources */ = {isa = PBXBuildFile; fileRef = 3805697F28B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_light.png */; };
+		3805698428B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3805698028B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_dark.png */; };
+		3805698528B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_light.png in Resources */ = {isa = PBXBuildFile; fileRef = 3805698128B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_light.png */; };
 		38097D8E2811DF3B00A77F03 /* UIView+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38097D8D2811DF3B00A77F03 /* UIView+Snapshot.swift */; };
 		380E073A26974E5600298C21 /* EssentialFeedCacheIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380E073926974E5600298C21 /* EssentialFeedCacheIntegrationTests.swift */; };
 		380E073C26974E5600298C21 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38AAD475261B4549004D6AF6 /* EssentialFeed.framework */; };
@@ -194,6 +198,10 @@
 		3805697828B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_LOAD_MORE_INDICATOR_dark.png; sourceTree = "<group>"; };
 		3805697928B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_light.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_LOAD_MORE_INDICATOR_light.png; sourceTree = "<group>"; };
 		3805697C28B10B9B00594893 /* LoadMoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadMoreCell.swift; sourceTree = "<group>"; };
+		3805697E28B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_LOAD_MORE_ERROR_dark.png; sourceTree = "<group>"; };
+		3805697F28B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_light.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_light.png; sourceTree = "<group>"; };
+		3805698028B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_dark.png; sourceTree = "<group>"; };
+		3805698128B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_light.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_LOAD_MORE_ERROR_light.png; sourceTree = "<group>"; };
 		38097D8D2811DF3B00A77F03 /* UIView+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Snapshot.swift"; sourceTree = "<group>"; };
 		380E073726974E5600298C21 /* EssentialFeedCacheIntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialFeedCacheIntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		380E073926974E5600298C21 /* EssentialFeedCacheIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EssentialFeedCacheIntegrationTests.swift; sourceTree = "<group>"; };
@@ -567,6 +575,10 @@
 		3866CE272884737300BC694C /* FeedSnapshotTests */ = {
 			isa = PBXGroup;
 			children = (
+				3805697E28B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_dark.png */,
+				3805698028B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_dark.png */,
+				3805697F28B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_light.png */,
+				3805698128B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_light.png */,
 				3805697828B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_dark.png */,
 				3805697928B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_light.png */,
 				38F0DCA22884783400802E86 /* FEED_WITH_CONTENT_extraExtraExtraLarge_dark.png */,
@@ -1178,6 +1190,7 @@
 				3866CE1F288472AA00BC694C /* IMAGE_COMMENTS_dark.png in Resources */,
 				3866CE102884727B00BC694C /* EMPTY_LIST_light.png in Resources */,
 				3866CE0B2884727B00BC694C /* EMPTY_LIST_dark.png in Resources */,
+				3805698528B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_light.png in Resources */,
 				3866CE0C2884727B00BC694C /* LIST_WITH_ERROR_MESSAGE_light.png in Resources */,
 				3866CE0F2884727B00BC694C /* LIST_WITH_ERROR_MESSAGE_dark.png in Resources */,
 				3866CE0E2884727B00BC694C /* LIST_WITH_ERROR_MESSAGE_extraExtraExtraLarge_light.png in Resources */,
@@ -1187,8 +1200,11 @@
 				38F0DCA92884784500802E86 /* IMAGE_COMMENTS_extraExtraExtraLarge_light.png in Resources */,
 				3866CE2F2884737300BC694C /* FEED_WITH_FAILED_IMAGE_LOADING_light.png in Resources */,
 				3866CE22288472AA00BC694C /* IMAGE_COMMENTS_light.png in Resources */,
+				3805698328B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_light.png in Resources */,
+				3805698428B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_dark.png in Resources */,
 				3866CE0D2884727B00BC694C /* LIST_WITH_ERROR_MESSAGE_extraExtraExtraLarge_dark.png in Resources */,
 				3866CE2C2884737300BC694C /* FEED_WITH_FAILED_IMAGE_LOADING_dark.png in Resources */,
+				3805698228B1150800594893 /* FEED_WITH_LOAD_MORE_ERROR_dark.png in Resources */,
 				3805697B28B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_light.png in Resources */,
 				38F0DCA52884783400802E86 /* FEED_WITH_CONTENT_extraExtraExtraLarge_light.png in Resources */,
 				3805697A28B1083200594893 /* FEED_WITH_LOAD_MORE_INDICATOR_dark.png in Resources */,
