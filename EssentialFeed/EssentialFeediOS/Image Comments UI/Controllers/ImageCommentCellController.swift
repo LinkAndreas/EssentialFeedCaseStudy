@@ -3,13 +3,15 @@
 import EssentialFeed
 import UIKit
 
-public final class ImageCommentCellController: NSObject, UITableViewDataSource {
+public final class ImageCommentCellController: NSObject {
     private let viewModel: ImageCommentViewModel
 
     public init(viewModel: ImageCommentViewModel) {
         self.viewModel = viewModel
     }
+}
 
+extension ImageCommentCellController: UITableViewDataSource {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         1
     }

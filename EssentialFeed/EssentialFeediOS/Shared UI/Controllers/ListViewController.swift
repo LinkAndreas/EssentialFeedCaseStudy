@@ -13,7 +13,7 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
         }
     )
 
-    private(set) public var errorView: ErrorView = ErrorView()
+    private(set) public var errorView = ErrorView()
 
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -103,6 +103,11 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
             let controller = cellController(at: indexPath)
             controller?.dataSourcePrefetching?.tableView?(tableView, cancelPrefetchingForRowsAt: [indexPath])
         }
+    }
+
+    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let controller = cellController(at: indexPath)
+        controller?.delegate?.tableView?(tableView, didSelectRowAt: indexPath)
     }
 
     private func preload(forRowAt indexPath: IndexPath) {
