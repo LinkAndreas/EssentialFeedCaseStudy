@@ -18,6 +18,10 @@ extension ListViewController {
         refreshControl?.isRefreshing == true
     }
 
+    var isShowingLoadingMoreIndicator: Bool {
+        loadMoreView()?.isLoading == true
+    }
+
     var errorMessage: String? {
         errorView.message
     }
