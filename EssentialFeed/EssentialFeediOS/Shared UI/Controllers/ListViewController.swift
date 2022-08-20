@@ -13,7 +13,7 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
         }
     )
 
-    private(set) public var errorView: ErrorView = ErrorView()
+    private(set) public var errorView = ErrorView()
 
     public override func viewDidLoad() {
         super.viewDidLoad()
