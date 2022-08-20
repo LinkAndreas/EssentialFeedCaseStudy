@@ -24,7 +24,7 @@ final class FeedUIIntegrationTests: XCTestCase {
         })
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        loaderSpy.completeFeedLoading(with: [image0, image1])
 
         sut.simulateTapOnFeedImage(at: 0)
         XCTAssertEqual(imageSelection, [image0])
@@ -56,12 +56,22 @@ final class FeedUIIntegrationTests: XCTestCase {
         XCTAssertEqual(loaderSpy.loadMoreCallCount, 0, "Expected no requests until load more action")
 
         sut.simulateLoadMoreFeedAction()
-
         XCTAssertEqual(loaderSpy.loadMoreCallCount, 1, "Expected load more request")
 
         sut.simulateLoadMoreFeedAction()
-
         XCTAssertEqual(loaderSpy.loadMoreCallCount, 1, "Expected no request while loading")
+
+        loaderSpy.completeLoadMore(lastPage: false, at: 0)
+        sut.simulateLoadMoreFeedAction()
+        XCTAssertEqual(loaderSpy.loadMoreCallCount, 2, "Expected request after load more completed with more pages.")
+
+        loaderSpy.completeLoadMoreWithError(at: 1)
+        sut.simulateLoadMoreFeedAction()
+        XCTAssertEqual(loaderSpy.loadMoreCallCount, 3, "Expected request after load more completed with error.")
+
+        loaderSpy.completeLoadMore(lastPage: true, at: 2)
+        sut.simulateLoadMoreFeedAction()
+        XCTAssertEqual(loaderSpy.loadMoreCallCount, 3, "Expected no request after load more completed with no more pages.")
     }
 
     func test_loadingFeedIndicator_isVisibleWhileLoadingFeed() {
@@ -70,13 +80,13 @@ final class FeedUIIntegrationTests: XCTestCase {
         sut.loadViewIfNeeded()
         XCTAssertTrue(sut.isShowingLoadingIndicator, "Expected loading indicator once view is loaded")
 
-        loaderSpy.completeFeedLoading(with: .success([]), atIndex: 0)
+        loaderSpy.completeFeedLoading(with: [], at: 0)
         XCTAssertFalse(sut.isShowingLoadingIndicator, "Expected no loading indicator once loading is completed")
 
         sut.simulateUserInitiatedReload()
         XCTAssertTrue(sut.isShowingLoadingIndicator, "Expected loading indicator once user initiated load")
 
-        loaderSpy.completeFeedLoading(with: .failure(anyNSError()), atIndex: 1)
+        loaderSpy.completeFeedLoadingWithError(anyNSError(), at: 1)
         XCTAssertFalse(sut.isShowingLoadingIndicator, "Expected no loading indicator once user initiated load failed")
     }
 
@@ -91,11 +101,11 @@ final class FeedUIIntegrationTests: XCTestCase {
         sut.loadViewIfNeeded()
         assertThat(sut, renders: [])
 
-        loaderSpy.completeFeedLoading(with: .success([image0]))
+        loaderSpy.completeFeedLoading(with: [image0])
         assertThat(sut, renders: [image0])
 
         sut.simulateUserInitiatedReload()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1, image2, image3]), atIndex: 1)
+        loaderSpy.completeFeedLoading(with: [image0, image1, image2, image3], at: 1)
         assertThat(sut, renders: [image0, image1, image2, image3])
     }
 
@@ -106,11 +116,11 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        loaderSpy.completeFeedLoading(with: [image0, image1])
         assertThat(sut, renders: [image0, image1])
 
         sut.simulateUserInitiatedReload()
-        loaderSpy.completeFeedLoading(with: .success([]), atIndex: 1)
+        loaderSpy.completeFeedLoading(with: [], at: 1)
         assertThat(sut, renders: [])
     }
 
@@ -120,13 +130,13 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         sut.loadViewIfNeeded()
 
-        loaderSpy.completeFeedLoading(with: .success([image0]))
+        loaderSpy.completeFeedLoading(with: [image0])
 
         assertThat(sut, renders: [image0])
 
         sut.simulateUserInitiatedReload()
 
-        loaderSpy.completeFeedLoading(with: .failure(anyNSError()), atIndex: 1)
+        loaderSpy.completeFeedLoadingWithError(anyNSError(), at: 1)
 
         assertThat(sut, renders: [image0])
     }
@@ -138,15 +148,15 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        loaderSpy.completeFeedLoading(with: [image0, image1])
 
         XCTAssertEqual(loaderSpy.loadedImageURLs, [], "Expected no image URL requests until views become visible")
 
-        sut.simulateFeedImageViewVisible(atIndex: 0)
+        sut.simulateFeedImageViewVisible(at: 0)
 
         XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url], "Expected first image URL request once first view becomes visible")
 
-        sut.simulateFeedImageViewVisible(atIndex: 1)
+        sut.simulateFeedImageViewVisible(at: 1)
 
         XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url, image1.url], "Expected second image URL request once second view becomes visible")
     }
@@ -158,15 +168,15 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        loaderSpy.completeFeedLoading(with: [image0, image1])
 
         XCTAssertEqual(loaderSpy.cancelledImageURLs, [], "Expected no image URL requests until views become visible")
 
-        sut.simulateFeedImageViewNotVisible(atIndex: 0)
+        sut.simulateFeedImageViewNotVisible(at: 0)
 
         XCTAssertEqual(loaderSpy.cancelledImageURLs, [image0.url], "Expected on cancelled image URL request once first view is not visible anymore")
 
-        sut.simulateFeedImageViewNotVisible(atIndex: 1)
+        sut.simulateFeedImageViewNotVisible(at: 1)
 
         XCTAssertEqual(loaderSpy.cancelledImageURLs, [image0.url, image1.url], "Expected two cancelled image URL requests once second view is not visible anymore")
     }
@@ -175,19 +185,19 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([makeImage(), makeImage()]))
+        loaderSpy.completeFeedLoading(with: [makeImage(), makeImage()])
 
-        let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
-        let view1 = sut.simulateFeedImageViewVisible(atIndex: 1)
+        let view0 = sut.simulateFeedImageViewVisible(at: 0)
+        let view1 = sut.simulateFeedImageViewVisible(at: 1)
 
         XCTAssertEqual(view0?.isShowingLoadingIndicator, true, "Expected loading indicator for first view while loading first image")
         XCTAssertEqual(view1?.isShowingLoadingIndicator, true, "Expected loading indicator for second view while loading second image")
 
-        loaderSpy.completeImageLoading(with: .success(anyData()), atIndex: 0)
+        loaderSpy.completeImageLoading(with: .success(anyData()), at: 0)
         XCTAssertEqual(view0?.isShowingLoadingIndicator, false, "Expected no loading indicator for first view when loading first image completes successfully")
         XCTAssertEqual(view1?.isShowingLoadingIndicator, true, "Expected no loading indicator state change for second view once first image loading completes successfully")
 
-        loaderSpy.completeImageLoading(with: .failure(anyNSError()), atIndex: 1)
+        loaderSpy.completeImageLoading(with: .failure(anyNSError()), at: 1)
         XCTAssertEqual(view0?.isShowingLoadingIndicator, false, "Expected no loading indicator state change for first view once second image loading completes successfully")
         XCTAssertEqual(view1?.isShowingLoadingIndicator, false, "Expected no loading indicator for second view when loading second image completes with error")
     }
@@ -196,21 +206,21 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([makeImage(), makeImage()]))
+        loaderSpy.completeFeedLoading(with: [makeImage(), makeImage()])
 
-        let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
-        let view1 = sut.simulateFeedImageViewVisible(atIndex: 1)
+        let view0 = sut.simulateFeedImageViewVisible(at: 0)
+        let view1 = sut.simulateFeedImageViewVisible(at: 1)
 
         XCTAssertEqual(view0?.renderedImage, .none, "Expected no image when loading first image")
         XCTAssertEqual(view1?.renderedImage, .none, "Expected no image when loading second image")
 
         let imageData0 = UIImage.make(with: .blue).pngData()!
         let imageData1 = UIImage.make(with: .red).pngData()!
-        loaderSpy.completeImageLoading(with: .success(imageData0), atIndex: 0)
+        loaderSpy.completeImageLoading(with: .success(imageData0), at: 0)
         XCTAssertEqual(view0?.renderedImage, imageData0, "Expected image for first view when loading first image completed successfully")
         XCTAssertEqual(view1?.renderedImage, .none, "Expected no image state change for second view when first image loading completed successfully")
 
-        loaderSpy.completeImageLoading(with: .success(imageData1), atIndex: 1)
+        loaderSpy.completeImageLoading(with: .success(imageData1), at: 1)
         XCTAssertEqual(view0?.renderedImage, imageData0, "Expected no image state change for first view when second image loading completed with error")
         XCTAssertEqual(view1?.renderedImage, imageData1, "Expected image for second view when loading second image completes successfully")
     }
@@ -219,20 +229,20 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([makeImage(), makeImage()]))
+        loaderSpy.completeFeedLoading(with: [makeImage(), makeImage()])
 
-        let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
-        let view1 = sut.simulateFeedImageViewVisible(atIndex: 1)
+        let view0 = sut.simulateFeedImageViewVisible(at: 0)
+        let view1 = sut.simulateFeedImageViewVisible(at: 1)
 
         XCTAssertEqual(view0?.isShowingRetryAction, false, "Expected no retry when loading first image")
         XCTAssertEqual(view1?.isShowingRetryAction, false, "Expected no retry when loading second image")
 
         let imageData0 = UIImage.make(with: .blue).pngData()!
-        loaderSpy.completeImageLoading(with: .success(imageData0), atIndex: 0)
+        loaderSpy.completeImageLoading(with: .success(imageData0), at: 0)
         XCTAssertEqual(view0?.isShowingRetryAction, false, "Expected no retry for first image when loading first image completed successfully")
         XCTAssertEqual(view1?.isShowingRetryAction, false, "Expected no retry state change for second view when first image loading completed successfully")
 
-        loaderSpy.completeImageLoading(with: .failure(anyNSError()), atIndex: 1)
+        loaderSpy.completeImageLoading(with: .failure(anyNSError()), at: 1)
         XCTAssertEqual(view0?.isShowingRetryAction, false, "Expected no image state change for first view when second image loading completed with error")
         XCTAssertEqual(view1?.isShowingRetryAction, true, "Expected retry for second view when loading second image completed with an error")
     }
@@ -241,14 +251,14 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([makeImage(), makeImage()]))
+        loaderSpy.completeFeedLoading(with: [makeImage(), makeImage()])
 
-        let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
+        let view0 = sut.simulateFeedImageViewVisible(at: 0)
 
         XCTAssertEqual(view0?.isShowingRetryAction, false, "Expected no retry when loading first image")
 
         let invalidImageData = "Invalid Image data".data(using: .utf8)!
-        loaderSpy.completeImageLoading(with: .success(invalidImageData), atIndex: 0)
+        loaderSpy.completeImageLoading(with: .success(invalidImageData), at: 0)
         XCTAssertEqual(view0?.isShowingRetryAction, true, "Expected retry for first image when loading first image completed with invalid data")
     }
 
@@ -258,10 +268,10 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        loaderSpy.completeFeedLoading(with: [image0, image1])
 
-        let view0 = sut.simulateFeedImageViewVisible(atIndex: 0)
-        let view1 = sut.simulateFeedImageViewVisible(atIndex: 1)
+        let view0 = sut.simulateFeedImageViewVisible(at: 0)
+        let view1 = sut.simulateFeedImageViewVisible(at: 1)
 
         XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url, image1.url], "Expected only two image URL requests before retry action")
 
@@ -280,12 +290,12 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        loaderSpy.completeFeedLoading(with: [image0, image1])
 
-        sut.simulateFeedImageViewNearVisible(atIndex: 0)
+        sut.simulateFeedImageViewNearVisible(at: 0)
         XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url], "Expected first image URL request once first image is near visible")
 
-        sut.simulateFeedImageViewNearVisible(atIndex: 1)
+        sut.simulateFeedImageViewNearVisible(at: 1)
         XCTAssertEqual(loaderSpy.loadedImageURLs, [image0.url, image1.url], "Expected second image URL request once second image is near visible")
     }
 
@@ -295,13 +305,13 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([image0, image1]))
+        loaderSpy.completeFeedLoading(with: [image0, image1])
         XCTAssertEqual(loaderSpy.cancelledImageURLs, [], "Expected no cancelled image URL requests until image is not near visible")
 
-        sut.simulateFeedImageViewNotNearVisible(atIndex: 0)
+        sut.simulateFeedImageViewNotNearVisible(at: 0)
         XCTAssertEqual(loaderSpy.cancelledImageURLs, [image0.url], "Expected first cancelled image URL request once first image is not near visible anymore")
 
-        sut.simulateFeedImageViewNotNearVisible(atIndex: 1)
+        sut.simulateFeedImageViewNotNearVisible(at: 1)
         XCTAssertEqual(loaderSpy.cancelledImageURLs, [image0.url, image1.url], "Expected second cancelled image URL request once second image is not near visible anymore")
     }
 
@@ -309,7 +319,7 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([makeImage()]))
+        loaderSpy.completeFeedLoading(with: [makeImage()])
 
         let view = sut.simulateFeedImageViewNotVisible()
         loaderSpy.completeImageLoading(with: .success(anyImageData()))
@@ -325,7 +335,7 @@ final class FeedUIIntegrationTests: XCTestCase {
         let exp = expectation(description: "Wait for background queue.")
 
         DispatchQueue.global().async {
-            loaderSpy.completeFeedLoading(with: .success([]), atIndex: 0)
+            loaderSpy.completeFeedLoading(with: [], at: 0)
             exp.fulfill()
         }
 
@@ -336,13 +346,13 @@ final class FeedUIIntegrationTests: XCTestCase {
         let (loaderSpy, sut) = makeSUT()
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoading(with: .success([makeImage()]), atIndex: 0)
-        _ = sut.simulateFeedImageViewVisible(atIndex: 0)
+        loaderSpy.completeFeedLoading(with: [makeImage()], at: 0)
+        _ = sut.simulateFeedImageViewVisible(at: 0)
 
         let exp = expectation(description: "Wait for background queue.")
 
         DispatchQueue.global().async {
-            loaderSpy.completeImageLoading(with: .success(self.anyImageData()), atIndex: 0)
+            loaderSpy.completeImageLoading(with: .success(self.anyImageData()), at: 0)
             exp.fulfill()
         }
 
@@ -355,11 +365,11 @@ final class FeedUIIntegrationTests: XCTestCase {
         XCTAssertEqual(sut.errorMessage, .none)
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoadingWithError(atIndex: 0)
+        loaderSpy.completeFeedLoadingWithError(at: 0)
         XCTAssertEqual(sut.errorMessage, loadError)
 
         sut.simulateUserInitiatedReload()
-        loaderSpy.completeFeedLoading(with: .success([makeImage()]), atIndex: 1)
+        loaderSpy.completeFeedLoading(with: [makeImage()], at: 1)
         XCTAssertEqual(sut.errorMessage, .none)
     }
 
@@ -369,7 +379,7 @@ final class FeedUIIntegrationTests: XCTestCase {
         XCTAssertEqual(sut.errorMessage, .none)
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoadingWithError(atIndex: 0)
+        loaderSpy.completeFeedLoadingWithError(at: 0)
         XCTAssertEqual(sut.errorMessage, loadError)
 
         sut.simulateErrorMessageButtonTap()

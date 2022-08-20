@@ -78,7 +78,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             .tryMap(FeedItemsMapper.map)
             .caching(to: localFeedLoader)
             .fallback(to: localFeedLoader.loadPublisher)
-            .map { Paginated(items: $0) }
+            .map { Paginated(items: $0, loadMore: nil) }
             .eraseToAnyPublisher()
     }
 

@@ -10,22 +10,22 @@ class EssentialAppUIAcceptanceTests: XCTestCase {
         let feed = launch(httpClient: .online(response(for:)), store: .empty)
 
         XCTAssertEqual(feed.numberOfRenderedFeedImageViews(), 2)
-        XCTAssertEqual(feed.renderedFeedImageData(atIndex: 0), makeImageData())
-        XCTAssertEqual(feed.renderedFeedImageData(atIndex: 1), makeImageData())
+        XCTAssertEqual(feed.renderedFeedImageData(at: 0), makeImageData())
+        XCTAssertEqual(feed.renderedFeedImageData(at: 1), makeImageData())
     }
 
     func test_onLaunch_displaysCachedFeedWhenCustomerHasNoConnectivity() {
         let sharedStore = InMemoryFeedStore.empty
         let onlineFeed = launch(httpClient: .online(response(for:)), store: sharedStore)
 
-        onlineFeed.simulateFeedImageViewVisible(atIndex: 0)
-        onlineFeed.simulateFeedImageViewVisible(atIndex: 1)
+        onlineFeed.simulateFeedImageViewVisible(at: 0)
+        onlineFeed.simulateFeedImageViewVisible(at: 1)
 
         let offlineFeed = launch(httpClient: .offline, store: sharedStore)
 
         XCTAssertEqual(offlineFeed.numberOfRenderedFeedImageViews(), 2)
-        XCTAssertEqual(offlineFeed.renderedFeedImageData(atIndex: 0), makeImageData())
-        XCTAssertEqual(offlineFeed.renderedFeedImageData(atIndex: 1), makeImageData())
+        XCTAssertEqual(offlineFeed.renderedFeedImageData(at: 0), makeImageData())
+        XCTAssertEqual(offlineFeed.renderedFeedImageData(at: 1), makeImageData())
     }
 
     func test_onLaunch_displaysEmptyFeedWhenCustomerHasNoConnectivityAndNoCache() {

@@ -55,35 +55,35 @@ extension ListViewController {
     }
 
     @discardableResult
-    func simulateFeedImageViewVisible(atIndex index: Int = 0) -> FeedImageCell? {
+    func simulateFeedImageViewVisible(at index: Int = 0) -> FeedImageCell? {
         feedImageView(at: index)
     }
 
     @discardableResult
-    func simulateFeedImageViewNotVisible(atIndex index: Int = 0) -> FeedImageCell? {
-        let view = simulateFeedImageViewVisible(atIndex: index)
+    func simulateFeedImageViewNotVisible(at index: Int = 0) -> FeedImageCell? {
+        let view = simulateFeedImageViewVisible(at: index)
 
         let delegate = tableView.delegate
         delegate?.tableView?(tableView, didEndDisplaying: view!, forRowAt: .init(row: index, section: 0))
         return view
     }
 
-    func simulateFeedImageViewNearVisible(atIndex index: Int = 0) {
+    func simulateFeedImageViewNearVisible(at index: Int = 0) {
         let dataSource = tableView.prefetchDataSource
         let indexPath = IndexPath(row: index, section: 0)
         dataSource?.tableView(tableView, prefetchRowsAt: [indexPath])
     }
 
-    func simulateFeedImageViewNotNearVisible(atIndex index: Int = 0) {
-        simulateFeedImageViewNearVisible(atIndex: index)
+    func simulateFeedImageViewNotNearVisible(at index: Int = 0) {
+        simulateFeedImageViewNearVisible(at: index)
 
         let dataSource = tableView.prefetchDataSource
         let indexPath = IndexPath(row: index, section: 0)
         dataSource?.tableView?(tableView, cancelPrefetchingForRowsAt: [indexPath])
     }
 
-    func renderedFeedImageData(atIndex index: Int) -> Data? {
-        simulateFeedImageViewVisible(atIndex: index)?.renderedImage
+    func renderedFeedImageData(at index: Int) -> Data? {
+        simulateFeedImageViewVisible(at: index)?.renderedImage
     }
 
     func numberOfRenderedFeedImageViews() -> Int {

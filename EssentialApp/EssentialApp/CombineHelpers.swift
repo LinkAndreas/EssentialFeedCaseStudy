@@ -4,6 +4,25 @@ import Combine
 import EssentialFeed
 
 public extension Paginated {
+    init(items: [Item], loadMorePublisher: (() -> AnyPublisher<Self, Error>)?) {
+        self.init(items: items, loadMore: loadMorePublisher.map { publisher in
+            return { loadMoreCompletion in
+                publisher().subscribe(
+                    Subscribers.Sink(
+                        receiveCompletion: { completion in
+                            if case let .failure(error) = completion {
+                                loadMoreCompletion(.failure(error))
+                            }
+                        },
+                        receiveValue: { value in
+                            loadMoreCompletion(.success(value))
+                        }
+                    )
+                )
+            }
+        })
+    }
+
     var loadMorePublisher: (() -> AnyPublisher<Self, Error>)? {
         guard let loadMore = loadMore else { return nil }
 
