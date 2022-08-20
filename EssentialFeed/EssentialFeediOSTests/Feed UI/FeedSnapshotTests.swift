@@ -38,7 +38,15 @@ final class FeedSnapshotTests: XCTestCase {
             snapshot: sut.snapshot(for: .iPhone8(style: .dark, category: .extraExtraExtraLarge)),
             named: "FEED_WITH_FAILED_IMAGE_LOADING_extraExtraExtraLarge_dark"
         )
+    }
 
+    func test_feedWithLoadMoreIndicator() {
+        let sut = makeSUT()
+
+        sut.display(feedWithLoadMoreIndicator())
+
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_LOAD_MORE_INDICATOR_light")
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_LOAD_MORE_INDICATOR_dark")
     }
 }
 
@@ -98,6 +106,24 @@ private extension FeedSnapshotTests {
                     location: "Paris, France"
                 )
             )
+        ]
+    }
+
+    func feedWithLoadMoreIndicator() -> [CellController] {
+        let stub = ImageStub(
+            viewModel: FeedImageViewModel(
+                description: "Brandenburg Gate",
+                location: "Berlin, Germany"
+            )
+        )
+        let cellController = FeedImageCellController(viewModel: stub.viewModel, delegate: stub)
+        stub.controller = cellController
+        let loadMore = LoadMoreCellController()
+        loadMore.display(ResourceLoadingViewModel(isLoading: true))
+
+        return [
+            CellController(dataSource: cellController, dataSourcePrefetching: cellController),
+            CellController(dataSource: loadMore)
         ]
     }
 }
