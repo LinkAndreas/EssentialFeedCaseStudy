@@ -2,7 +2,7 @@
 
 import UIKit
 
-final class LoadMoreCell: UITableViewCell {
+public final class LoadMoreCell: UITableViewCell {
     private lazy var spinner: UIActivityIndicatorView = {
         let spinner = UIActivityIndicatorView(style: .medium)
         contentView.addSubview(spinner)
@@ -12,6 +12,7 @@ final class LoadMoreCell: UITableViewCell {
             spinner.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             spinner.heightAnchor.constraint(lessThanOrEqualToConstant: 40)
         ])
+
         return spinner
     }()
 
@@ -22,7 +23,6 @@ final class LoadMoreCell: UITableViewCell {
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         label.textAlignment = .center
-
         contentView.addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -31,10 +31,11 @@ final class LoadMoreCell: UITableViewCell {
             label.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             contentView.bottomAnchor.constraint(equalTo: label.bottomAnchor, constant: 8)
         ])
+
         return label
     }()
 
-    var isLoading: Bool {
+    public var isLoading: Bool {
         get { spinner.isAnimating }
         set {
             if newValue {
@@ -45,7 +46,7 @@ final class LoadMoreCell: UITableViewCell {
         }
     }
 
-    var message: String? {
+    public var message: String? {
         get { messageLabel.text }
         set { messageLabel.text = newValue }
     }

@@ -9,6 +9,7 @@ extension FeedUIIntegrationTests {
         var feedRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
         var imageRequests: [(url: URL, completion: (FeedImageDataLoader.LoadResult) -> Void)] = []
         var loadFeedCallCount: Int { feedRequests.count }
+        private (set) var loadMoreCallCount: Int = 0
         var loadedImageURLs: [URL] { imageRequests.map(\.url) }
         private (set) var cancelledImageURLs: [URL] = []
 
@@ -27,10 +28,17 @@ extension FeedUIIntegrationTests {
             return publisher.eraseToAnyPublisher()
         }
 
-        func completeFeedLoading(with result: Result<[FeedImage], Error>, atIndex index: Int = 0) {
+        func completeFeedLoading(with result: Result<[FeedImage], Error> = .success([]), atIndex index: Int = 0) {
             switch result {
             case let .success(feed):
-                feedRequests[index].send(Paginated(items: feed))
+                feedRequests[index].send(
+                    Paginated(
+                        items: feed,
+                        loadMore: { [weak self] _ in
+                            self?.loadMoreCallCount += 1
+                        }
+                    )
+                )
 
             case let .failure(error):
                 feedRequests[index].send(completion: .failure(error))
