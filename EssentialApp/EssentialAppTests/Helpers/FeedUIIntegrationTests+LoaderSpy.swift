@@ -6,7 +6,7 @@ import EssentialFeediOS
 
 extension FeedUIIntegrationTests {
     final class LoaderSpy: FeedImageDataLoader {
-        var feedRequests: [PassthroughSubject<[FeedImage], Error>] = []
+        var feedRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
         var imageRequests: [(url: URL, completion: (FeedImageDataLoader.LoadResult) -> Void)] = []
         var loadFeedCallCount: Int { feedRequests.count }
         var loadedImageURLs: [URL] { imageRequests.map(\.url) }
@@ -21,8 +21,8 @@ extension FeedUIIntegrationTests {
         }
 
         // MARK: - FeedLoader
-        func loadPublisher() -> AnyPublisher<[FeedImage], Error> {
-            let publisher = PassthroughSubject<[FeedImage], Error>()
+        func loadPublisher() -> AnyPublisher<Paginated<FeedImage>, Error> {
+            let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
             feedRequests.append(publisher)
             return publisher.eraseToAnyPublisher()
         }
@@ -30,7 +30,7 @@ extension FeedUIIntegrationTests {
         func completeFeedLoading(with result: Result<[FeedImage], Error>, atIndex index: Int = 0) {
             switch result {
             case let .success(feed):
-                feedRequests[index].send(feed)
+                feedRequests[index].send(Paginated(items: feed))
 
             case let .failure(error):
                 feedRequests[index].send(completion: .failure(error))
