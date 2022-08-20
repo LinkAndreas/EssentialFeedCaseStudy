@@ -5,6 +5,9 @@ import EssentialFeediOS
 import UIKit
 
 public final class FeedViewAdapter: ResourceView {
+    typealias ImageDataPresentationAdapter = LoadResourcePresentationAdapter<Data, WeakRef<FeedImageCellController>>
+    typealias LoadMorePresentationAdapter = LoadResourcePresentationAdapter<Paginated<FeedImage>, FeedViewAdapter>
+
     private weak var controller: ListViewController?
     private let imageLoader: (URL) -> FeedImageDataLoader.Publisher
     private let selection: (FeedImage) -> Void
@@ -49,7 +52,20 @@ public final class FeedViewAdapter: ResourceView {
             )
         }
 
-        let loadMore = LoadMoreCellController { viewModel.loadMore?{ _ in } }
+        guard let loadMorePublisher = viewModel.loadMorePublisher else {
+            controller?.display(feedSection)
+            return
+        }
+
+        let loadMoreAdapter = LoadMorePresentationAdapter(loader: loadMorePublisher)
+        let loadMore = LoadMoreCellController(callback: loadMoreAdapter.loadResource)
+        loadMoreAdapter.presenter = LoadResourcePresenter(
+            resourceView: self,
+            loadingView: WeakRef(loadMore),
+            errorView: WeakRef(loadMore),
+            mapper: { $0 }
+        )
+        
         let loadMoreSection: [CellController] = [CellController(dataSource: loadMore, delegate: loadMore)]
 
         controller?.display(feedSection, loadMoreSection)
