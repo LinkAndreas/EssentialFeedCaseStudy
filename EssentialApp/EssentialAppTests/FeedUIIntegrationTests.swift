@@ -405,6 +405,23 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         wait(for: [exp], timeout: 1.0)
     }
+    
+    func test_loadMoreCompletion_rendersErrorMessageOnError() {
+        let (loaderSpy, sut) = makeSUT()
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoading()
+        sut.simulateLoadMoreFeedAction()
+        
+        XCTAssertNil(sut.loadMoreFeedErrorMessage)
+        
+        loaderSpy.completeLoadMoreWithError()
+        
+        XCTAssertEqual(sut.loadMoreFeedErrorMessage, "Couldn\'t connect to server.")
+        
+        sut.simulateLoadMoreFeedAction()
+        
+        XCTAssertNil(sut.loadMoreFeedErrorMessage)
+    }
 
     func test_loadFeedCompletion_rendersConnectionErrorUntilUserInitiatedReloadSucceeded() {
         let (loaderSpy, sut) = makeSUT()

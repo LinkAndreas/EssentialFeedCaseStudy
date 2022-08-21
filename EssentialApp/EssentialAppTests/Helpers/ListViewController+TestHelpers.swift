@@ -25,6 +25,10 @@ extension ListViewController {
     var errorMessage: String? {
         errorView.message
     }
+    
+    var loadMoreFeedErrorMessage: String? {
+        loadMoreView()?.message
+    }
 
     func simulateErrorMessageButtonTap() {
         errorView.simulateTap()
