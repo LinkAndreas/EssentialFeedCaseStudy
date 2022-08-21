@@ -18,18 +18,17 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
     public override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.dataSource = dataSource
-        setupErrorView()
+        configureTableView()
         refresh()
     }
 
+    private func configureTableView() {
+        dataSource.defaultRowAnimation = .fade
+        tableView.dataSource = dataSource
+        setupErrorView()
+    }
+
     private func setupErrorView() {
-        errorView.onHide = { [weak self] in
-            self?.tableView.beginUpdates()
-            self?.tableView.sizeTableHeaderToFit()
-            self?.tableView.endUpdates()
-        }
-        
         let container = UIView()
         container.backgroundColor = .clear
         container.addSubview(errorView)
@@ -43,6 +42,12 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
         ])
         
         tableView.tableHeaderView = container
+
+        errorView.onHide = { [weak self] in
+            self?.tableView.beginUpdates()
+            self?.tableView.sizeTableHeaderToFit()
+            self?.tableView.endUpdates()
+        }
     }
 
     public override func viewDidLayoutSubviews() {
@@ -57,11 +62,15 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
         tableView.reloadData()
     }
 
+    @IBAction func refresh() {
+        onRefresh?()
+    }
+
     public func display(_ sections: [CellController]...) {
         var snapshot = NSDiffableDataSourceSnapshot<Int, CellController>()
-        sections.enumerated().forEach { index, cellControllers in
-            snapshot.appendSections([index])
-            snapshot.appendItems(cellControllers)
+        sections.enumerated().forEach { section, cellControllers in
+            snapshot.appendSections([section])
+            snapshot.appendItems(cellControllers, toSection: section)
         }
 
         if #available(iOS 15.0, *) {
@@ -79,8 +88,14 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
         errorView.message = viewModel.message
     }
 
-    @IBAction func refresh() {
-        onRefresh?()
+    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let controller = cellController(at: indexPath)
+        controller?.delegate?.tableView?(tableView, didSelectRowAt: indexPath)
+    }
+
+    public override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let controller = cellController(at: indexPath)
+        controller?.delegate?.tableView?(tableView, willDisplay: cell, forRowAt: indexPath)
     }
 
     public override func tableView(
@@ -93,12 +108,10 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
     }
 
     public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        indexPaths.forEach(preload(forRowAt:))
-    }
-
-    public override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        let controller = cellController(at: indexPath)
-        controller?.delegate?.tableView?(tableView, willDisplay: cell, forRowAt: indexPath)
+        indexPaths.forEach { indexPath in
+            let controller = cellController(at: indexPath)
+            controller?.dataSourcePrefetching?.tableView(tableView, prefetchRowsAt: [indexPath])
+        }
     }
 
     public func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
@@ -106,16 +119,6 @@ public final class ListViewController: UITableViewController, UITableViewDataSou
             let controller = cellController(at: indexPath)
             controller?.dataSourcePrefetching?.tableView?(tableView, cancelPrefetchingForRowsAt: [indexPath])
         }
-    }
-
-    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let controller = cellController(at: indexPath)
-        controller?.delegate?.tableView?(tableView, didSelectRowAt: indexPath)
-    }
-
-    private func preload(forRowAt indexPath: IndexPath) {
-        let controller = cellController(at: indexPath)
-        controller?.dataSourcePrefetching?.tableView(tableView, prefetchRowsAt: [indexPath])
     }
 
     private func cellController(at indexPath: IndexPath) -> CellController? {
