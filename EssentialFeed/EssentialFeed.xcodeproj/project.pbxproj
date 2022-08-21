@@ -151,6 +151,7 @@
 		38F0DCA62884783400802E86 /* FEED_WITH_CONTENT_extraExtraExtraLarge_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F0DCA22884783400802E86 /* FEED_WITH_CONTENT_extraExtraExtraLarge_dark.png */; };
 		38F0DCA92884784500802E86 /* IMAGE_COMMENTS_extraExtraExtraLarge_light.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F0DCA72884784500802E86 /* IMAGE_COMMENTS_extraExtraExtraLarge_light.png */; };
 		38F0DCAA2884784500802E86 /* IMAGE_COMMENTS_extraExtraExtraLarge_dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F0DCA82884784500802E86 /* IMAGE_COMMENTS_extraExtraExtraLarge_dark.png */; };
+		38F8103A28B2147C009E946F /* FeedEndpointTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F8103928B2147C009E946F /* FeedEndpointTests.swift */; };
 		38F8DEC42652C3360090CD73 /* URLSessionHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F8DEC12652C2F20090CD73 /* URLSessionHTTPClient.swift */; };
 /* End PBXBuildFile section */
 
@@ -341,6 +342,7 @@
 		38F0DCA22884783400802E86 /* FEED_WITH_CONTENT_extraExtraExtraLarge_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FEED_WITH_CONTENT_extraExtraExtraLarge_dark.png; sourceTree = "<group>"; };
 		38F0DCA72884784500802E86 /* IMAGE_COMMENTS_extraExtraExtraLarge_light.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = IMAGE_COMMENTS_extraExtraExtraLarge_light.png; sourceTree = "<group>"; };
 		38F0DCA82884784500802E86 /* IMAGE_COMMENTS_extraExtraExtraLarge_dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = IMAGE_COMMENTS_extraExtraExtraLarge_dark.png; sourceTree = "<group>"; };
+		38F8103928B2147C009E946F /* FeedEndpointTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedEndpointTests.swift; sourceTree = "<group>"; };
 		38F8DEC12652C2F20090CD73 /* URLSessionHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionHTTPClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -783,6 +785,7 @@
 			children = (
 				38870181271B414E0054F760 /* Helper */,
 				38AAD483261B4549004D6AF6 /* FeedItemsMapperTests.swift */,
+				38F8103928B2147C009E946F /* FeedEndpointTests.swift */,
 				3887017F271B400D0054F760 /* FeedImageDataMapperTests.swift */,
 			);
 			path = "Feed API";
@@ -1362,6 +1365,7 @@
 				3853B6982666AF0B00D14854 /* FeedCacheTestHelpers.swift in Sources */,
 				3860172726499D250066F663 /* XCTTestCase+MemoryLeakTracking.swift in Sources */,
 				38DA49BF26FA6C07001397BF /* FeedLocalizationTests.swift in Sources */,
+				38F8103A28B2147C009E946F /* FeedEndpointTests.swift in Sources */,
 				38AAD484261B4549004D6AF6 /* FeedItemsMapperTests.swift in Sources */,
 				383CF6E826655FBF001F4272 /* FeedStoreSpy.swift in Sources */,
 				38625F0A279D90BA00B995F4 /* ImageCommentsMapperTests.swift in Sources */,
