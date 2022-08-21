@@ -11,10 +11,10 @@ public protocol FeedImageCellControllerDelegate: AnyObject {
 
 public final class FeedImageCellController: NSObject {
     public typealias ResourceViewModel = UIImage
+
     private let viewModel: FeedImageViewModel
     public let delegate: FeedImageCellControllerDelegate
     private let selection: () -> Void
-
     private var cell: FeedImageCell?
 
     public init(
@@ -38,7 +38,7 @@ extension FeedImageCellController: UITableViewDataSource, UITableViewDelegate, U
         cell?.locationContainer?.isHidden = !viewModel.hasLocation
         cell?.locationLabel?.text = viewModel.location
         cell?.descriptionLabel?.text = viewModel.description
-        cell?.feedImageRetryButton.isHidden = true
+        cell?.feedImageView.image = nil
         cell?.onRetry = { [weak self] in self?.delegate.didRequestImage() }
         delegate.didRequestImage()
         return cell!
