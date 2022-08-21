@@ -57,7 +57,9 @@ public final class FeedViewAdapter: ResourceView {
             return
         }
 
-        let loadMoreAdapter = LoadMorePresentationAdapter(loader: loadMorePublisher)
+        let loadMoreAdapter = LoadMorePresentationAdapter(
+            loader: { loadMorePublisher.dispatchOnMainQueue() }
+        )
         let loadMore = LoadMoreCellController(callback: loadMoreAdapter.loadResource)
         loadMoreAdapter.presenter = LoadResourcePresenter(
             resourceView: self,
