@@ -38,7 +38,32 @@ final class FeedSnapshotTests: XCTestCase {
             snapshot: sut.snapshot(for: .iPhone8(style: .dark, category: .extraExtraExtraLarge)),
             named: "FEED_WITH_FAILED_IMAGE_LOADING_extraExtraExtraLarge_dark"
         )
+    }
 
+    func test_feedWithLoadMoreIndicator() {
+        let sut = makeSUT()
+
+        sut.display(feedWithLoadMoreIndicator())
+
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_LOAD_MORE_INDICATOR_light")
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_LOAD_MORE_INDICATOR_dark")
+    }
+
+    func test_feedWithLoadMoreError() {
+        let sut = makeSUT()
+
+        sut.display(feedWithLoadMoreError())
+
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .light)), named: "FEED_WITH_LOAD_MORE_ERROR_light")
+        assert(snapshot: sut.snapshot(for: .iPhone8(style: .dark)), named: "FEED_WITH_LOAD_MORE_ERROR_dark")
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .light, category: .extraExtraExtraLarge)),
+            named: "FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_light"
+        )
+        assert(
+            snapshot: sut.snapshot(for: .iPhone8(style: .dark, category: .extraExtraExtraLarge)),
+            named: "FEED_WITH_LOAD_MORE_ERROR_extraExtraExtraLarge_dark"
+        )
     }
 }
 
@@ -98,6 +123,35 @@ private extension FeedSnapshotTests {
                     location: "Paris, France"
                 )
             )
+        ]
+    }
+
+    func feedWithLoadMoreIndicator() -> [CellController] {
+        let loadMore = LoadMoreCellController()
+        loadMore.display(ResourceLoadingViewModel(isLoading: true))
+
+        return feed(with: loadMore)
+    }
+
+    func feedWithLoadMoreError() -> [CellController] {
+        let loadMore = LoadMoreCellController()
+        loadMore.display(.error(message: "This is a multiline\nerror message"))
+
+        return feed(with: loadMore)
+    }
+
+    func feed(with loadMore: LoadMoreCellController) -> [CellController] {
+        let stub = ImageStub(
+            viewModel: FeedImageViewModel(
+                description: "Brandenburg Gate",
+                location: "Berlin, Germany"
+            )
+        )
+        let cellController = FeedImageCellController(viewModel: stub.viewModel, delegate: stub)
+        stub.controller = cellController
+        return [
+            CellController(dataSource: cellController, dataSourcePrefetching: cellController),
+            CellController(dataSource: loadMore)
         ]
     }
 }

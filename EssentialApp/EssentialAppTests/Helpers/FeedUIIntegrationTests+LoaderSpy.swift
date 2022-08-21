@@ -6,10 +6,14 @@ import EssentialFeediOS
 
 extension FeedUIIntegrationTests {
     final class LoaderSpy: FeedImageDataLoader {
-        var feedRequests: [PassthroughSubject<[FeedImage], Error>] = []
+        var feedRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
+        var loadMoreRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
         var imageRequests: [(url: URL, completion: (FeedImageDataLoader.LoadResult) -> Void)] = []
+
         var loadFeedCallCount: Int { feedRequests.count }
+        var loadMoreCallCount: Int { loadMoreRequests.count }
         var loadedImageURLs: [URL] { imageRequests.map(\.url) }
+
         private (set) var cancelledImageURLs: [URL] = []
 
         private struct TaskSpy: FeedImageDataLoaderTask {
@@ -21,25 +25,50 @@ extension FeedUIIntegrationTests {
         }
 
         // MARK: - FeedLoader
-        func loadPublisher() -> AnyPublisher<[FeedImage], Error> {
-            let publisher = PassthroughSubject<[FeedImage], Error>()
+        func loadPublisher() -> AnyPublisher<Paginated<FeedImage>, Error> {
+            let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
             feedRequests.append(publisher)
             return publisher.eraseToAnyPublisher()
         }
 
-        func completeFeedLoading(with result: Result<[FeedImage], Error>, atIndex index: Int = 0) {
-            switch result {
-            case let .success(feed):
-                feedRequests[index].send(feed)
-
-            case let .failure(error):
-                feedRequests[index].send(completion: .failure(error))
-            }
+        func completeFeedLoading(with feed: [FeedImage] = [], at index: Int = 0) {
+            feedRequests[index].send(
+                Paginated(
+                    items: feed,
+                    loadMorePublisher: { [weak self] in
+                        let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
+                        self?.loadMoreRequests.append(publisher)
+                        return publisher.eraseToAnyPublisher()
+                    }
+                )
+            )
         }
 
-        func completeFeedLoadingWithError(atIndex index: Int = 0) {
-            let error = NSError(domain: "an error", code: 0)
+        func completeFeedLoadingWithError(
+            _ error: Error = NSError(domain: "an error", code: 0),
+            at index: Int = 0
+        ) {
             feedRequests[index].send(completion: .failure(error))
+        }
+
+        func completeLoadMore(with feed: [FeedImage] = [], lastPage: Bool = false, at index: Int = 0) {
+            loadMoreRequests[index].send(
+                Paginated(
+                    items: feed,
+                    loadMorePublisher: lastPage ? nil : { [weak self] in
+                        let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
+                        self?.loadMoreRequests.append(publisher)
+                        return publisher.eraseToAnyPublisher()
+                    }
+                )
+            )
+        }
+
+        func completeLoadMoreWithError(
+            _ error: Error = NSError(domain: "an error", code: 0),
+            at index: Int = 0
+        ) {
+            loadMoreRequests[index].send(completion: .failure(error))
         }
 
         // MARK: - FeedImageDataLoader
@@ -52,7 +81,7 @@ extension FeedUIIntegrationTests {
             return task
         }
 
-        func completeImageLoading(with result: FeedImageDataLoader.LoadResult, atIndex index: Int = 0) {
+        func completeImageLoading(with result: FeedImageDataLoader.LoadResult, at index: Int = 0) {
             imageRequests[index].completion(result)
         }
     }

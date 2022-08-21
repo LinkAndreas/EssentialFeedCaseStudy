@@ -18,12 +18,31 @@ extension ListViewController {
         refreshControl?.isRefreshing == true
     }
 
+    var isShowingLoadingMoreIndicator: Bool {
+        loadMoreView()?.isLoading == true
+    }
+
     var errorMessage: String? {
         errorView.message
+    }
+    
+    var loadMoreFeedErrorMessage: String? {
+        loadMoreView()?.message
     }
 
     func simulateErrorMessageButtonTap() {
         errorView.simulateTap()
+    }
+
+    func cell(row: Int, section: Int) -> UITableViewCell? {
+        guard
+            let dataSource = tableView.dataSource,
+            dataSource.numberOfSections?(in: tableView) ?? 0 > section,
+            dataSource.tableView(tableView, numberOfRowsInSection: section) > row
+        else { return nil }
+
+        let indexPath = IndexPath(row: row, section: section)
+        return dataSource.tableView(tableView, cellForRowAt: indexPath)
     }
 }
 
@@ -34,57 +53,81 @@ extension ListViewController {
 
         delegate?.tableView?(tableView, didSelectRowAt: indexPath)
     }
+    
+    func simulateTapOnLoadMoreErrorMessage() {
+        let delegate = tableView.delegate
+        let indexPath = IndexPath(row: 0, section: feedLoadMoreSection)
 
-    @discardableResult
-    func simulateFeedImageViewVisible(atIndex index: Int = 0) -> FeedImageCell? {
-        feedImageView(atIndex: index) as? FeedImageCell
+        delegate?.tableView?(tableView, didSelectRowAt: indexPath)
+    }
+
+    func simulateLoadMoreFeedAction() {
+        guard let view = loadMoreView() else { return }
+
+        let delegate = tableView.delegate
+        let indexPath = IndexPath(row: 0, section: feedLoadMoreSection)
+        delegate?.tableView?(tableView, willDisplay: view, forRowAt: indexPath)
     }
 
     @discardableResult
-    func simulateFeedImageViewNotVisible(atIndex index: Int = 0) -> FeedImageCell? {
-        let view = simulateFeedImageViewVisible(atIndex: index)
+    func simulateFeedImageViewVisible(at index: Int = 0) -> FeedImageCell? {
+        feedImageView(at: index)
+    }
+
+    @discardableResult
+    func simulateFeedImageViewNotVisible(at index: Int = 0) -> FeedImageCell? {
+        let view = simulateFeedImageViewVisible(at: index)
 
         let delegate = tableView.delegate
         delegate?.tableView?(tableView, didEndDisplaying: view!, forRowAt: .init(row: index, section: 0))
         return view
     }
 
-    func simulateFeedImageViewNearVisible(atIndex index: Int = 0) {
+    func simulateFeedImageViewNearVisible(at index: Int = 0) {
         let dataSource = tableView.prefetchDataSource
         let indexPath = IndexPath(row: index, section: 0)
         dataSource?.tableView(tableView, prefetchRowsAt: [indexPath])
     }
 
-    func simulateFeedImageViewNotNearVisible(atIndex index: Int = 0) {
-        simulateFeedImageViewNearVisible(atIndex: index)
+    func simulateFeedImageViewNotNearVisible(at index: Int = 0) {
+        simulateFeedImageViewNearVisible(at: index)
 
         let dataSource = tableView.prefetchDataSource
         let indexPath = IndexPath(row: index, section: 0)
         dataSource?.tableView?(tableView, cancelPrefetchingForRowsAt: [indexPath])
     }
 
-    func renderedFeedImageData(atIndex index: Int) -> Data? {
-        simulateFeedImageViewVisible(atIndex: index)?.renderedImage
+    func renderedFeedImageData(at index: Int) -> Data? {
+        simulateFeedImageViewVisible(at: index)?.renderedImage
     }
 
     func numberOfRenderedFeedImageViews() -> Int {
-        tableView.numberOfSections == 0 ? 0 : tableView.numberOfRows(inSection: feedImageSection)
+        tableView.numberOfSections > feedImageSection ? tableView.numberOfRows(inSection: feedImageSection) : 0
+    }
+
+    func numberOfRenderedLoadMoreViews() -> Int {
+        tableView.numberOfSections > feedLoadMoreSection ? tableView.numberOfRows(inSection: feedLoadMoreSection) : 0
+    }
+    
+    var canLoadMore: Bool {
+        loadMoreView() != nil
+    }
+
+    func feedImageView(at row: Int = 0) -> FeedImageCell? {
+        return cell(row: row, section: feedImageSection) as? FeedImageCell
+    }
+
+    func loadMoreView(at row: Int = 0) -> LoadMoreCell? {
+        return cell(row: row, section: feedLoadMoreSection) as? LoadMoreCell
     }
 
     var feedImageSection: Int { 0 }
-
-    func feedImageView(atIndex index: Int = 0) -> UITableViewCell? {
-        guard numberOfRenderedFeedImageViews() > index else { return nil }
-
-        let dataSource = tableView.dataSource
-        let indexPath: IndexPath = .init(row: index, section: feedImageSection)
-        return dataSource?.tableView(tableView, cellForRowAt: indexPath)
-    }
+    var feedLoadMoreSection: Int { 1 }
 }
 
 extension ListViewController {
     func numberOfRenderedComments() -> Int {
-        tableView.numberOfSections == 0 ? 0 : tableView.numberOfRows(inSection: commentsSection)
+        tableView.numberOfSections > commentsSection ? tableView.numberOfRows(inSection: commentsSection) : 0
     }
 
     var commentsSection: Int { 0 }
@@ -102,10 +145,6 @@ extension ListViewController {
     }
 
     private func comment(at index: Int = 0) -> ImageCommentCell? {
-        guard numberOfRenderedComments() > index else { return nil }
-
-        let dataSource = tableView.dataSource
-        let indexPath: IndexPath = .init(row: index, section: commentsSection)
-        return dataSource?.tableView(tableView, cellForRowAt: indexPath) as? ImageCommentCell
+        return cell(row: index, section: commentsSection) as? ImageCommentCell
     }
 }

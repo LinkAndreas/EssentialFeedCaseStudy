@@ -36,9 +36,9 @@ extension FeedUIIntegrationTests {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        let view = sut.feedImageView(atIndex: index)
+        let view = sut.feedImageView(at: index)
 
-        guard let cell = view as? FeedImageCell else {
+        guard let cell = view else {
             XCTFail("Expected \(FeedImageCell.self) instance, got \(String(describing: view))", file: file, line: line)
             return
         }

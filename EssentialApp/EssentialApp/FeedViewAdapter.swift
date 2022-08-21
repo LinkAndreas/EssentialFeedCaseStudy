@@ -5,6 +5,9 @@ import EssentialFeediOS
 import UIKit
 
 public final class FeedViewAdapter: ResourceView {
+    typealias ImageDataPresentationAdapter = LoadResourcePresentationAdapter<Data, WeakRef<FeedImageCellController>>
+    typealias LoadMorePresentationAdapter = LoadResourcePresentationAdapter<Paginated<FeedImage>, FeedViewAdapter>
+
     private weak var controller: ListViewController?
     private let imageLoader: (URL) -> FeedImageDataLoader.Publisher
     private let selection: (FeedImage) -> Void
@@ -19,8 +22,8 @@ public final class FeedViewAdapter: ResourceView {
         self.selection = selection
     }
 
-    public func display(_ viewModel: FeedViewModel) {
-        controller?.display(viewModel.feed.map { model in
+    public func display(_ viewModel: Paginated<FeedImage>) {
+        let feedSection: [CellController] = viewModel.items.map { model in
             let adapter = LoadResourcePresentationAdapter<Data, WeakRef<FeedImageCellController>>(
                 loader: { [imageLoader] in
                     imageLoader(model.url)
@@ -47,7 +50,27 @@ public final class FeedViewAdapter: ResourceView {
                 delegate: view,
                 dataSourcePrefetching: view
             )
-        })
+        }
+
+        guard let loadMorePublisher = viewModel.loadMorePublisher else {
+            controller?.display(feedSection)
+            return
+        }
+
+        let loadMoreAdapter = LoadMorePresentationAdapter(
+            loader: { loadMorePublisher.dispatchOnMainQueue() }
+        )
+        let loadMore = LoadMoreCellController(callback: loadMoreAdapter.loadResource)
+        loadMoreAdapter.presenter = LoadResourcePresenter(
+            resourceView: self,
+            loadingView: WeakRef(loadMore),
+            errorView: WeakRef(loadMore),
+            mapper: { $0 }
+        )
+        
+        let loadMoreSection: [CellController] = [CellController(dataSource: loadMore, delegate: loadMore)]
+
+        controller?.display(feedSection, loadMoreSection)
     }
 
     private func mapper(data: Data) throws -> UIImage {
