@@ -90,7 +90,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func makeRemoteLoadMoreLoader(items: [FeedImage], lastItem: FeedImage?) -> (() -> AnyPublisher<Paginated<FeedImage>, Error>)? {
         lastItem.map { [baseURL] lastImage in
             let url = FeedEndpoint.get(after: lastImage).url(baseURL: baseURL)
-            return { [httpClient] in
+            return { [httpClient, localFeedLoader] in
                 httpClient
                     .loadPublisher(from: url)
                     .tryMap(FeedItemsMapper.map)
@@ -101,6 +101,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                             loadMorePublisher: self.makeRemoteLoadMoreLoader(items: allItems, lastItem: newItems.last)
                         )
                     }
+                    .caching(to: localFeedLoader)
                     .eraseToAnyPublisher()
             }
         }
