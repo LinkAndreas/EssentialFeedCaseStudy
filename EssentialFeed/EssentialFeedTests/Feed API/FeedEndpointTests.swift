@@ -5,7 +5,7 @@ import XCTest
 
 final class FeedEndpointTests: XCTestCase {
     func test_feed_endpointURL() {
-        let baseURL = URL(string: "http://base-url.com/")!
+        let baseURL = URL(string: "http://base-url.com")!
         let sut = FeedEndpoint.get()
         
         let received = sut.url(baseURL: baseURL)
@@ -18,7 +18,7 @@ final class FeedEndpointTests: XCTestCase {
     
     func test_feed_endpointURLAfterGivenImage() {
         let image = uniqueImage()
-        let baseURL = URL(string: "http://base-url.com/")!
+        let baseURL = URL(string: "http://base-url.com")!
         let sut = FeedEndpoint.get(after: image)
         
         let received = sut.url(baseURL: baseURL)
