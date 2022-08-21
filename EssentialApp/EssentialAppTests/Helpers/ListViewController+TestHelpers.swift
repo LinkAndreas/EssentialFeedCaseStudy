@@ -108,6 +108,10 @@ extension ListViewController {
     func numberOfRenderedLoadMoreViews() -> Int {
         tableView.numberOfSections > feedLoadMoreSection ? tableView.numberOfRows(inSection: feedLoadMoreSection) : 0
     }
+    
+    var canLoadMore: Bool {
+        loadMoreView() != nil
+    }
 
     func feedImageView(at row: Int = 0) -> FeedImageCell? {
         return cell(row: row, section: feedImageSection) as? FeedImageCell

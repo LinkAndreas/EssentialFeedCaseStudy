@@ -13,7 +13,7 @@ extension FeedEndpoint {
             var components = URLComponents()
             components.scheme = baseURL.scheme
             components.host = baseURL.host
-            components.path = baseURL.path + "v1/feed"
+            components.path = baseURL.path + "/v1/feed"
             components.queryItems = [
                 URLQueryItem(name: "limit", value: "10"),
                 image.map { URLQueryItem(name: "after_id", value: $0.id.uuidString) }
