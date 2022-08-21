@@ -416,7 +416,7 @@ final class FeedUIIntegrationTests: XCTestCase {
         
         loaderSpy.completeLoadMoreWithError()
         
-        XCTAssertEqual(sut.loadMoreFeedErrorMessage, "Couldn\'t connect to server.")
+        XCTAssertEqual(sut.loadMoreFeedErrorMessage, loadError)
         
         sut.simulateLoadMoreFeedAction()
         
@@ -448,6 +448,28 @@ final class FeedUIIntegrationTests: XCTestCase {
 
         sut.simulateErrorMessageButtonTap()
         XCTAssertEqual(sut.errorMessage, .none)
+    }
+    
+    func test_loadMoreView_dismissesErrorMessageOnTap() {
+        let (loaderSpy, sut) = makeSUT()
+        sut.loadViewIfNeeded()
+        loaderSpy.completeFeedLoading()
+        
+        sut.simulateLoadMoreFeedAction()
+        
+        XCTAssertEqual(loaderSpy.loadMoreCallCount, 1)
+        
+        sut.simulateTapOnLoadMoreErrorMessage()
+
+        XCTAssertEqual(loaderSpy.loadMoreCallCount, 1)
+
+        loaderSpy.completeLoadMoreWithError()
+        
+        XCTAssertEqual(sut.loadMoreFeedErrorMessage, loadError)
+
+        sut.simulateTapOnLoadMoreErrorMessage()
+
+        XCTAssertEqual(loaderSpy.loadMoreCallCount, 2)
     }
 }
 
