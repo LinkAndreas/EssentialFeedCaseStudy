@@ -9,7 +9,7 @@ public struct CellController {
     let dataSourcePrefetching: UITableViewDataSourcePrefetching?
 
     public init(
-        id: AnyHashable = UUID(),
+        id: AnyHashable,
         dataSource: UITableViewDataSource,
         delegate: UITableViewDelegate? = nil,
         dataSourcePrefetching: UITableViewDataSourcePrefetching? = nil
@@ -21,14 +21,14 @@ public struct CellController {
     }
 }
 
-extension CellController: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
 extension CellController: Equatable {
     public static func ==(lhs: Self, rhs: Self) -> Bool {
         return lhs.id == rhs.id
+    }
+}
+
+extension CellController: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

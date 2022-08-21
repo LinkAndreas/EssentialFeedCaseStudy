@@ -68,7 +68,7 @@ public final class FeedViewAdapter: ResourceView {
             mapper: { $0 }
         )
         
-        let loadMoreSection: [CellController] = [CellController(dataSource: loadMore, delegate: loadMore)]
+        let loadMoreSection: [CellController] = [CellController(id: UUID(), dataSource: loadMore, delegate: loadMore)]
 
         controller?.display(feedSection, loadMoreSection)
     }

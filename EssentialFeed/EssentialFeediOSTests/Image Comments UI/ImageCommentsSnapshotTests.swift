@@ -53,7 +53,7 @@ extension ListViewController {
     func display(_ comments: [ImageCommentViewModel]) {
         let controllers: [CellController] = comments.map { comment in
             let controller = ImageCommentCellController(viewModel: comment)
-            return CellController(dataSource: controller)
+            return CellController(id: UUID(), dataSource: controller)
         }
 
         display(controllers)
