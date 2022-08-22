@@ -119,13 +119,39 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     private func makeLocalImageLoaderWithRemoteFallback(url: URL) -> FeedImageDataLoader.Publisher {
+        let client = HTTPClientProfilingDecorator(decoratee: httpClient, logger: logger)
         return localImageLoader
             .loadPublisher(from: url)
-            .fallback(to: { [httpClient, localImageLoader] in
-                httpClient
+            .fallback(to: { [client, localImageLoader] in
+                client
                     .loadPublisher(from: url)
                     .tryMap(FeedImageDataMapper.map)
                     .caching(to: localImageLoader, using: url)
             })
+    }
+}
+
+final class HTTPClientProfilingDecorator: HTTPClient {
+    private let decoratee: HTTPClient
+    private let logger: Logger
+
+    init(decoratee: HTTPClient, logger: Logger) {
+        self.decoratee = decoratee
+        self.logger = logger
+    }
+
+    func load(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> EssentialFeed.HTTPClientTask {
+        let startTime = CACurrentMediaTime()
+
+        logger.trace("Start loading url \(url).")
+        return decoratee.load(from: url) { [logger] result in
+            if case let .failure(error) = result {
+                logger.trace("Failed to load url \(url) with error \(error.localizedDescription).")
+            }
+
+            let elapsedTime = CACurrentMediaTime() - startTime
+            logger.trace("Finished loading url \(url) in \(elapsedTime) seconds.")
+            completion(result)
+        }
     }
 }
