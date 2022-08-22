@@ -24,8 +24,13 @@ final class CommentsUIIntegrationTests: XCTestCase {
         XCTAssertEqual(loaderSpy.loadCommentsCallCount, 1, "Expected a loading request once the view is loaded")
 
         sut.simulateUserInitiatedReload()
+        XCTAssertEqual(loaderSpy.loadCommentsCallCount, 1, "Expected no load request until previous request completes")
+
+        loaderSpy.completeCommentsLoading(at: 0)
+        sut.simulateUserInitiatedReload()
         XCTAssertEqual(loaderSpy.loadCommentsCallCount, 2, "Expected another load request once user initiated the load")
 
+        loaderSpy.completeCommentsLoading(at: 1)
         sut.simulateUserInitiatedReload()
         XCTAssertEqual(loaderSpy.loadCommentsCallCount, 3, "Expected a third load request once user initiated another load")
     }
@@ -36,13 +41,13 @@ final class CommentsUIIntegrationTests: XCTestCase {
         sut.loadViewIfNeeded()
         XCTAssertTrue(sut.isShowingLoadingIndicator, "Expected loading indicator once view is loaded")
 
-        loaderSpy.completeCommentsLoading(with: .success([]), atIndex: 0)
+        loaderSpy.completeCommentsLoading(at: 0)
         XCTAssertFalse(sut.isShowingLoadingIndicator, "Expected no loading indicator once loading is completed")
 
         sut.simulateUserInitiatedReload()
         XCTAssertTrue(sut.isShowingLoadingIndicator, "Expected loading indicator once user initiated load")
 
-        loaderSpy.completeCommentsLoading(with: .failure(anyNSError()), atIndex: 1)
+        loaderSpy.completeCommentsLoading(with: .failure(anyNSError()), at: 1)
         XCTAssertFalse(sut.isShowingLoadingIndicator, "Expected no loading indicator once user initiated load failed")
     }
 
@@ -59,7 +64,7 @@ final class CommentsUIIntegrationTests: XCTestCase {
         assertThat(sut, renders: [comment0])
 
         sut.simulateUserInitiatedReload()
-        loaderSpy.completeCommentsLoading(with: .success([comment0, comment1]), atIndex: 1)
+        loaderSpy.completeCommentsLoading(with: .success([comment0, comment1]), at: 1)
         assertThat(sut, renders: [comment0, comment1])
     }
 
@@ -73,7 +78,7 @@ final class CommentsUIIntegrationTests: XCTestCase {
         assertThat(sut, renders: [comment])
 
         sut.simulateUserInitiatedReload()
-        loaderSpy.completeCommentsLoading(with: .success([]), atIndex: 1)
+        loaderSpy.completeCommentsLoading(at: 1)
         assertThat(sut, renders: [])
     }
 
@@ -89,7 +94,7 @@ final class CommentsUIIntegrationTests: XCTestCase {
 
         sut.simulateUserInitiatedReload()
 
-        loaderSpy.completeCommentsLoading(with: .failure(anyNSError()), atIndex: 1)
+        loaderSpy.completeCommentsLoading(with: .failure(anyNSError()), at: 1)
 
         assertThat(sut, renders: [comment])
     }
@@ -102,7 +107,7 @@ final class CommentsUIIntegrationTests: XCTestCase {
         let exp = expectation(description: "Wait for background queue.")
 
         DispatchQueue.global().async {
-            loaderSpy.completeCommentsLoading(with: .success([]), atIndex: 0)
+            loaderSpy.completeCommentsLoading(at: 0)
             exp.fulfill()
         }
 
@@ -115,11 +120,11 @@ final class CommentsUIIntegrationTests: XCTestCase {
         XCTAssertEqual(sut.errorMessage, .none)
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoadingWithError(atIndex: 0)
+        loaderSpy.completeFeedLoadingWithError(at: 0)
         XCTAssertEqual(sut.errorMessage, loadError)
 
         sut.simulateUserInitiatedReload()
-        loaderSpy.completeCommentsLoading(with: .success([makeComment()]), atIndex: 1)
+        loaderSpy.completeCommentsLoading(with: .success([makeComment()]), at: 1)
         XCTAssertEqual(sut.errorMessage, .none)
     }
 
@@ -129,7 +134,7 @@ final class CommentsUIIntegrationTests: XCTestCase {
         XCTAssertEqual(sut.errorMessage, .none)
 
         sut.loadViewIfNeeded()
-        loaderSpy.completeFeedLoadingWithError(atIndex: 0)
+        loaderSpy.completeFeedLoadingWithError(at: 0)
         XCTAssertEqual(sut.errorMessage, loadError)
 
         sut.simulateErrorMessageButtonTap()

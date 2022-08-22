@@ -42,6 +42,7 @@ extension FeedUIIntegrationTests {
                     }
                 )
             )
+            feedRequests[index].send(completion: .finished)
         }
 
         func completeFeedLoadingWithError(

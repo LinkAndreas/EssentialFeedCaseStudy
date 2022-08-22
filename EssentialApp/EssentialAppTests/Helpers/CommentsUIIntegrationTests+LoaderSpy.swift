@@ -16,17 +16,18 @@ extension CommentsUIIntegrationTests {
             return publisher.eraseToAnyPublisher()
         }
 
-        func completeCommentsLoading(with result: Result<[ImageComment], Error>, atIndex index: Int = 0) {
+        func completeCommentsLoading(with result: Result<[ImageComment], Error> = .success([]), at index: Int = 0) {
             switch result {
             case let .success(comments):
                 requests[index].send(comments)
+                requests[index].send(completion: .finished)
 
             case let .failure(error):
                 requests[index].send(completion: .failure(error))
             }
         }
 
-        func completeFeedLoadingWithError(atIndex index: Int = 0) {
+        func completeFeedLoadingWithError(at index: Int = 0) {
             let error = NSError(domain: "an error", code: 0)
             requests[index].send(completion: .failure(error))
         }
