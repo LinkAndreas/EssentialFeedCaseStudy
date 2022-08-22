@@ -19,6 +19,13 @@ extension ManagedFeedImage {
         return try first(in: context, for: url)?.data
     }
 
+    static func update(data: Data?, for url: URL, in context: NSManagedObjectContext) throws {
+        let image = try first(in: context, for: url)
+        image?.data = data
+        context.userInfo[url] = data
+        try context.save()
+    }
+
     static func images(
         from localFeed: [LocalFeedImage],
         in context: NSManagedObjectContext

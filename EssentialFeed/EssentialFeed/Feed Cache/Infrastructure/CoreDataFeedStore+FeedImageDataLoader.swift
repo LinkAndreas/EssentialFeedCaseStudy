@@ -8,9 +8,7 @@ extension CoreDataFeedStore: FeedImageDataStore {
     ) {
         perform { context in
             completion(Result {
-                try ManagedFeedImage.first(in: context, for: url)
-                    .map { $0.data = imageData }
-                    .map(context.save)
+                try ManagedFeedImage.update(data: imageData, for: url, in: context)
             })
         }
     }
