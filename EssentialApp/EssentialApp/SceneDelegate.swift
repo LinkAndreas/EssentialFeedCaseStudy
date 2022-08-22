@@ -4,11 +4,13 @@ import Combine
 import CoreData
 import EssentialFeed
 import EssentialFeediOS
+import os
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
+    private lazy var logger: Logger = Logger(subsystem: "de.linkandreas.EssentialApp", category: "main")
     private lazy var baseURL = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed")!
 
     private lazy var httpClient: HTTPClient = {
@@ -24,6 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             )
         } catch {
             assertionFailure("Failed to instantiate CoreDataFeedStore, error occurred: \(error.localizedDescription)")
+            logger.fault("Failed to instantiate CoreDataFeedStore, error occurred: \(error.localizedDescription)")
             return NullStore()
         }
     }()
