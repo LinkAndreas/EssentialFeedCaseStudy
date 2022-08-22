@@ -9,6 +9,8 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
+    private lazy var baseURL = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed")!
+
     private lazy var httpClient: HTTPClient = {
         URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
     }()
@@ -21,11 +23,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     .appendingPathComponent("feed-store.sqlite")
             )
         } catch {
+            assertionFailure("Failed to instantiate CoreDataFeedStore, error occurred: \(error.localizedDescription)")
             return NullStore()
         }
     }()
-
-    private lazy var baseURL = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed")!
 
     private lazy var navigationController = UINavigationController(
         rootViewController: FeedUIComposer.feedComposedWith(
