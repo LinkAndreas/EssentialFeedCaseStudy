@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3805698928B3D0DD00594893 /* NullStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3805698828B3D0DD00594893 /* NullStore.swift */; };
 		3887B8452760EC13003541D6 /* CombineHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3887B8442760EC13003541D6 /* CombineHelpers.swift */; };
 		38A934E6288C0D3E00C94D3F /* CommentsUIIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38A934E5288C0D3E00C94D3F /* CommentsUIIntegrationTests.swift */; };
 		38A934E8288C0D8300C94D3F /* CommentsUIComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38A934E7288C0D8300C94D3F /* CommentsUIComposer.swift */; };
@@ -74,6 +75,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3805698828B3D0DD00594893 /* NullStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NullStore.swift; sourceTree = "<group>"; };
 		3887B8442760EC13003541D6 /* CombineHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineHelpers.swift; sourceTree = "<group>"; };
 		38A934E5288C0D3E00C94D3F /* CommentsUIIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsUIIntegrationTests.swift; sourceTree = "<group>"; };
 		38A934E7288C0D8300C94D3F /* CommentsUIComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsUIComposer.swift; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 				38FE1C8D275B6EB200D39EF0 /* FeedViewAdapter.swift */,
 				38A934EB288C18FB00C94D3F /* CommentsViewAdapter.swift */,
 				38FA5D05275775B800645A56 /* SceneDelegate.swift */,
+				3805698828B3D0DD00594893 /* NullStore.swift */,
 				3887B8442760EC13003541D6 /* CombineHelpers.swift */,
 				38FA5D07275775B800645A56 /* ViewController.swift */,
 				38FE1C8E275B6EB200D39EF0 /* WeakRef.swift */,
@@ -361,6 +364,7 @@
 				38FA5D06275775B800645A56 /* SceneDelegate.swift in Sources */,
 				38A934E8288C0D8300C94D3F /* CommentsUIComposer.swift in Sources */,
 				38FE1C91275B6EB200D39EF0 /* WeakRef.swift in Sources */,
+				3805698928B3D0DD00594893 /* NullStore.swift in Sources */,
 				38FE1C90275B6EB200D39EF0 /* FeedViewAdapter.swift in Sources */,
 				38ED977327590A20006E0C96 /* FeedImageDataLoaderCacheDecorator.swift in Sources */,
 				3887B8452760EC13003541D6 /* CombineHelpers.swift in Sources */,

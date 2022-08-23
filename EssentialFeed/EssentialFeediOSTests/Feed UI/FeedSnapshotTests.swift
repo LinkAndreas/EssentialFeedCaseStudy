@@ -72,7 +72,7 @@ private extension ListViewController {
         let cells: [CellController] = stubs.map { stub in
             let controller = FeedImageCellController(viewModel: stub.viewModel, delegate: stub)
             stub.controller = controller
-            return CellController(dataSource: controller, dataSourcePrefetching: controller)
+            return CellController(id: UUID(), dataSource: controller, dataSourcePrefetching: controller)
         }
 
         display(cells)
@@ -150,8 +150,8 @@ private extension FeedSnapshotTests {
         let cellController = FeedImageCellController(viewModel: stub.viewModel, delegate: stub)
         stub.controller = cellController
         return [
-            CellController(dataSource: cellController, dataSourcePrefetching: cellController),
-            CellController(dataSource: loadMore)
+            CellController(id: UUID(), dataSource: cellController, dataSourcePrefetching: cellController),
+            CellController(id: UUID(), dataSource: loadMore)
         ]
     }
 }
