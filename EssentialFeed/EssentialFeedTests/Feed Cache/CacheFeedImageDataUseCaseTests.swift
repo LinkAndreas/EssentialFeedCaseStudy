@@ -15,7 +15,7 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        sut.save(imageData, for: url) { _ in }
+        try? sut.save(imageData, for: url)
 
         XCTAssertEqual(spy.receivedMessages, [.insert(imageData: imageData, url: url)])
     }
@@ -38,11 +38,11 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
     }
 
     // MARK: - Helper
-    private func failed() -> LocalFeedImageDataLoader.SaveResult {
+    private func failed() -> Result<Void, Error> {
         return .failure(LocalFeedImageDataLoader.SaveError.failed)
     }
 
-    private func success() -> LocalFeedImageDataLoader.SaveResult {
+    private func success() -> Result<Void, Error> {
         return .success(())
     }
 
@@ -59,7 +59,7 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
 
     private func expect(
         _ sut: LocalFeedImageDataLoader,
-        toCompleteWith expectedResult: LocalFeedImageDataLoader.SaveResult,
+        toCompleteWith expectedResult: Result<Void, Error>,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -67,16 +67,11 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let imageData = anyData()
         let url = anyURL()
 
-        let expectation = expectation(description: "Wait for result")
-        var receivedResult: LocalFeedImageDataLoader.SaveResult?
-
         action()
-        sut.save(imageData, for: url) { result in
-            receivedResult = result
-            expectation.fulfill()
-        }
 
-        wait(for: [expectation], timeout: 1.0)
+        let receivedResult = Result {
+            try sut.save(imageData, for: url)
+        }
 
         switch (expectedResult, receivedResult) {
         case (.success, .success):

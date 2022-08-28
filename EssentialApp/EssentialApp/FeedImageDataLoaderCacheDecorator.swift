@@ -28,6 +28,6 @@ public final class FeedImageDataLoaderCacheDecorator: FeedImageDataLoader {
 
 private extension FeedImageDataCache {
     func saveIgnoringResult(_ imageData: Data, for url: URL) {
-        save(imageData, for: url) { _ in }
+        try? save(imageData, for: url)
     }
 }

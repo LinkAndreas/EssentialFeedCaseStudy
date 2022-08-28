@@ -257,24 +257,21 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        let exp = expectation(description: "Wait for result")
-        sut.save(imageData, for: url) { result in
-            switch result {
-            case .success:
-                break
-
-            case let .failure(receivedError):
-                XCTFail(
-                    "Expected to succeed, but received \(receivedError) instead.",
-                    file: file,
-                    line: line
-                )
-            }
-
-            exp.fulfill()
+        let result = Result {
+            try sut.save(imageData, for: url)
         }
 
-        wait(for: [exp], timeout: 1.0)
+        switch result {
+        case .success:
+            break
+
+        case let .failure(receivedError):
+            XCTFail(
+                "Expected to succeed, but received \(receivedError) instead.",
+                file: file,
+                line: line
+            )
+        }
     }
 
     private func validate(
@@ -284,24 +281,21 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        let exp = expectation(description: "Wait for result")
-        sut.save(imageData, for: url) { result in
-            switch result {
-            case .success:
-                break
-
-            case let .failure(receivedError):
-                XCTFail(
-                    "Expected to succeed, but received \(receivedError) instead.",
-                    file: file,
-                    line: line
-                )
-            }
-
-            exp.fulfill()
+        let result = Result {
+            try sut.save(imageData, for: url)
         }
 
-        wait(for: [exp], timeout: 1.0)
+        switch result {
+        case .success:
+            break
+
+        case let .failure(receivedError):
+            XCTFail(
+                "Expected to succeed, but received \(receivedError) instead.",
+                file: file,
+                line: line
+            )
+        }
     }
 
     private func setupEmptyStoreState() {
