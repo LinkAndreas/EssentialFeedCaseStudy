@@ -38,19 +38,19 @@ extension LocalFeedImageDataLoader: FeedImageDataLoader {
 
     public func loadImageData(from url: URL, completion: @escaping (LoadResult) -> Void) -> FeedImageDataLoaderTask {
         let task = LoadImageDataTask(completion: completion)
-        store.retrieve(dataForURL: url) { [weak self] result in
-            guard self != nil else { return }
+        let result = Result<Data?, Error> {
+            try store.retrieve(dataForURL: url)
+        }
 
-            switch result {
-            case let .success(data?):
-                task.complete(with: .success(data))
+        switch result {
+        case let .success(data?):
+            task.complete(with: .success(data))
 
-            case .success(.none):
-                task.complete(with: .failure(LoadError.notFound))
+        case .success(.none):
+            task.complete(with: .failure(LoadError.notFound))
 
-            case .failure:
-                task.complete(with: .failure(LoadError.failed))
-            }
+        case .failure:
+            task.complete(with: .failure(LoadError.failed))
         }
 
         return task

@@ -45,43 +45,6 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
         })
     }
 
-    func test_loadImageData_doesNotDeliverResultAfterCancellingTask() {
-        let url = anyURL()
-        let (spy, sut) = makeSUT()
-
-        var receivedResults: [LocalFeedImageDataLoader.LoadResult] = []
-        let task = sut.loadImageData(from: url) { result in
-            receivedResults.append(result)
-        }
-
-        task.cancel()
-
-        spy.completeDataRetrieval(with: .success(.none))
-        spy.completeDataRetrieval(with: .success(anyData()))
-        spy.completeDataRetrieval(with: .failure(anyNSError()))
-
-        XCTAssertTrue(receivedResults.isEmpty, "Should not receive result after cancelling task.")
-    }
-
-    func test_loadImageData_doesNotDeliverResultAfterSUTInstanceGotDeallocated() {
-        let url = anyURL()
-        let spy = FeedImageDataStoreSpy()
-        var sut: LocalFeedImageDataLoader? = LocalFeedImageDataLoader(store: spy)
-
-        var receivedResults: [LocalFeedImageDataLoader.LoadResult] = []
-        _ = sut?.loadImageData(from: url) { result in
-            receivedResults.append(result)
-        }
-
-        sut = nil
-
-        spy.completeDataRetrieval(with: .success(.none))
-        spy.completeDataRetrieval(with: .success(anyData()))
-        spy.completeDataRetrieval(with: .failure(anyNSError()))
-
-        XCTAssertTrue(receivedResults.isEmpty, "Should not receive result after cancelling task.")
-    }
-
     // MARK: - Helper
     private func failed() -> LocalFeedImageDataLoader.LoadResult {
         return .failure(LocalFeedImageDataLoader.LoadError.failed)
@@ -112,12 +75,12 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
         let expectation = expectation(description: "Wait for load result.")
         var receivedResult: LocalFeedImageDataLoader.LoadResult?
 
+        action()
+
         _ = sut.loadImageData(from: url) { result in
             receivedResult = result
             expectation.fulfill()
         }
-
-        action()
 
         wait(for: [expectation], timeout: 1.0)
 
