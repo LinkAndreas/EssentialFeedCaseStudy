@@ -168,3 +168,56 @@ extension DispatchQueue {
         }
     }
 }
+
+extension Scheduler {
+    func eraseToAnyScheduler() -> AnyScheduler<SchedulerTimeType, SchedulerOptions> {
+        AnyScheduler(self)
+    }
+}
+
+final class AnyScheduler<SchedulerTimeType: Strideable, SchedulerOptions>: Scheduler where SchedulerTimeType.Stride: SchedulerTimeIntervalConvertible {
+    private var _now: (() -> SchedulerTimeType)!
+    private var _minimumTolerance: (() -> SchedulerTimeType.Stride)!
+    private var _schedule: ((SchedulerOptions?, @escaping () -> Void) -> Void)!
+    private var _scheduleAfter: ((SchedulerTimeType, SchedulerTimeType.Stride, SchedulerOptions?, @escaping () -> Void) -> Void)!
+    private var _scheduleAfterInterval: ((SchedulerTimeType, SchedulerTimeType.Stride, SchedulerTimeType.Stride, SchedulerOptions?, @escaping () -> Void) -> Cancellable)!
+
+    init<S: Scheduler>(_ scheduler: S) where S.SchedulerTimeType == SchedulerTimeType, S.SchedulerOptions == SchedulerOptions {
+        _now = { scheduler.now }
+        _minimumTolerance = { scheduler.minimumTolerance }
+        _schedule = { scheduler.schedule(options: $0, $1)}
+        _scheduleAfter = { scheduler.schedule(after: $0, tolerance: $1, options: $2, $3)}
+        _scheduleAfterInterval = { scheduler.schedule(after: $0, interval: $1, tolerance: $2, options: $3, $4)}
+    }
+
+    var now: SchedulerTimeType {
+        _now()
+    }
+
+    var minimumTolerance: SchedulerTimeType.Stride {
+        _minimumTolerance()
+    }
+
+    func schedule(options: SchedulerOptions?, _ action: @escaping () -> Void) {
+        _schedule(options, action)
+    }
+
+    func schedule(
+        after date: SchedulerTimeType,
+        tolerance: SchedulerTimeType.Stride,
+        options: SchedulerOptions?,
+        _ action: @escaping () -> Void
+    ) {
+        _scheduleAfter(date, tolerance, options, action)
+    }
+
+    func schedule(
+        after date: SchedulerTimeType,
+        interval: SchedulerTimeType.Stride,
+        tolerance: SchedulerTimeType.Stride,
+        options: SchedulerOptions?,
+        _ action: @escaping () -> Void
+    ) -> Cancellable {
+        _scheduleAfterInterval(date, interval, tolerance, options, action)
+    }
+}
