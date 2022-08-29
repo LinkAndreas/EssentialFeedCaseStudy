@@ -23,11 +23,11 @@ class FeedImageDataStoreSpy: FeedImageDataStore {
         try insertionResult?.get()
     }
 
-    func completeDataRetrieval(with result: FeedImageDataStore.RetrievalResult) {
+    func stubRetrievalResult(with result: Result<Data?, Error>) {
         retrievalResult = result
     }
 
-    func completeDataInsertion(with result: FeedImageDataStore.InsertionResult) {
+    func stubInsertionResult(with result: Result<Void, Error>) {
         insertionResult = result
     }
 }

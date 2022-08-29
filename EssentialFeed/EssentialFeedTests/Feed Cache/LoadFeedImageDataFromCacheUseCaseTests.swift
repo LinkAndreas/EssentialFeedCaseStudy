@@ -10,11 +10,12 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
         XCTAssertTrue(spy.receivedMessages.isEmpty)
     }
 
-    func test_loadImageData_requestsStoreDataForURL() {
+    func test_loadImageData_requestsStoreDataForURL() throws {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        _ = sut.loadImageData(from: url) { _ in }
+        spy.stubRetrievalResult(with: .success(anyData()))
+        _ = try sut.loadImageData(from: url)
 
         XCTAssertEqual(spy.receivedMessages, [.retrieve(dataFor: url)])
     }
@@ -24,7 +25,7 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
 
         expect(sut, toCompleteWith: failed(), when: {
-            spy.completeDataRetrieval(with: .failure(error))
+            spy.stubRetrievalResult(with: .failure(error))
         })
     }
 
@@ -32,7 +33,7 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
 
         expect(sut, toCompleteWith: notFound(), when: {
-            spy.completeDataRetrieval(with: .success(.none))
+            spy.stubRetrievalResult(with: .success(.none))
         })
     }
 
@@ -41,16 +42,16 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
         let foundData = anyData()
 
         expect(sut, toCompleteWith: .success(foundData), when: {
-            spy.completeDataRetrieval(with: .success(foundData))
+            spy.stubRetrievalResult(with: .success(foundData))
         })
     }
 
     // MARK: - Helper
-    private func failed() -> LocalFeedImageDataLoader.LoadResult {
+    private func failed() -> Result<Data, Error> {
         return .failure(LocalFeedImageDataLoader.LoadError.failed)
     }
 
-    private func notFound() -> LocalFeedImageDataLoader.LoadResult {
+    private func notFound() -> Result<Data, Error> {
         return .failure(LocalFeedImageDataLoader.LoadError.notFound)
     }
 
@@ -67,32 +68,26 @@ final class LoadFeedImageDataFromCacheUseCaseTests: XCTestCase {
 
     private func expect(
         _ sut: LocalFeedImageDataLoader,
-        toCompleteWith expectedResult: LocalFeedImageDataLoader.LoadResult,
+        toCompleteWith expectedResult: Result<Data, Error>,
         when action: () -> Void
     ) {
         let url = anyURL()
 
-        let expectation = expectation(description: "Wait for load result.")
-        var receivedResult: LocalFeedImageDataLoader.LoadResult?
-
         action()
 
-        _ = sut.loadImageData(from: url) { result in
-            receivedResult = result
-            expectation.fulfill()
+        let receivedResult = Result {
+            try sut.loadImageData(from: url)
         }
 
-        wait(for: [expectation], timeout: 1.0)
-
         switch (receivedResult, expectedResult) {
-        case let (.success(receivedData)?, .success(expectedData)):
+        case let (.success(receivedData), .success(expectedData)):
             XCTAssertEqual(
                 receivedData,
                 expectedData,
                 "Expected to receive \(String(describing: receivedData)), but received \(String(describing: receivedData)) instead."
             )
 
-        case let (.failure(receivedError as NSError)?, .failure(expectedError as NSError)):
+        case let (.failure(receivedError as NSError), .failure(expectedError as NSError)):
             XCTAssertEqual(
                 receivedError,
                 expectedError,

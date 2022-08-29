@@ -156,13 +156,12 @@ extension EssentialAppUIAcceptanceTests {
             completion(.success(()))
         }
 
-        func insert(_ imageData: Data, for url: URL, completion: @escaping (FeedImageDataStore.InsertionResult) -> Void) {
+        func insert(_ imageData: Data, for url: URL) throws {
             cachedImageData[url] = imageData
-            completion(.success(()))
         }
 
-        public func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.RetrievalResult) -> Void) {
-            completion(.success(cachedImageData[url]))
+        public func retrieve(dataForURL url: URL) throws -> Data? {
+            cachedImageData[url]
         }
 
         static var empty: InMemoryFeedStore {

@@ -25,7 +25,7 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
 
         expect(sut, toCompleteWith: failed(), when: {
-            spy.completeDataInsertion(with: .failure(error))
+            spy.stubInsertionResult(with: .failure(error))
         })
     }
 
@@ -33,7 +33,7 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
 
         expect(sut, toCompleteWith: success(), when: {
-            spy.completeDataInsertion(with: .success(()))
+            spy.stubInsertionResult(with: .success(()))
         })
     }
 
