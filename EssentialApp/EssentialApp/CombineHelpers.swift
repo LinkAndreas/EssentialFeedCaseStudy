@@ -171,6 +171,12 @@ extension DispatchQueue {
 
 typealias AnyDispatchQueueScheduler = AnyScheduler<DispatchQueue.SchedulerTimeType, DispatchQueue.SchedulerOptions>
 
+extension AnyDispatchQueueScheduler {
+    static var immediateOnMainQueue: AnyDispatchQueueScheduler {
+        DispatchQueue.immediateWhenOnMainQueueScheduler.eraseToAnyScheduler()
+    }
+}
+
 extension Scheduler {
     func eraseToAnyScheduler() -> AnyScheduler<SchedulerTimeType, SchedulerOptions> {
         AnyScheduler(self)
