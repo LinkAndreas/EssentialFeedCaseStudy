@@ -81,7 +81,7 @@ class EssentialAppUIAcceptanceTests: XCTestCase {
 
 extension EssentialAppUIAcceptanceTests {
     private func launch(httpClient: HTTPClientStub = .offline, store: InMemoryFeedStore = .empty) -> ListViewController {
-        let sut = SceneDelegate(httpClient: httpClient, store: store)
+        let sut = SceneDelegate(httpClient: httpClient, store: store, scheduler: .immediateOnMainQueue)
         sut.window = UIWindow()
         sut.configureWindow()
 
@@ -102,7 +102,7 @@ extension EssentialAppUIAcceptanceTests {
     }
 
     private func enterBackground(with store: InMemoryFeedStore) {
-        let sut = SceneDelegate(httpClient: HTTPClientStub.offline, store: store)
+        let sut = SceneDelegate(httpClient: HTTPClientStub.offline, store: store, scheduler: .immediateOnMainQueue)
         sut.window = UIWindow()
         sut.configureWindow()
         sut.sceneWillResignActive(UIApplication.shared.connectedScenes.first!)
