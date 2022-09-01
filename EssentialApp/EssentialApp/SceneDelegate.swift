@@ -10,6 +10,12 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
+    private lazy var scheduler = DispatchQueue(
+        label: "de.linkandreas.EssentialApp.infra.queue",
+        qos: .userInitiated,
+        attributes: .concurrent
+    ).eraseToAnyScheduler()
+
     private lazy var logger: Logger = Logger(subsystem: "de.linkandreas.EssentialApp", category: "main")
     private lazy var baseURL = URL(string: "https://ile-api.essentialdeveloper.com/essential-feed")!
 
@@ -42,10 +48,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private lazy var localFeedLoader = LocalFeedLoader(store: store, currentDate: Date.init)
     private lazy var localImageLoader = LocalFeedImageDataLoader(store: store)
 
-    convenience init(httpClient: HTTPClient, store: FeedStore & FeedImageDataStore) {
+    convenience init(
+        httpClient: HTTPClient,
+        store: FeedStore & FeedImageDataStore,
+        scheduler: AnyDispatchQueueScheduler
+    ) {
         self.init()
         self.httpClient = httpClient
         self.store = store
+        self.scheduler = scheduler
     }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -121,11 +132,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func makeLocalImageLoaderWithRemoteFallback(url: URL) -> FeedImageDataLoader.Publisher {
         return localImageLoader
             .loadPublisher(from: url)
-            .fallback(to: { [httpClient, localImageLoader] in
+            .fallback(to: { [httpClient, localImageLoader, scheduler] in
                 httpClient
                     .loadPublisher(from: url)
                     .tryMap(FeedImageDataMapper.map)
                     .caching(to: localImageLoader, using: url)
+                    .subscribe(on: scheduler)
+                    .eraseToAnyPublisher()
             })
+            .subscribe(on: scheduler)
+            .eraseToAnyPublisher()
     }
 }

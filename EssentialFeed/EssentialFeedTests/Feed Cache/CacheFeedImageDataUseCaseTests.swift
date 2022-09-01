@@ -15,7 +15,7 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let url = anyURL()
         let (spy, sut) = makeSUT()
 
-        sut.save(imageData, for: url) { _ in }
+        try? sut.save(imageData, for: url)
 
         XCTAssertEqual(spy.receivedMessages, [.insert(imageData: imageData, url: url)])
     }
@@ -25,7 +25,7 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
 
         expect(sut, toCompleteWith: failed(), when: {
-            spy.completeDataInsertion(with: .failure(error))
+            spy.stubInsertionResult(with: .failure(error))
         })
     }
 
@@ -33,36 +33,16 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let (spy, sut) = makeSUT()
 
         expect(sut, toCompleteWith: success(), when: {
-            spy.completeDataInsertion(with: .success(()))
+            spy.stubInsertionResult(with: .success(()))
         })
     }
 
-    func test_saveImageDataFromURL_doesNotDeliverResultAfterInstanceHasBeenDeallocated() {
-        let imageData = anyData()
-        let url = anyURL()
-        let store: FeedImageDataStoreSpy = FeedImageDataStoreSpy()
-        var sut: LocalFeedImageDataLoader? = LocalFeedImageDataLoader(store: store)
-
-        var receivedResults: [LocalFeedImageDataLoader.SaveResult] = []
-        sut?.save(imageData, for: url) { result in
-            receivedResults.append(result)
-        }
-
-        sut = nil
-        store.completeDataInsertion(with: success())
-
-        XCTAssertTrue(
-            receivedResults.isEmpty,
-            "Result should not be delivered after instance has been deallocated"
-        )
-    }
-
     // MARK: - Helper
-    private func failed() -> LocalFeedImageDataLoader.SaveResult {
+    private func failed() -> Result<Void, Error> {
         return .failure(LocalFeedImageDataLoader.SaveError.failed)
     }
 
-    private func success() -> LocalFeedImageDataLoader.SaveResult {
+    private func success() -> Result<Void, Error> {
         return .success(())
     }
 
@@ -79,7 +59,7 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
 
     private func expect(
         _ sut: LocalFeedImageDataLoader,
-        toCompleteWith expectedResult: LocalFeedImageDataLoader.SaveResult,
+        toCompleteWith expectedResult: Result<Void, Error>,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -87,17 +67,11 @@ final class CacheFeedImageDataUseCaseTests: XCTestCase {
         let imageData = anyData()
         let url = anyURL()
 
-        let expectation = expectation(description: "Wait for result")
-        var receivedResult: LocalFeedImageDataLoader.SaveResult?
-
-        sut.save(imageData, for: url) { result in
-            receivedResult = result
-            expectation.fulfill()
-        }
-
         action()
 
-        wait(for: [expectation], timeout: 1.0)
+        let receivedResult = Result {
+            try sut.save(imageData, for: url)
+        }
 
         switch (expectedResult, receivedResult) {
         case (.success, .success):

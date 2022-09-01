@@ -16,7 +16,8 @@ class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase, FeedImageDataLo
         let url = anyURL()
         let (primaryLoader, fallbackLoader, sut) = makeSUT()
 
-        _ = sut.loadImageData(from: url) { _ in }
+        primaryLoader.stubImageLoadResult(with: anyData())
+        _ = try? sut.loadImageData(from: url)
 
         XCTAssertEqual(primaryLoader.loadedURLs, [url], "Expected to load url from primary loader first.")
         XCTAssertTrue(fallbackLoader.loadedURLs.isEmpty, "Expected no loaded urls in the fallback loader.")
@@ -26,35 +27,12 @@ class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase, FeedImageDataLo
         let url = anyURL()
         let (primaryLoader, fallbackLoader, sut) = makeSUT()
 
-        _ = sut.loadImageData(from: url) { _ in }
-
-        primaryLoader.complete(with: anyNSError())
+        primaryLoader.stubImageLoadResult(with: anyNSError())
+        fallbackLoader.stubImageLoadResult(with: anyData())
+        _ = try? sut.loadImageData(from: url)
 
         XCTAssertEqual(primaryLoader.loadedURLs, [url], "Expected to load url from primary loader first.")
         XCTAssertEqual(fallbackLoader.loadedURLs, [url], "Expected to load url from fallback loader afterwards.")
-    }
-
-    func test_cancelLoadImageData_cancelsPrimaryLoaderTask() {
-        let url = anyURL()
-        let (primaryLoader, fallbackLoader, sut) = makeSUT()
-
-        let task = sut.loadImageData(from: url) { _ in }
-        task.cancel()
-
-        XCTAssertEqual(primaryLoader.cancelledURLs, [url], "Expected to cancel URL loading from primary loader.")
-        XCTAssertTrue(fallbackLoader.cancelledURLs.isEmpty, "Expected no cancelled URLs in the fallback loader.")
-    }
-
-    func test_cancelLoadImageData_cancelsFallbackLoaderTaskAfterPrimaryLoaderFailure() {
-        let url = anyURL()
-        let (primaryLoader, fallbackLoader, sut) = makeSUT()
-
-        let task = sut.loadImageData(from: url) { _ in }
-        primaryLoader.complete(with: anyNSError())
-        task.cancel()
-
-        XCTAssertTrue(primaryLoader.cancelledURLs.isEmpty, "Expected to cancel URL loading from primary loader.")
-        XCTAssertEqual(fallbackLoader.cancelledURLs, [url], "Expected to cancel URL loading from fallback loader.")
     }
 
     func test_loadImageData_deliversPrimaryDataOnPrimaryLoaderSuccess() {
@@ -62,7 +40,7 @@ class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase, FeedImageDataLo
         let (primaryLoader, _, sut) = makeSUT()
 
         expect(sut, toCompleteWith: .success(primaryData), when: {
-            primaryLoader.complete(with: primaryData)
+            primaryLoader.stubImageLoadResult(with: primaryData)
         })
     }
 
@@ -71,8 +49,8 @@ class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase, FeedImageDataLo
         let (primaryLoader, fallbackLoader, sut) = makeSUT()
 
         expect(sut, toCompleteWith: .success(fallbackData), when: {
-            primaryLoader.complete(with: anyNSError())
-            fallbackLoader.complete(with: fallbackData)
+            primaryLoader.stubImageLoadResult(with: anyNSError())
+            fallbackLoader.stubImageLoadResult(with: fallbackData)
         })
     }
 
@@ -80,8 +58,8 @@ class FeedImageDataLoaderWithFallbackCompositeTests: XCTestCase, FeedImageDataLo
         let (primaryLoader, fallbackLoader, sut) = makeSUT()
 
         expect(sut, toCompleteWith: .failure(anyNSError()), when: {
-            primaryLoader.complete(with: anyNSError())
-            fallbackLoader.complete(with: anyNSError())
+            primaryLoader.stubImageLoadResult(with: anyNSError())
+            fallbackLoader.stubImageLoadResult(with: anyNSError())
         })
     }
 }

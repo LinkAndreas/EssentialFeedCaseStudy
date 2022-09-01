@@ -5,26 +5,11 @@ import EssentialFeed
 import EssentialFeediOS
 
 extension FeedUIIntegrationTests {
-    final class LoaderSpy: FeedImageDataLoader {
-        var feedRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
-        var loadMoreRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
-        var imageRequests: [(url: URL, completion: (FeedImageDataLoader.LoadResult) -> Void)] = []
-
-        var loadFeedCallCount: Int { feedRequests.count }
-        var loadMoreCallCount: Int { loadMoreRequests.count }
-        var loadedImageURLs: [URL] { imageRequests.map(\.url) }
-
-        private (set) var cancelledImageURLs: [URL] = []
-
-        private struct TaskSpy: FeedImageDataLoaderTask {
-            var onCancel: () -> Void
-
-            func cancel() {
-                onCancel()
-            }
-        }
-
+    final class LoaderSpy {
         // MARK: - FeedLoader
+        private var feedRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
+        var loadFeedCallCount: Int { feedRequests.count }
+        
         func loadPublisher() -> AnyPublisher<Paginated<FeedImage>, Error> {
             let publisher = PassthroughSubject<Paginated<FeedImage>, Error>()
             feedRequests.append(publisher)
@@ -52,6 +37,10 @@ extension FeedUIIntegrationTests {
             feedRequests[index].send(completion: .failure(error))
         }
 
+        // MARK: - LoadMoreFeedLoader
+        private var loadMoreRequests: [PassthroughSubject<Paginated<FeedImage>, Error>] = []
+        var loadMoreCallCount: Int { loadMoreRequests.count }
+
         func completeLoadMore(with feed: [FeedImage] = [], lastPage: Bool = false, at index: Int = 0) {
             loadMoreRequests[index].send(
                 Paginated(
@@ -73,17 +62,26 @@ extension FeedUIIntegrationTests {
         }
 
         // MARK: - FeedImageDataLoader
-        func loadImageData(
-            from url: URL,
-            completion: @escaping (FeedImageDataLoader.LoadResult) -> Void
-        ) -> FeedImageDataLoaderTask {
-            let task = TaskSpy(onCancel: { [weak self] in self?.cancelledImageURLs.append(url) })
-            imageRequests.append((url, completion))
-            return task
+        private var imageRequests = [(url: URL, publisher: PassthroughSubject<Data, Error>)]()
+
+        var loadedImageURLs: [URL] { imageRequests.map(\.url) }
+        private(set) var cancelledImageURLs = [URL]()
+
+        func loadImageDataPublisher(from url: URL) -> AnyPublisher<Data, Error> {
+            let publisher = PassthroughSubject<Data, Error>()
+            imageRequests.append((url, publisher))
+            return publisher.handleEvents(receiveCancel: { [weak self] in
+                self?.cancelledImageURLs.append(url)
+            }).eraseToAnyPublisher()
         }
 
-        func completeImageLoading(with result: FeedImageDataLoader.LoadResult, at index: Int = 0) {
-            imageRequests[index].completion(result)
+        func completeImageLoading(with imageData: Data = Data(), at index: Int = 0) {
+            imageRequests[index].publisher.send(imageData)
+            imageRequests[index].publisher.send(completion: .finished)
+        }
+
+        func completeImageLoadingWithError(at index: Int = 0) {
+            imageRequests[index].publisher.send(completion: .failure(anyNSError()))
         }
     }
 }

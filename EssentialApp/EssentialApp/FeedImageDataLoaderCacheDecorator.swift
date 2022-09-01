@@ -11,23 +11,15 @@ public final class FeedImageDataLoaderCacheDecorator: FeedImageDataLoader {
         self.cache = cache
     }
 
-    public func loadImageData(from url: URL, completion: @escaping (LoadResult) -> Void) -> FeedImageDataLoaderTask {
-        return decoratee.loadImageData(from: url) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case let .success(imageData):
-                self.cache.saveIgnoringResult(imageData, for: url)
-                completion(result)
-
-            case .failure:
-                completion(result)
-            }
-        }
+    public func loadImageData(from url: URL) throws -> Data {
+        let imageData = try decoratee.loadImageData(from: url)
+        self.cache.saveIgnoringResult(imageData, for: url)
+        return imageData
     }
 }
 
 private extension FeedImageDataCache {
     func saveIgnoringResult(_ imageData: Data, for url: URL) {
-        save(imageData, for: url) { _ in }
+        try? save(imageData, for: url)
     }
 }

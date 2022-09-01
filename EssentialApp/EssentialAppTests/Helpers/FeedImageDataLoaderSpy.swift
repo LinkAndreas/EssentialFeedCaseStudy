@@ -3,35 +3,20 @@
 import EssentialFeed
 
 final class FeedImageDataLoaderSpy: FeedImageDataLoader {
-    private final class Task: FeedImageDataLoaderTask {
-        private let callback: () -> Void
+    private (set) var receivedMessages: [URL] = []
+    var loadedURLs: [URL] { receivedMessages }
+    var loadResult: Result<Data, Error>!
 
-        init(callback: @escaping () -> Void) {
-            self.callback = callback
-        }
-
-        func cancel() {
-            callback()
-        }
+    func loadImageData(from url: URL) throws -> Data {
+        receivedMessages.append(url)
+        return try loadResult.get()
     }
 
-    private (set) var receivedMessages: [(url: URL, completion: ((LoadResult) -> Void))] = []
-    var loadedURLs: [URL] { receivedMessages.map(\.url) }
-    var cancelledURLs: [URL] = []
-    private var completions: [(LoadResult) -> Void] { receivedMessages.map(\.completion) }
-
-    func loadImageData(from url: URL, completion: @escaping (LoadResult) -> Void) -> FeedImageDataLoaderTask {
-        receivedMessages.append((url, completion))
-        return Task { [weak self] in
-            self?.cancelledURLs.append(url)
-        }
+    func stubImageLoadResult(with data: Data) {
+        loadResult = .success(data)
     }
 
-    func complete(with data: Data, atIndex index: Int = 0) {
-        completions[index](.success(data))
-    }
-
-    func complete(with error: Error, atIndex index: Int = 0) {
-        completions[index](.failure(error))
+    func stubImageLoadResult(with error: Error) {
+        loadResult = .failure(error)
     }
 }

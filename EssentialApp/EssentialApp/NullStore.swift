@@ -15,11 +15,11 @@ final class NullStore: FeedStore & FeedImageDataStore {
         completion(.success(.none))
     }
 
-    func retrieve(dataForURL url: URL, completion: @escaping (FeedImageDataStore.RetrievalResult) -> Void) {
-        completion(.success(.none))
+    func retrieve(dataForURL url: URL) throws -> Data? {
+        return nil
     }
 
-    func insert(_ imageData: Data, for url: URL, completion: @escaping (InsertionResult) -> Void) {
-        completion(.success(()))
+    func insert(_ imageData: Data, for url: URL) throws {
+        return
     }
 }

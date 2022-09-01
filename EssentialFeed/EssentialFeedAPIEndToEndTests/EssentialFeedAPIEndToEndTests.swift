@@ -39,7 +39,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
     }
 
     // MARK: - Helpers
-    private func loadImageData(file: StaticString = #file, line: UInt = #line) -> FeedImageDataLoader.LoadResult? {
+    private func loadImageData(file: StaticString = #file, line: UInt = #line) -> Result<Data, Error>? {
         let testServerURL: URL = feedTestServerURL.appendingPathComponent("73A7F70C-75DA-4C2E-B5A3-EED40DC53AA6/image")
         let client = ephemeralClient()
 
